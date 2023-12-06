@@ -1,5 +1,11 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@next/*": ["apps/nextjs/src/*"],
+      "@expo/*": ["apps/expo/*"],
+      "@packages/*": ["packages/*"]
+    },
     "target": "es2017",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
