@@ -5,6 +5,7 @@ import type {
   SignedInAuthObject,
   SignedOutAuthObject,
 } from "@clerk/nextjs/api";
+import { type NextRequest } from "next/server";
 
 import { db } from "@acme/db";
 
@@ -31,7 +32,7 @@ export const createContextInner = async ({ auth }: AuthContextProps) => {
  * This is the actual context you'll use in your router
  * @link https://trpc.io/docs/context
  **/
-export const createContext = async (opts: CreateNextContextOptions) => {
+export const createContext = async (opts: { req: NextRequest }) => {
   return await createContextInner({ auth: getAuth(opts.req) });
 };
 

@@ -1,16 +1,25 @@
-import { appRouter, createContext } from "@acme/api";
-import { createNextApiHandler } from "@trpc/server/adapters/next";
-import { NextApiRequest, NextApiResponse } from "next";
+import { appRouter } from "@acme/api/src/router/index";
+import { createContext } from "@acme/api";
+import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
+import { type NextRequest } from "next/server";
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  // Enable cors
-  //   await cors(req, res);
+export const maxDuration = 300;
 
-  // Let the tRPC handler do its magic
-  return createNextApiHandler({
+const handler = (req: NextRequest) =>
+  fetchRequestHandler({
+    endpoint: "/api/trpc",
+    req,
     router: appRouter,
-    createContext,
-  })(req, res);
-};
+    createContext: () => createContext({ req }),
+    onError:
+      process.env.NODE_ENV === "development"
+        ? // env.NODE_ENV === "development"
+          ({ path, error }) => {
+            console.error(
+              `❌ tRPC failed on ${path ?? "<no-path>"}: ${error.message}`,
+            );
+          }
+        : undefined,
+  });
 
 export { handler as GET, handler as POST };
