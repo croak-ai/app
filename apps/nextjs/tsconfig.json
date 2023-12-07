@@ -1,4 +1,7 @@
 {
+  "compilerOptions": {
+    "plugins": [{ "name": "next" }]
+  },
   "extends": "../../tsconfig.json",
   "exclude": [],
   "include": [
