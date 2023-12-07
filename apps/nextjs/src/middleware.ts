@@ -1,11 +1,23 @@
-import { withClerkMiddleware } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-
-export default withClerkMiddleware((_req: NextRequest) => {
-  return NextResponse.next();
+import { authMiddleware, RedirectToSignIn } from "@clerk/nextjs";
+import { redirectToSignIn } from "@clerk/nextjs/server";
+export default authMiddleware({
+  afterAuth(auth, req, evt) {
+    // handle users who aren't authenticated
+    if (!auth.userId && !auth.isPublicRoute) {
+      return redirectToSignIn({ returnBackUrl: req.url });
+    }
+    // redirect them to organization selection page
+    // if (
+    //   auth.userId &&
+    //   !auth.orgId &&
+    //   req.nextUrl.pathname !== "/org-selection"
+    // ) {
+    //   const orgSelection = new URL("/org-selection", req.url);
+    //   return NextResponse.redirect(orgSelection);
+    // }
+  },
 });
-
 // Stop Middleware running on static files
 export const config = {
   matcher: [
