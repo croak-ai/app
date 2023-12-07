@@ -1,5 +1,3 @@
-import type { AppRouter } from "./src/root";
-
 export { appRouter, type AppRouter } from "./src/root";
 
 export { createContext } from "./src/context";

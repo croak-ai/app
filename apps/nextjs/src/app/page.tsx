@@ -1,22 +1,11 @@
-"use client";
+import { OrganizationList } from "@clerk/nextjs";
 
-import { useEffect, useState } from "react";
-import { trpc } from "./_trpc/client";
-
-export const Test = () => {
-  const data = trpc.post.all.useQuery();
-
-  if (data.error) {
-    throw data.error;
-  }
-
+export default function OrganizationListPage() {
   return (
-    <div>
-      I am trying to fetch data from the server: This is the loading:{" "}
-      {data.status}
-      This is the data: {data.data}
-    </div>
+    <OrganizationList
+      afterCreateOrganizationUrl="/organization/:slug"
+      afterSelectPersonalUrl="/user/:id"
+      afterSelectOrganizationUrl="/organization/:slug"
+    />
   );
-};
-
-export default Test;
+}
