@@ -1,6 +1,7 @@
 "use client";
 import { cn } from "@next/utils/tailwindMerge";
-
+import { Button } from "@next/components/ui/Button";
+import { Input } from "@next/components/ui/Input";
 //import { trpc } from "@next/app/_trpc/client";
 // import { appRouter } from "@packages/api";
 // console.log("router: ", typeof appRouter);
