@@ -96,6 +96,7 @@ importers:
       '@acme/db': '*'
       '@acme/tailwind-config': '*'
       '@clerk/nextjs': ^4.27.1
+      '@radix-ui/react-slot': ^1.0.2
       '@tanstack/react-query': ^4.16.1
       '@trpc/client': ^10.43.1
       '@trpc/next': ^10.43.1
@@ -105,6 +106,7 @@ importers:
       '@types/react': ^18.0.25
       '@types/react-dom': ^18.0.9
       autoprefixer: ^10.4.13
+      class-variance-authority: ^0.7.0
       clsx: ^2.0.0
       cors: ^2.8.5
       eslint: ^8.28.0
@@ -123,11 +125,13 @@ importers:
       '@acme/db': link:../../packages/db
       '@acme/tailwind-config': link:../../packages/config/tailwind
       '@clerk/nextjs': 4.27.5_pvgaconotzu4vdk37yty4okb7y
+      '@radix-ui/react-slot': 1.0.2_qjur23isozgejic6xjvb76mkmm
       '@tanstack/react-query': 4.36.1_biqbaboplfbrettd7655fr4n2y
       '@trpc/client': 10.44.1_@trpc+server@10.44.1
       '@trpc/next': 10.44.1_nq4f5nwyn7nxboutr5r3wg6m6q
       '@trpc/react-query': 10.44.1_il5gn6rctlrcxnwprhepjf3ajq
       '@trpc/server': 10.44.1
+      class-variance-authority: 0.7.0
       clsx: 2.0.0
       cors: 2.8.5
       next: 14.0.3_biqbaboplfbrettd7655fr4n2y
@@ -2985,6 +2989,35 @@ packages:
     engines: {node: '>=16'}
     dev: false
 
+  /@radix-ui/react-compose-refs/1.0.1_qjur23isozgejic6xjvb76mkmm:
+    resolution: {integrity: sha512-fDSBgd44FKHa1FRMU59qBMPFcl2PZE+2nmqunj+BWFyYYjnhIDWL2ItDs3rrbJDQOtzt5nIebLCQc4QRfz6LJw==}
+    peerDependencies:
+      '@types/react': '*'
+      react: ^16.8 || ^17.0 || ^18.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+    dependencies:
+      '@babel/runtime': 7.23.5
+      '@types/react': 18.2.42
+      react: 18.2.0
+    dev: false
+
+  /@radix-ui/react-slot/1.0.2_qjur23isozgejic6xjvb76mkmm:
+    resolution: {integrity: sha512-YeTpuq4deV+6DusvVUW4ivBgnkHwECUu0BiN43L5UCDFgdhsRUWAghhTF5MbvNTPzmiFOx90asDSUjWuCNapwg==}
+    peerDependencies:
+      '@types/react': '*'
+      react: ^16.8 || ^17.0 || ^18.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+    dependencies:
+      '@babel/runtime': 7.23.5
+      '@radix-ui/react-compose-refs': 1.0.1_qjur23isozgejic6xjvb76mkmm
+      '@types/react': 18.2.42
+      react: 18.2.0
+    dev: false
+
   /@react-native-community/cli-clean/9.2.1:
     resolution: {integrity: sha512-dyNWFrqRe31UEvNO+OFWmQ4hmqA07bR9Ief/6NnGwx67IO9q83D5PEAf/o96ML6jhSbDwCmpPKhPwwBbsyM3mQ==}
     dependencies:
@@ -4524,6 +4557,12 @@ packages:
   /ci-info/3.9.0:
     resolution: {integrity: sha512-NIxF55hv4nSqQswkAeiOi1r83xy8JldOFDTWiug55KBu9Jnblncd2U6ViHmYgHf01TPZS77NJBhBMKdWj9HQMQ==}
     engines: {node: '>=8'}
+    dev: false
+
+  /class-variance-authority/0.7.0:
+    resolution: {integrity: sha512-jFI8IQw4hczaL4ALINxqLEXQbWcNjoSkloa4IaufXCJr6QawJyw7tuRysRsrE8w2p/4gGaxKIt/hX3qz/IbD1A==}
+    dependencies:
+      clsx: 2.0.0
     dev: false
 
   /clean-stack/2.2.0:
