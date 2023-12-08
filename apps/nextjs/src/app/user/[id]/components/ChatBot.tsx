@@ -20,15 +20,6 @@ export default function ChatBot() {
       )}`,
     });
 
-  // const messages = ["Hello", "This is a bot"];
-  // const messages = [{ id: 1, role: "BOT", content: "Hello I am a chatbot" }];
-
-  // const generateEmbedding = usePipeline(
-  //   'feature-extraction',
-  //   'Supabase/gte-small'
-  // );
-
-  // const isReady = !!generateEmbedding;
   return (
     <div className="flex h-full w-full max-w-6xl flex-col items-center">
       <div className="my-2 flex w-full grow flex-col gap-6 overflow-y-auto rounded-sm p-4 sm:my-10 sm:border sm:p-8">
@@ -107,7 +98,6 @@ export default function ChatBot() {
             value={input}
             onChange={handleInputChange}
           />
-          {/* <Button type="submit" disabled={!isReady}> */}
           <Button type="submit">Send</Button>
         </form>
       </div>

@@ -7,7 +7,7 @@ const openai = new OpenAI();
 export const botRouter = router({
   createAssistant: publicProcedure
     .input(z.string().nullish())
-    .query(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       // const assistant = await openai.beta.assistants.create({
       //   name: "Math Tutor",
       //   instructions:
