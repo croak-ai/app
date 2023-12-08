@@ -1,4 +1,5 @@
 "use client";
+import { cn } from "@next/utils/tailwindMerge";
 
 //import { trpc } from "@next/app/_trpc/client";
 // import { appRouter } from "@packages/api";
@@ -46,28 +47,28 @@ export default function ChatBot() {
             </div>
           )}
         </div>
-        {/* <form
+        <form
           className="flex items-center gap-2 space-x-2"
           onSubmit={async (e) => {
             e.preventDefault();
-            if (!generateEmbedding) {
-              throw new Error("Unable to generate embeddings");
-            }
+            // if (!generateEmbedding) {
+            //   throw new Error("Unable to generate embeddings");
+            // }
 
-            const output = await generateEmbedding(input, {
-              pooling: "mean",
-              normalize: true,
-            });
+            // const output = await generateEmbedding(input, {
+            //   pooling: "mean",
+            //   normalize: true,
+            // });
 
-            const embedding = JSON.stringify(Array.from(output.data));
+            // const embedding = JSON.stringify(Array.from(output.data));
 
-            const {
-              data: { session },
-            } = await supabase.auth.getSession();
+            // const {
+            //   data: { session },
+            // } = await supabase.auth.getSession();
 
-            if (!session) {
-              return;
-            }
+            // if (!session) {
+            //   return;
+            // }
 
             handleSubmit(e, {
               options: {
@@ -91,7 +92,7 @@ export default function ChatBot() {
           <Button type="submit" disabled={!isReady}>
             Send
           </Button>
-        </form> */}
+        </form>
       </div>
     </div>
   );
