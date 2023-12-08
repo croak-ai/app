@@ -7,6 +7,9 @@
 export default function ChatBot() {
   // const botRes = trpc.bot.createAssistant.useQuery();
 
+  // const messages = ["Hello", "This is a bot"];
+  const messages = [{ id: 1, role: "BOT", content: "Hello I am a chatbot" }];
+
   return (
     <div className="flex h-full w-full max-w-6xl flex-col items-center">
       <div className="my-2 flex w-full grow flex-col gap-6 overflow-y-auto rounded-sm p-4 sm:my-10 sm:border sm:p-8">
@@ -22,9 +25,9 @@ export default function ChatBot() {
               {content}
             </div>
           ))}
-          {isLoading && (
+          {/* {isLoading && (
             <div className="dot-pulse m-6 self-start text-gray-500 before:text-gray-500 after:text-gray-500" />
-          )}
+          )} */}
           {messages.length === 0 && (
             <div className="flex grow items-center justify-center self-stretch">
               <svg
@@ -43,7 +46,7 @@ export default function ChatBot() {
             </div>
           )}
         </div>
-        <form
+        {/* <form
           className="flex items-center gap-2 space-x-2"
           onSubmit={async (e) => {
             e.preventDefault();
@@ -88,7 +91,7 @@ export default function ChatBot() {
           <Button type="submit" disabled={!isReady}>
             Send
           </Button>
-        </form>
+        </form> */}
       </div>
     </div>
   );
