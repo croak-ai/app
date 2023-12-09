@@ -7,6 +7,7 @@ import type {
   Organization,
 } from "@clerk/nextjs/api";
 import { type NextRequest } from "next/server";
+import { getTursoDbUrlFromClerkTenantId } from "@acme/shared-functions";
 
 import { createDbClient } from "@acme/db";
 
@@ -45,13 +46,20 @@ export const createContextInner = async ({ auth }: AuthContextProps) => {
     throw new Error("Invalid organization ID");
   }
 
-  return {
-    auth,
-    db: createDbClient(
-      `libsql://${dbName}-${TRPC_TURSO_ORG_SLUG}.turso.io`,
-      TRPC_TURSO_DB_TOKEN,
-    ),
-  };
+  try {
+    return {
+      auth,
+      db: createDbClient(
+        `libsql://${dbName}-${TRPC_TURSO_ORG_SLUG}.turso.io`,
+        TRPC_TURSO_DB_TOKEN,
+      ),
+    };
+  } catch (error) {
+    console.error("Failed to create DB client, returning auth only", error);
+    return {
+      auth,
+    };
+  }
 };
 
 /**
