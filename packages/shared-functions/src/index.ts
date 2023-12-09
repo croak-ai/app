@@ -30,3 +30,7 @@ export const getTursoDbUrlFromClerkTenantId = (
   let dbName = getTursoDbNameFromClerkTenantId({ tenantId });
   return `${dbName}-${tursoOrgId}.turso.io`;
 };
+
+export const getEmptyDatabaseName = (group: { groupName: string }) => {
+  return `t-empty-${group.groupName}`;
+};

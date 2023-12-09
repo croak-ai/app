@@ -2,6 +2,7 @@ import { protectedProcedure, router } from "../../trpc";
 import {
   getTursoDbUrlFromClerkTenantId,
   getTursoDbNameFromClerkTenantId,
+  getEmptyDatabaseName,
 } from "@acme/shared-functions";
 
 export const createNewTursoDB = router({
@@ -55,6 +56,8 @@ export const createNewTursoDB = router({
         tenantId: orgId,
       });
 
+      const emptyDatabaseName = getEmptyDatabaseName({ groupName: group });
+
       const newDatabaseResponse = await fetch(
         `${tursoURL}/v1/organizations/${orgSlug}/databases`,
         {
@@ -65,17 +68,23 @@ export const createNewTursoDB = router({
           body: JSON.stringify({
             name: newDatabaseName,
             group: group,
+            seed: {
+              Type: "database",
+              Name: emptyDatabaseName,
+            },
           }),
         },
       );
 
-      const newDatabaseData = await newDatabaseResponse.json();
-
-      if (!newDatabaseData) {
-        throw new Error("Failed to create new database");
+      if (!newDatabaseResponse.ok) {
+        throw new Error(`HTTP error! status: ${newDatabaseResponse.status}`);
       }
 
-      console.log(`Created a new Database! -> ${newDatabaseData}`);
+      const newDatabaseData = await newDatabaseResponse.json();
+
+      console.log(
+        `Created a new Database! -> ${JSON.stringify(newDatabaseData)}`,
+      );
 
       return "Created new database";
     } catch (error) {

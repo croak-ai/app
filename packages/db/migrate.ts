@@ -8,6 +8,24 @@ import {
   MIGRATIONS_TURSO_API_BASE_URL,
   MIGRATIONS_TURSO_AUTH_TOKEN,
 } from "./env";
+import { getEmptyDatabaseName } from "@acme/shared-functions";
+
+async function migrateDatabase(db: {
+  Name: string;
+  Group: string;
+  secret: string;
+}) {
+  const client = createClient({
+    url: `libsql://${db.Name}-${MIGRATIONS_TURSO_ORG_SLUG}.turso.io`,
+    authToken: db.secret,
+  });
+
+  await migrate(drizzle(client), {
+    migrationsFolder: "./migrations",
+  });
+
+  console.log(`Tables migrated for ${db.Name} in the group ${db.Group}!`);
+}
 
 async function main() {
   try {
@@ -62,6 +80,50 @@ async function main() {
         db.Name.startsWith("t-"),
     );
 
+    // Handle Creating Empty Databases
+    // This is for when we have a new organization, it copies the tables from t-empty-${group.name}
+    for (const group of availableGroups) {
+      const emptyDatabaseName = getEmptyDatabaseName({ groupName: group.name });
+
+      const groupHasEmptyDatabase = filteredDatabases.some(
+        (db) => db.Group === group.name && db.Name === emptyDatabaseName,
+      );
+
+      if (!groupHasEmptyDatabase) {
+        await fetch(
+          `${MIGRATIONS_TURSO_API_BASE_URL}/v1/organizations/${MIGRATIONS_TURSO_ORG_SLUG}/databases`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${MIGRATIONS_TURSO_AUTH_TOKEN}`,
+            },
+            body: JSON.stringify({
+              name: emptyDatabaseName,
+              group: group.name,
+            }),
+          },
+        );
+
+        console.log(
+          `Created new ${emptyDatabaseName} database (this is for when we have a new organization, it copies the tables from t-empty)`,
+        );
+
+        console.log(
+          `Waiting 1 second for the database to be created before we migrate it...`,
+        );
+
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        // Migrate the newly created empty database
+        await migrateDatabase({
+          Name: emptyDatabaseName,
+          Group: group.name,
+          secret: group.secret,
+        });
+      }
+    }
+
+    // Handle Migrations
+    // We migrate all databases that start with t- (which includes t-empty-${group.name})
     if (filteredDatabases.length === 0) {
       console.log(
         "No databases to migrate! Make sure you configured your .env file correctly and that your databases are named correctly. (starting with a t-)",
@@ -69,18 +131,7 @@ async function main() {
       process.exit(0);
     }
 
-    for (const db of filteredDatabases) {
-      const client = createClient({
-        url: `libsql://${db.Name}-${MIGRATIONS_TURSO_ORG_SLUG}.turso.io`,
-        authToken: db.secret,
-      });
-
-      await migrate(drizzle(client), {
-        migrationsFolder: "./migrations",
-      });
-
-      console.log(`Tables migrated for ${db.Name} in the group ${db.Group}!`);
-    }
+    await Promise.all(filteredDatabases.map((db) => migrateDatabase(db)));
 
     process.exit(0);
   } catch (error) {

@@ -12,6 +12,7 @@
     "generate": "drizzle-kit generate:sqlite"
   },
   "dependencies": {
+    "@acme/shared-functions": "*",
     "@libsql/client": "0.4.0-pre.5",
     "@planetscale/database": "^1.10.0",
     "better-sqlite3": "^9.2.2",
