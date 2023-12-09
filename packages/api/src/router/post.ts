@@ -4,8 +4,6 @@ import { z } from "zod";
 
 export const postRouter = router({
   all: publicProcedure.query(async ({ ctx }) => {
-    const tasks = await ctx.db.select().from(post);
-    console.log(tasks);
     return "YES";
   }),
   byId: publicProcedure.input(z.string()).query(({ ctx, input }) => {

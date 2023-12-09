@@ -39,18 +39,15 @@ export const createContextInner = async ({ auth }: AuthContextProps) => {
     );
   }
 
-  let dbName = orgId;
-  if (dbName.startsWith("org_")) {
-    dbName = dbName.replace("org_", "t-").toLowerCase();
-  } else {
-    throw new Error("Invalid organization ID");
-  }
-
   try {
     return {
       auth,
       db: createDbClient(
-        `libsql://${dbName}-${TRPC_TURSO_ORG_SLUG}.turso.io`,
+        `libsql://` +
+          getTursoDbUrlFromClerkTenantId({
+            tenantId: orgId,
+            tursoOrgId: TRPC_TURSO_ORG_SLUG,
+          }),
         TRPC_TURSO_DB_TOKEN,
       ),
     };

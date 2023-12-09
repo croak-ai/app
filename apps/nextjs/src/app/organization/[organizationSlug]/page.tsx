@@ -1,4 +1,4 @@
-import Test from "./components/test";
+import Link from "next/link";
 
 export default async function Page({
   params,
@@ -7,8 +7,12 @@ export default async function Page({
 }) {
   return (
     <>
-      <Test />
-      {params.organizationSlug}
+      <Link
+        href={`/organization/${params.organizationSlug}/create-db`}
+        style={{ color: "blue" }}
+      >
+        Create a new database
+      </Link>
     </>
   );
 }
