@@ -59,8 +59,15 @@ async function main() {
     const filteredDatabases = formattedDatabases.filter(
       (db) =>
         availableGroups.some((group) => group.name === db.Group) &&
-        db.Name.startsWith("org-"),
+        db.Name.startsWith("t-"),
     );
+
+    if (filteredDatabases.length === 0) {
+      console.log(
+        "No databases to migrate! Make sure you configured your .env file correctly and that your databases are named correctly. (starting with a t-)",
+      );
+      process.exit(0);
+    }
 
     for (const db of filteredDatabases) {
       const client = createClient({

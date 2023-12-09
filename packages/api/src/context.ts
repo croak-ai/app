@@ -40,7 +40,7 @@ export const createContextInner = async ({ auth }: AuthContextProps) => {
 
   let dbName = orgId;
   if (dbName.startsWith("org_")) {
-    dbName = dbName.replace("org_", "org-").toLowerCase();
+    dbName = dbName.replace("org_", "t-").toLowerCase();
   } else {
     throw new Error("Invalid organization ID");
   }
