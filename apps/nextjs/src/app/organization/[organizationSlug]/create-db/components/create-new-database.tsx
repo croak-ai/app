@@ -1,27 +1,17 @@
-// If you are reading this Nick, I will make this a server component I pwomise
+import { getServerTRPCClient } from "@next/utils/trpc/serverTRPCClient";
+import { redirect } from "next/navigation";
 
-"use client";
+export const CreateDatabase = async ({ orgSlug }: { orgSlug: string }) => {
+  try {
+    const tRPCClient = getServerTRPCClient();
 
-import { reactTRPC } from "@next/utils/trpc/reactTRPCClient";
-import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+    await tRPCClient.createNewTursoDB.createNewTursoDB.mutate();
 
-export const Test = () => {
-  const mutation = reactTRPC.createNewTursoDB.createNewTursoDB.useMutation();
-  const router = useRouter();
-  const params = useParams();
-
-  useEffect(() => {
-    const fetchData = async () => {
-      await mutation.mutateAsync();
-    };
-    const orgSlug = params?.organizationSlug;
-    router.push(`/organization/${orgSlug}`);
-
-    fetchData();
-  }, []);
-
-  return <div>Creating Database...</div>;
+    return <>Database Created</>;
+  } catch (e) {
+    console.error(e);
+    return <>Error creating database</>;
+  }
 };
 
-export default Test;
+export default CreateDatabase;

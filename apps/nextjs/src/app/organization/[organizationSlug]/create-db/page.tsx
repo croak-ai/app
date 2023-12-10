@@ -1,4 +1,5 @@
-import Test from "./components/create-new-database";
+import { Suspense } from "react";
+import CreateDatabase from "./components/create-new-database";
 
 export default async function Page({
   params,
@@ -7,8 +8,9 @@ export default async function Page({
 }) {
   return (
     <>
-      <Test />
-      {params.organizationSlug}
+      <Suspense fallback={<>Creating Database</>}>
+        <CreateDatabase orgSlug={params.organizationSlug} />
+      </Suspense>
     </>
   );
 }

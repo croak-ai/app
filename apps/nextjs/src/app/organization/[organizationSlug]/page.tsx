@@ -7,12 +7,16 @@ export default async function Page({
 }) {
   return (
     <>
+      This is the organization page for {params.organizationSlug}
+      Click{" "}
       <Link
         href={`/organization/${params.organizationSlug}/create-db`}
         style={{ color: "blue" }}
       >
-        Create a new database
-      </Link>
+        this link
+      </Link>{" "}
+      to create the database if you haven't yet. This will be better implemented
+      but it is 7am ok.{" "}
     </>
   );
 }
