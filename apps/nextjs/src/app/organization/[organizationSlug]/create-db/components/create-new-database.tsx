@@ -2,12 +2,12 @@
 
 "use client";
 
-import { trpc } from "@next/app/_trpc/client";
+import { reactTRPC } from "@next/utils/trpc/reactTRPCClient";
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 
 export const Test = () => {
-  const mutation = trpc.createNewTursoDB.createNewTursoDB.useMutation();
+  const mutation = reactTRPC.createNewTursoDB.createNewTursoDB.useMutation();
   const router = useRouter();
   const params = useParams();
 

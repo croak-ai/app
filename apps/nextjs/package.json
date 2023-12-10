@@ -20,12 +20,12 @@
     "@trpc/client": "^10.43.1",
     "@trpc/next": "^10.43.1",
     "@trpc/react-query": "^10.44.1",
-    "@trpc/server": "^10.43.1",
+    "@trpc/server": "^10.44.1",
     "cors": "^2.8.5",
     "next": "^14.0.3",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "superjson": "^1.9.1",
+    "superjson": "^1.12.0",
     "zod": "^3.18.0"
   },
   "devDependencies": {
