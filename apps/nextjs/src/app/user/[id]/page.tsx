@@ -1,9 +1,9 @@
-import Bot from "./components/Bot";
+import ChatBot from "./components/ChatBot";
 
-export default function User() {
+export default function ChatPage() {
   return (
-    <>
-      <Bot />
-    </>
+    <div className="flex h-screen items-center justify-center">
+      <ChatBot />
+    </div>
   );
 }
