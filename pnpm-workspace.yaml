@@ -4,4 +4,4 @@ packages:
   - packages/api
   - packages/db
   - packages/shared-functions
-  - packages/config/*
+  - packages/ui
