@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import TRPC_Provider from "./_trpc/TRPC_Provider";
-import { ClerkProvider } from "@clerk/nextjs";
+import Providers from "./providers";
+import { Suspense } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,11 +18,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <ClerkProvider>
-        <TRPC_Provider>
-          <body className={inter.className}>{children}</body>
-        </TRPC_Provider>
-      </ClerkProvider>
+      <Providers>
+        <body className={inter.className}>
+          <Suspense fallback={<>Loading Suspense From Layout...</>}>
+            {children}
+          </Suspense>
+        </body>
+      </Providers>
     </html>
   );
 }

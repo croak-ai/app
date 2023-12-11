@@ -1,8 +1,9 @@
+import { post } from "@packages/db/schema/post";
 import { router, publicProcedure, protectedProcedure } from "../trpc";
 import { z } from "zod";
 
 export const postRouter = router({
-  all: publicProcedure.query(({ ctx }) => {
+  all: publicProcedure.query(async ({ ctx }) => {
     return "YES";
   }),
   byId: publicProcedure.input(z.string()).query(({ ctx, input }) => {

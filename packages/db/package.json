@@ -8,10 +8,11 @@
     "clean": "rm -rf .turbo node_modules",
     "with-env": "dotenv -e ../../.env --",
     "push": "drizzle-kit push:sqlite",
-    "generate": "drizzle-kit generate:sqlite",
-    "dev": "drizzle-kit studio --port 5556"
+    "migrate": "pnpm ts-node migrate.ts",
+    "generate": "drizzle-kit generate:sqlite"
   },
   "dependencies": {
+    "@acme/shared-functions": "*",
     "@libsql/client": "0.4.0-pre.5",
     "@planetscale/database": "^1.10.0",
     "better-sqlite3": "^9.2.2",
@@ -21,6 +22,7 @@
   "devDependencies": {
     "dotenv-cli": "^7.2.1",
     "drizzle-kit": "^0.19.13",
+    "ts-node": "^10.9.2",
     "typescript": "^5.1.6"
   }
 }

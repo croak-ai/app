@@ -1,13 +1,13 @@
 import { type inferAsyncReturnType } from "@trpc/server";
-import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { getAuth } from "@clerk/nextjs/server";
 import type {
   SignedInAuthObject,
   SignedOutAuthObject,
 } from "@clerk/nextjs/api";
 import { type NextRequest } from "next/server";
+import { getTursoDbUrlFromClerkTenantId } from "@acme/shared-functions";
 
-import { db } from "@acme/db";
+import { createDbClient } from "@acme/db";
 
 /**
  * Replace this with an object if you want to pass things to createContextInner
@@ -22,10 +22,39 @@ type AuthContextProps = {
  * @see https://beta.create.t3.gg/en/usage/trpc#-servertrpccontextts
  */
 export const createContextInner = async ({ auth }: AuthContextProps) => {
-  return {
-    auth,
-    db,
-  };
+  const orgId = auth?.orgId;
+
+  if (!orgId) {
+    throw new Error("No organization ID");
+  }
+
+  const TRPC_TURSO_DB_TOKEN = process.env.TRPC_TURSO_DB_TOKEN;
+  const TRPC_TURSO_ORG_SLUG = process.env.TRPC_TURSO_ORG_SLUG;
+
+  if (!TRPC_TURSO_DB_TOKEN || !TRPC_TURSO_ORG_SLUG) {
+    throw new Error(
+      "No TRPC_TURSO_API_BASE_URL or TRPC_TURSO_ORG_SLUG, make sure you configured your .env file correctly",
+    );
+  }
+
+  try {
+    return {
+      auth,
+      db: createDbClient(
+        `libsql://` +
+          getTursoDbUrlFromClerkTenantId({
+            tenantId: orgId,
+            tursoOrgId: TRPC_TURSO_ORG_SLUG,
+          }),
+        TRPC_TURSO_DB_TOKEN,
+      ),
+    };
+  } catch (error) {
+    console.error("Failed to create DB client, returning auth only", error);
+    return {
+      auth,
+    };
+  }
 };
 
 /**
