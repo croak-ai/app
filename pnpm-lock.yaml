@@ -43,9 +43,9 @@ importers:
       '@acme/api':
         specifier: '*'
         version: link:../../packages/api
-      '@acme/tailwind-config':
+      '@acme/ui':
         specifier: '*'
-        version: link:../../packages/config/tailwind
+        version: link:../../packages/ui
       '@clerk/clerk-expo':
         specifier: ^0.17.7
         version: 0.17.8(@types/react@18.2.43)(expo-auth-session@4.1.0)(expo-web-browser@12.5.0)(react-dom@18.2.0)(react-native@0.70.5)(react@18.2.0)
@@ -137,9 +137,9 @@ importers:
       '@acme/db':
         specifier: '*'
         version: link:../../packages/db
-      '@acme/tailwind-config':
+      '@acme/ui':
         specifier: '*'
-        version: link:../../packages/config/tailwind
+        version: link:../../packages/ui
       '@clerk/clerk-js':
         specifier: ^4.65.6
         version: 4.65.7(@types/react@18.2.43)(react-dom@18.2.0)(react@18.2.0)
@@ -263,18 +263,6 @@ importers:
         specifier: ^4.9.3
         version: 4.9.5
 
-  packages/config/tailwind:
-    devDependencies:
-      autoprefixer:
-        specifier: ^10.4.13
-        version: 10.4.16(postcss@8.4.32)
-      postcss:
-        specifier: ^8.4.19
-        version: 8.4.32
-      tailwindcss:
-        specifier: ^3.2.4
-        version: 3.3.6
-
   packages/db:
     dependencies:
       '@acme/shared-functions':
@@ -314,6 +302,58 @@ importers:
       typescript:
         specifier: latest
         version: 5.3.3
+
+  packages/ui:
+    dependencies:
+      '@radix-ui/react-slot':
+        specifier: ^1.0.2
+        version: 1.0.2(@types/react@18.2.43)(react@17.0.2)
+      class-variance-authority:
+        specifier: ^0.6.0
+        version: 0.6.1
+      clsx:
+        specifier: ^1.2.1
+        version: 1.2.1
+      lucide-react:
+        specifier: ^0.244.0
+        version: 0.244.0(react@17.0.2)
+      tailwind-merge:
+        specifier: ^1.13.2
+        version: 1.14.0
+      tailwindcss-animate:
+        specifier: ^1.0.6
+        version: 1.0.7(tailwindcss@3.3.6)
+    devDependencies:
+      '@types/node':
+        specifier: ^17.0.12
+        version: 17.0.45
+      '@types/react':
+        specifier: ^18.2.0
+        version: 18.2.43
+      '@types/react-dom':
+        specifier: ^18.2.0
+        version: 18.2.17
+      autoprefixer:
+        specifier: ^10.4.14
+        version: 10.4.16(postcss@8.4.32)
+      eslint:
+        specifier: ^8.28.0
+        version: 8.55.0
+      eslint-config-next:
+        specifier: 13.1.6
+        version: 13.1.6(eslint@8.55.0)(typescript@4.9.5)
+      postcss:
+        specifier: ^8.4.24
+        version: 8.4.32
+      react:
+        specifier: ^17.0.2
+        version: 17.0.2
+      tailwindcss:
+        specifier: ^3.3.2
+        version: 3.3.6
+      typescript:
+        specifier: ^4.5.2
+        version: 4.9.5
 
 packages:
 
@@ -2955,6 +2995,20 @@ packages:
     engines: {node: '>=16'}
     dev: false
 
+  /@radix-ui/react-compose-refs@1.0.1(@types/react@18.2.43)(react@17.0.2):
+    resolution: {integrity: sha512-fDSBgd44FKHa1FRMU59qBMPFcl2PZE+2nmqunj+BWFyYYjnhIDWL2ItDs3rrbJDQOtzt5nIebLCQc4QRfz6LJw==}
+    peerDependencies:
+      '@types/react': '*'
+      react: ^16.8 || ^17.0 || ^18.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+    dependencies:
+      '@babel/runtime': 7.23.5
+      '@types/react': 18.2.43
+      react: 17.0.2
+    dev: false
+
   /@radix-ui/react-compose-refs@1.0.1(@types/react@18.2.43)(react@18.2.0):
     resolution: {integrity: sha512-fDSBgd44FKHa1FRMU59qBMPFcl2PZE+2nmqunj+BWFyYYjnhIDWL2ItDs3rrbJDQOtzt5nIebLCQc4QRfz6LJw==}
     peerDependencies:
@@ -2967,6 +3021,21 @@ packages:
       '@babel/runtime': 7.23.5
       '@types/react': 18.2.43
       react: 18.2.0
+    dev: false
+
+  /@radix-ui/react-slot@1.0.2(@types/react@18.2.43)(react@17.0.2):
+    resolution: {integrity: sha512-YeTpuq4deV+6DusvVUW4ivBgnkHwECUu0BiN43L5UCDFgdhsRUWAghhTF5MbvNTPzmiFOx90asDSUjWuCNapwg==}
+    peerDependencies:
+      '@types/react': '*'
+      react: ^16.8 || ^17.0 || ^18.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+    dependencies:
+      '@babel/runtime': 7.23.5
+      '@radix-ui/react-compose-refs': 1.0.1(@types/react@18.2.43)(react@17.0.2)
+      '@types/react': 18.2.43
+      react: 17.0.2
     dev: false
 
   /@radix-ui/react-slot@1.0.2(@types/react@18.2.43)(react@18.2.0):
@@ -3471,6 +3540,10 @@ packages:
   /@types/node@16.18.6:
     resolution: {integrity: sha512-vmYJF0REqDyyU0gviezF/KHq/fYaUbFhkcNbQCuPGFQj6VTbXuHZoxs/Y7mutWe73C8AC6l9fFu8mSYiBAqkGA==}
     dev: false
+
+  /@types/node@17.0.45:
+    resolution: {integrity: sha512-w+tIMs3rq2afQdsPJlODhoUEKzFP1ayaoyl1CcnwtIlsVe7K7bA1NGm4s3PraqTLlXnbIN84zuBlxBWo1u9BLw==}
+    dev: true
 
   /@types/node@18.19.3:
     resolution: {integrity: sha512-k5fggr14DwAytoA/t8rPrIz++lXK7/DqckthCmoZOKNsEbJkId4Z//BqgApXBUGrGddrigYa1oqheo/7YmW4rg==}
@@ -4626,6 +4699,12 @@ packages:
     engines: {node: '>=8'}
     dev: false
 
+  /class-variance-authority@0.6.1:
+    resolution: {integrity: sha512-eurOEGc7YVx3majOrOb099PNKgO3KnKSApOprXI4BTq6bcfbqbQXPN2u+rPPmIJ2di23bMwhk0SxCCthBmszEQ==}
+    dependencies:
+      clsx: 1.2.1
+    dev: false
+
   /class-variance-authority@0.7.0:
     resolution: {integrity: sha512-jFI8IQw4hczaL4ALINxqLEXQbWcNjoSkloa4IaufXCJr6QawJyw7tuRysRsrE8w2p/4gGaxKIt/hX3qz/IbD1A==}
     dependencies:
@@ -4702,6 +4781,11 @@ packages:
   /clone@2.1.2:
     resolution: {integrity: sha512-3Pe/CF1Nn94hyhIYpjtiLhdCoEoz0DqQ+988E9gmeEdQZlojxnOb74wctFyuwWQHzqyf9X7C7MG8juUpqBJT8w==}
     engines: {node: '>=0.8'}
+    dev: false
+
+  /clsx@1.2.1:
+    resolution: {integrity: sha512-EcR6r5a8bj6pu3ycsa/E/cKVGuTgZJZdsyUYHOksG/UHIiKfjxzRxYJpyVBwYaQeOvghal9fcc4PidlgzugAQg==}
+    engines: {node: '>=6'}
     dev: false
 
   /clsx@2.0.0:
@@ -7626,6 +7710,14 @@ packages:
       es5-ext: 0.10.62
     dev: true
 
+  /lucide-react@0.244.0(react@17.0.2):
+    resolution: {integrity: sha512-PeDVbx5PlIRrVvdxiuSxPfBo7sK5qrL3LbvvRoGVNiHYRAkBm/48lKqoioxcmp0bgsyJs9lMw7CdtGFvnMJbVg==}
+    peerDependencies:
+      react: ^16.5.1 || ^17.0.0 || ^18.0.0
+    dependencies:
+      react: 17.0.2
+    dev: false
+
   /magic-string@0.30.5:
     resolution: {integrity: sha512-7xlpfBaQaP/T6Vh8MO/EqXSW5En6INHEvEXQiuff7Gku0PWjU3uf6w/j9o7O+SpB5fOAkrI5HeoNgwjEO0pFsA==}
     engines: {node: '>=12'}
@@ -9455,6 +9547,13 @@ packages:
       react: 18.2.0
     dev: false
 
+  /react@17.0.2:
+    resolution: {integrity: sha512-gnhPt75i/dq/z3/6q/0asP78D0u592D5L1pd7M8P+dck6Fu/jJeL6iVVK23fptSUZj8Vjf++7wXA8UNclGQcbA==}
+    engines: {node: '>=0.10.0'}
+    dependencies:
+      loose-envify: 1.4.0
+      object-assign: 4.1.1
+
   /react@18.2.0:
     resolution: {integrity: sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==}
     engines: {node: '>=0.10.0'}
@@ -10367,10 +10466,22 @@ packages:
     resolution: {integrity: sha512-Cat63mxsVJlzYvN51JmVXIgNoUokrIaT2zLclCXjRd8boZ0004U4KCs/sToJ75C6sdlByWxpYnb5Boif1VSFew==}
     dev: false
 
+  /tailwind-merge@1.14.0:
+    resolution: {integrity: sha512-3mFKyCo/MBcgyOTlrY8T7odzZFx+w+qKSMAmdFzRvqBfLlSigU6TZnlFHK0lkMwj9Bj8OYU+9yW9lmGuS0QEnQ==}
+    dev: false
+
   /tailwind-merge@2.1.0:
     resolution: {integrity: sha512-l11VvI4nSwW7MtLSLYT4ldidDEUwQAMWuSHk7l4zcXZDgnCRa0V3OdCwFfM7DCzakVXMNRwAeje9maFFXT71dQ==}
     dependencies:
       '@babel/runtime': 7.23.5
+    dev: false
+
+  /tailwindcss-animate@1.0.7(tailwindcss@3.3.6):
+    resolution: {integrity: sha512-bl6mpH3T7I3UFxuvDEXLxy/VuFxBk5bbzplh7tXI68mwMokNYd1t9qPBHlnyTwfa4JGC4zP516I1hYYtQ/vspA==}
+    peerDependencies:
+      tailwindcss: '>=3.0.0 || insiders'
+    dependencies:
+      tailwindcss: 3.3.6
     dev: false
 
   /tailwindcss@3.3.6:
