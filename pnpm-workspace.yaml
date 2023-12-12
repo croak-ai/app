@@ -1,7 +1,7 @@
 packages:
   - apps/expo
   - apps/nextjs
-  - packages/trpc
+  - packages/api/trpc
   - packages/db
   - packages/shared-functions
   - packages/ui
