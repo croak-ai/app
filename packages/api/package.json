@@ -17,7 +17,6 @@
     "@trpc/client": "^10.43.1",
     "@trpc/next": "^10.43.1",
     "@trpc/server": "^10.43.1",
-    "openai": "^4.20.1",
     "superjson": "^1.9.1",
     "zod": "^3.18.0"
   },
