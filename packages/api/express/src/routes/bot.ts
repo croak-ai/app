@@ -1,4 +1,4 @@
-import app from "../../index";
+import app from "../index";
 import { Request, Response } from "express";
 
 app.get("/express/test", (req: Request, res: Response) => {
