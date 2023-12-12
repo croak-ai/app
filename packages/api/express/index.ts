@@ -1,3 +1,4 @@
-//Entry point
+import express, { Request, Response } from 'express';
 
-//Maybe export funciton types. Who knows
+const app = express();
+const port = process.env.PORT || 3000;

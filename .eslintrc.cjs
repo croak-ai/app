@@ -8,6 +8,7 @@ module.exports = {
       "./tsconfig.json",
       "./apps/*/tsconfig.json",
       "./packages/*/tsconfig.json",
+      "./packages/api/*/tsconfig.json",
     ],
   },
   plugins: ["@typescript-eslint"],
