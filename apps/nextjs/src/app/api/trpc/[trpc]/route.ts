@@ -1,5 +1,5 @@
-import { appRouter } from "@acme/api";
-import { createContext } from "@acme/api";
+import { appRouter } from "@acme/trpc";
+import { createContext } from "@acme/trpc";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { type NextRequest } from "next/server";
 
