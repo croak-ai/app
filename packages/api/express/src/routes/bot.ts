@@ -1,7 +1,6 @@
 import app from "../../index";
+import { Request, Response } from "express";
 
-console.log("helloooo ");
-
-// app.get('/', (req: Request, res: Response) => {
-//     res.send('Hello, TypeScript Express!');
-//   });
+app.get("/test", (req: Request, res: Response) => {
+  res.send("Hello, TypeScript Express!");
+});
