@@ -1,5 +1,5 @@
 async function getData() {
-  const res = await fetch("http://localhost:3000/test");
+  const res = await fetch("http://localhost:3000/express/test");
   // The return value is *not* serialized
   // You can return Date, Map, Set, etc.
 
@@ -7,8 +7,7 @@ async function getData() {
     // This will activate the closest `error.js` Error Boundary
     throw new Error("Failed to fetch data");
   }
-  console.log(res.json);
-  return res.json();
+  return res;
 }
 
 export default async function ExpressTest() {
