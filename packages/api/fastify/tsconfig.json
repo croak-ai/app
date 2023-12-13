@@ -1,4 +1,5 @@
 {
+  "extends": "../../../tsconfig.json",
   "compilerOptions": {
     "sourceMap": true,
     "outDir": "./dist",
@@ -14,8 +15,6 @@
     "experimentalDecorators": true
   },
   "exclude": [
-    "node_modules/@types/react",
-    "node_modules/@types/react-native",
     "node_modules"
     /* other exclusions as needed */
   ],
