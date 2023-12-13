@@ -166,7 +166,7 @@ importers:
       fastify: ^4.24.3
       fastify-tsconfig: ^2.0.0
       nodemon: ^3.0.2
-      typescript: ^4.9.3
+      typescript: ^5.3.3
     dependencies:
       '@acme/db': link:../../db
       '@acme/shared-functions': link:../../shared-functions
@@ -178,7 +178,7 @@ importers:
       eslint: 8.55.0
       fastify-tsconfig: 2.0.0
       nodemon: 3.0.2
-      typescript: 4.9.5
+      typescript: 5.3.3
 
   packages/api/trpc:
     specifiers:

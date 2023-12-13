@@ -13,6 +13,11 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true
   },
-  "exclude": ["node_modules"],
+  "exclude": [
+    "node_modules/@types/react",
+    "node_modules/@types/react-native",
+    "node_modules"
+    /* other exclusions as needed */
+  ],
   "include": ["./src/**/*.ts"]
 }
