@@ -3,7 +3,7 @@
   "compilerOptions": {
     "module": "CommonJS",
     "sourceMap": true,
-    "outDir": "./build",
+    "outDir": "dist",
     "noImplicitAny": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
