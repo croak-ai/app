@@ -5,7 +5,7 @@ export default async function bot(fastify: FastifyInstance) {
   fastify.get(
     "/test",
     async function (_request: FastifyRequest, reply: FastifyReply) {
-      reply.send("Hello from server mane");
+      reply.send("AYY BLUZZIN");
     },
   );
 }
