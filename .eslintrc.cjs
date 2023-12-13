@@ -11,6 +11,7 @@ module.exports = {
       "./packages/api/*/tsconfig.json",
     ],
   },
+  ignorePatterns: ["build/"],
   plugins: ["@typescript-eslint"],
   extends: ["plugin:@typescript-eslint/recommended"],
 };

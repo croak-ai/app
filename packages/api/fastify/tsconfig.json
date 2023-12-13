@@ -1,8 +1,9 @@
 {
   "extends": "../../../tsconfig.json",
   "compilerOptions": {
+    "module": "CommonJS",
     "sourceMap": true,
-    "outDir": "./dist",
+    "outDir": "./build",
     "noImplicitAny": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
@@ -10,9 +11,10 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
+    "esModuleInterop": false,
     "emitDecoratorMetadata": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "noEmit": false
   },
   "exclude": [
     "node_modules"
