@@ -20,7 +20,7 @@ export default async function Page({
   children: React.ReactNode;
 }) {
   return (
-    <Suspense>
+    <Suspense fallback={<>SUIS</>}>
       <EnsureOrg>{children}</EnsureOrg>
     </Suspense>
   );
