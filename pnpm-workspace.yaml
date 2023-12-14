@@ -1,7 +1,8 @@
 packages:
   - apps/expo
   - apps/nextjs
-  - packages/api
+  - packages/api/trpc
+  - packages/api/fastify
   - packages/db
   - packages/shared-functions
   - packages/ui

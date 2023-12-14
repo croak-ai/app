@@ -10,7 +10,7 @@ const config = {
   reactStrictMode: true,
   swcMinify: true,
   transpilePackages: [
-    "@acme/api",
+    "@acme/trpc",
     "@acme/db",
     "@acme/ui",
     "@acme/shared-functions",
