@@ -12,7 +12,7 @@ async function WokspacePage() {
 
 export default async function Layout() {
   return (
-    <Suspense fallback={<>SUSPENSE</>>
+    <Suspense fallback={<>SUSPENSE</>}>
       <WokspacePage />
     </Suspense>
   );
