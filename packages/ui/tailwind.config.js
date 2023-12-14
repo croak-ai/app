@@ -5,18 +5,13 @@ module.exports = {
     "./pages/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
     "./app/**/*.{ts,tsx}",
-    "./src/**/*.{ts,tsx}",
+    "../../packages/ui/components/**/*.{ts,tsx}",
+    "../../apps/nextjs/src/**/*.{ts,tsx}",
   ],
   theme: {
     container: {
       center: true,
       padding: "2rem",
-      screens: {
-        sm: "576px",
-        md: "768px",
-        lg: "960px",
-        xl: "1440px",
-      },
     },
     transparent: "transparent",
     current: "currentColor",
