@@ -33,7 +33,7 @@ export const createContextInner = async ({ auth }: AuthContextProps) => {
 
   if (!TRPC_TURSO_DB_TOKEN || !TRPC_TURSO_ORG_SLUG) {
     throw new Error(
-      "No TRPC_TURSO_API_BASE_URL or TRPC_TURSO_ORG_SLUG, make sure you configured your .env file correctly",
+      "No TRPC_TURSO_DB_TOKEN or TRPC_TURSO_ORG_SLUG, make sure you configured your .env file correctly",
     );
   }
 
