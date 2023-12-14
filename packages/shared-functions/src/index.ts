@@ -34,3 +34,10 @@ export const getTursoDbUrlFromClerkTenantId = (
 export const getEmptyDatabaseName = (group: { groupName: string }) => {
   return `t-empty-${group.groupName}`;
 };
+
+export function formatString(str: string): string {
+  return str
+    .split(/(?=[A-Z])/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
