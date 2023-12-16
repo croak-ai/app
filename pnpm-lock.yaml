@@ -140,6 +140,9 @@ importers:
       '@acme/db':
         specifier: '*'
         version: link:../../packages/db
+      '@acme/lottie-animations':
+        specifier: '*'
+        version: link:../../packages/lottie-animations
       '@acme/shared-functions':
         specifier: '*'
         version: link:../../packages/shared-functions
@@ -185,6 +188,9 @@ importers:
       cors:
         specifier: ^2.8.5
         version: 2.8.5
+      lottie-react:
+        specifier: ^2.4.0
+        version: 2.4.0(react-dom@18.2.0)(react@18.2.0)
       next:
         specifier: ^14.0.3
         version: 14.0.4(react-dom@18.2.0)(react@18.2.0)
@@ -338,6 +344,12 @@ importers:
         version: 10.9.2(@types/node@18.19.3)(typescript@5.3.3)
       typescript:
         specifier: ^5.1.6
+        version: 5.3.3
+
+  packages/lottie-animations:
+    dependencies:
+      typescript:
+        specifier: latest
         version: 5.3.3
 
   packages/shared-functions:
@@ -9400,6 +9412,21 @@ packages:
     hasBin: true
     dependencies:
       js-tokens: 4.0.0
+
+  /lottie-react@2.4.0(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-pDJGj+AQlnlyHvOHFK7vLdsDcvbuqvwPZdMlJ360wrzGFurXeKPr8SiRCjLf3LrNYKANQtSsh5dz9UYQHuqx4w==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      lottie-web: 5.12.2
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    dev: false
+
+  /lottie-web@5.12.2:
+    resolution: {integrity: sha512-uvhvYPC8kGPjXT3MyKMrL3JitEAmDMp30lVkuq/590Mw9ok6pWcFCwXJveo0t5uqYw1UREQHofD+jVpdjBv8wg==}
+    dev: false
 
   /lower-case@2.0.2:
     resolution: {integrity: sha512-7fm3l3NAF9WfN6W3JOmf5drwpVqX78JtoGJ3A6W0a6ZnldM41w2fV5D490psKFTpMds8TJse/eHLFFsNHHjHgg==}

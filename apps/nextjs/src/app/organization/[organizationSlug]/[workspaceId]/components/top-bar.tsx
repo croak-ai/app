@@ -18,7 +18,7 @@ import { Button } from "@packages/ui/components/ui/button";
 
 export function WorkspaceLayout({ children }: { children: React.ReactNode }) {
   const [isSheetOpen, setSheetOpen] = useState(false);
-  const [isMac, setIsMac] = useState<boolean | null>(null);
+  const [isMac, setIsMac] = useState(false);
 
   useEffect(() => {
     setIsMac(window.navigator.userAgent.includes("Mac"));
@@ -39,7 +39,6 @@ export function WorkspaceLayout({ children }: { children: React.ReactNode }) {
   const AISheet = () => {
     return (
       <>
-        {" "}
         {isSheetOpen ? null : (
           <Button variant="outline" onClick={() => setSheetOpen(true)}>
             Ask Voyaging AI <Icons.magicWand className="mx-2 h-4 w-4" />

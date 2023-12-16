@@ -14,15 +14,9 @@ import {
   FormMessage,
 } from "@acme/ui/components/ui/form";
 import { Input } from "@acme/ui/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@acme/ui/components/ui/select";
+import { useRouter } from "next/navigation";
+
 import { useForm } from "react-hook-form";
-import { ContinueButton } from "@acme/ui/components/bonus/continue-button";
 import Loading from "@acme/ui/components/bonus/loading";
 import { useState } from "react";
 import { useEffect } from "react";
@@ -32,13 +26,20 @@ import { redirect } from "next/navigation";
 import ForwardButton from "@packages/ui/components/steps/forward-button";
 import { Separator } from "@packages/ui/components/ui/separator";
 
+import Lottie from "lottie-react";
+
+import { successCheck } from "@acme/lottie-animations";
+
 export default function CreateWorkSpaceForm({
   currentStep,
+  workspaceId,
 }: {
   currentStep: number;
+  workspaceId: string;
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const router = useRouter();
 
   if (error) {
     setLoading(false);
@@ -80,8 +81,13 @@ export default function CreateWorkSpaceForm({
     try {
       setLoading(true);
 
+      const url = new URL(window.location.href);
+
+      url.searchParams.set("workspaceId", "123");
+
+      //
       if (true) {
-        redirect(`/`);
+        router.replace(url.toString());
       } else {
         setError(new Error("Something went wrong. Please try again."));
       }
@@ -89,6 +95,32 @@ export default function CreateWorkSpaceForm({
       setError(e as Error);
     }
   };
+
+  if (workspaceId) {
+    return (
+      <>
+        <div className="w-full rounded-md  sm:h-full md:h-[500px]">
+          <div className="space-y-6 pb-6">
+            <div>
+              <h3 className="text-lg font-medium">
+                Successfully Created Workspace!
+              </h3>
+            </div>
+            <div className="flex justify-center">
+              <Lottie
+                animationData={successCheck}
+                className="w-1/2"
+                loop={false}
+              />
+            </div>
+          </div>
+        </div>
+        <div className="flex justify-end py-4">
+          <ForwardButton currentStep={currentStep} />
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
