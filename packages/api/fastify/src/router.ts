@@ -1,7 +1,6 @@
 import { FastifyInstance } from "fastify";
 
-import test from "./routes/test";
-
+import postTest from "./routes/postTest";
 export default async function router(fastify: FastifyInstance) {
-  fastify.register(test, { prefix: "/" });
+  fastify.register(postTest, { prefix: "/" });
 }

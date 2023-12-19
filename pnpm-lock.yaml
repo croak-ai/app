@@ -246,9 +246,6 @@ importers:
       '@clerk/nextjs':
         specifier: ^4.27.1
         version: 4.28.1(next@14.0.4)(react-dom@18.2.0)(react@18.2.0)
-      drizzle-orm:
-        specifier: ^0.28.6
-        version: 0.28.6(@libsql/client@0.4.0-pre.5)(@planetscale/database@1.13.0)(better-sqlite3@9.2.2)
       fastify:
         specifier: ^4.24.3
         version: 4.25.1
@@ -256,9 +253,6 @@ importers:
       '@types/node':
         specifier: '*'
         version: 18.19.3
-      drizzle-kit:
-        specifier: ^0.19.13
-        version: 0.19.13
       eslint:
         specifier: ^8.28.0
         version: 8.56.0
