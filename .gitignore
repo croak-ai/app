@@ -45,3 +45,6 @@ yarn-error.log*
 
 # turbo
 .turbo
+
+# Turso synced database
+**/sync/
