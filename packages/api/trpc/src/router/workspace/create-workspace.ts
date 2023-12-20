@@ -1,0 +1,84 @@
+import { dekEncryptionKey, workspace } from "@packages/db/schema/tenant";
+import { protectedProcedureWithOrgDB, router } from "../../trpc";
+import { z } from "zod";
+type newWorkspaceType = typeof workspace.$inferInsert;
+type newDEKEncryptionKeyType = typeof dekEncryptionKey.$inferInsert;
+import crypto from "crypto";
+import { TRPCError } from "@trpc/server";
+
+export const zCreateWorkspace = z.object({
+  zName: z.string().min(1).max(256),
+  zDescription: z.string().min(1).max(256),
+  zSlug: z.string().min(1).max(256),
+});
+
+export const createWorkspace = router({
+  createWorkspace: protectedProcedureWithOrgDB
+    .input(zCreateWorkspace)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        console.log("1");
+        const key = crypto.getRandomValues(new Uint8Array(16)); // 16 bytes * 8 = 128 bits
+        const keyHex = Array.from(key)
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join("");
+
+        const newDEKEncryptionKey: newDEKEncryptionKeyType = {
+          dek: keyHex,
+          kekType: "plaintext",
+          kekId: "",
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        };
+
+        const newDekEncryptionKeyRes = await ctx.db
+          ?.insert(dekEncryptionKey)
+          .values(newDEKEncryptionKey)
+          .returning({ insertedId: dekEncryptionKey.id });
+
+        if (
+          newDekEncryptionKeyRes.length !== 1 ||
+          !newDekEncryptionKeyRes ||
+          !newDekEncryptionKeyRes[0]
+        ) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to create new DEK encryption key",
+          });
+        }
+
+        const newWorkspace: newWorkspaceType = {
+          name: input.zName,
+          description: input.zDescription,
+          slug: input.zSlug,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+          publicChannelEncryptionId: newDekEncryptionKeyRes[0].insertedId,
+        };
+
+        const newWorkspaceRes = await ctx.db
+          ?.insert(workspace)
+          .values(newWorkspace)
+          .returning({
+            insertedId: workspace.id,
+            insertedName: workspace.name,
+            insertedDescription: workspace.description,
+          });
+
+        if (!newWorkspaceRes) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to create new workspace",
+          });
+        }
+
+        return newWorkspaceRes;
+      } catch (error) {
+        console.error(error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create new workspace",
+        });
+      }
+    }),
+});

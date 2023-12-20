@@ -14,6 +14,8 @@ import {
   FormMessage,
 } from "@acme/ui/components/ui/form";
 import { Input } from "@acme/ui/components/ui/input";
+import { Textarea } from "@acme/ui/components/ui/textarea";
+
 import { useRouter } from "next/navigation";
 
 import { useForm } from "react-hook-form";
@@ -22,13 +24,13 @@ import { useState } from "react";
 import { useEffect } from "react";
 import { ScrollArea } from "@packages/ui/components/ui/scroll-area";
 
-import { redirect } from "next/navigation";
 import ForwardButton from "@packages/ui/components/steps/forward-button";
 import { Separator } from "@packages/ui/components/ui/separator";
 
 import Lottie from "lottie-react";
 
 import { successCheck } from "@acme/lottie-animations";
+import { reactTRPC } from "@next/utils/trpc/reactTRPCClient";
 
 export default function CreateWorkSpaceForm({
   currentStep,
@@ -40,6 +42,9 @@ export default function CreateWorkSpaceForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const router = useRouter();
+
+  const createWorkspace =
+    reactTRPC.createWorkspace.createWorkspace.useMutation();
 
   if (error) {
     setLoading(false);
@@ -54,6 +59,8 @@ export default function CreateWorkSpaceForm({
     workspaceSlug: z.string().min(2, {
       message: "workspaceSlug must be at least 2 characters.",
     }),
+
+    workspaceDescription: z.string().min(2).max(512),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -76,14 +83,27 @@ export default function CreateWorkSpaceForm({
     form.setValue("workspaceSlug", slug);
   }, [workspaceName]);
 
-  //const onSubmit = async (data: z.infer<typeof formSchema>) => {
-  const onSubmit = async () => {
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    //const onSubmit = async () => {
     try {
       setLoading(true);
 
+      const workspace = await createWorkspace.mutateAsync({
+        zName: data.workspaceName,
+        zSlug: data.workspaceSlug,
+        zDescription: data.workspaceDescription,
+      });
+
+      if (workspace.length !== 1 || !workspace[0]?.insertedId) {
+        setError(new Error("Something went wrong. Please try again."));
+        return;
+      }
+
+      const id = workspace[0].insertedId;
+
       const url = new URL(window.location.href);
 
-      url.searchParams.set("workspaceId", "123");
+      url.searchParams.set("workspaceId", id.toString());
 
       //
       if (true) {
@@ -124,7 +144,7 @@ export default function CreateWorkSpaceForm({
 
   return (
     <>
-      <ScrollArea className="w-full rounded-md  sm:h-full md:h-[500px]">
+      <ScrollArea className="w-full rounded-md  sm:h-full md:h-[650px]">
         <div className="space-y-6 pb-6">
           <div>
             <h3 className="text-lg font-medium">
@@ -177,6 +197,25 @@ export default function CreateWorkSpaceForm({
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="workspaceDescription"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Workspace Description</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="This is the data engineering workspace, where we store all of our data engineering resources."
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      This is your workspace description
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </form>
           </Form>
         </div>
@@ -187,8 +226,8 @@ export default function CreateWorkSpaceForm({
             <Loading name="Submitting" />
           </Button>
         ) : (
-          <Button type="submit" onClick={onSubmit}>
-            Submit{" "}
+          <Button type="submit" onClick={form.handleSubmit(onSubmit)}>
+            Submit
           </Button>
         )}
       </div>

@@ -4,19 +4,18 @@ import { text, integer, sqliteTable } from "drizzle-orm/sqlite-core";
 export const workspace = sqliteTable("workspace", {
   id: integer("id").primaryKey(),
   name: text("name", { length: 256 }).notNull(),
+  slug: text("slug", { length: 256 }).notNull().unique(),
   description: text("description", { length: 256 }).notNull(),
   createdAt: integer("createdAt").notNull(),
   updatedAt: integer("updatedAt").notNull(),
   deletedAt: integer("deletedAt"),
-  publicChannelEncryptionId: text("publicEncryptionId", {
-    length: 256,
-  }).notNull(),
+  publicChannelEncryptionId: integer("publicEncryptionId").notNull(),
 });
 
 export const channel = sqliteTable("channel", {
   id: integer("id").primaryKey(),
   name: text("name", { length: 256 }).notNull(),
-  description: text("description", { length: 256 }).notNull(),
+  description: text("description", { length: 512 }).notNull(),
   workspaceId: integer("workspaceId").notNull(),
   bRequiresWriteAccess: integer("bRequiresWriteAccess").default(0),
   bIsPrivateChannel: integer("bIsPrivateChannel").default(0),
@@ -56,9 +55,9 @@ export const workspaceMember = sqliteTable("workspaceMember", {
  */
 export const dekEncryptionKey = sqliteTable("dekEncryptionKey", {
   id: integer("id").primaryKey(),
-  dek: text("key", { length: 256 }).notNull(),
+  dek: text("key", { length: 256 }).notNull().unique(),
   kekType: text("kekType", { length: 256 }).notNull(),
-  kekId: text("kekId", { length: 256 }).notNull(),
+  kekId: text("kekId", { length: 256 }),
   createdAt: integer("createdAt").notNull(),
   updatedAt: integer("updatedAt").notNull(),
   deletedAt: integer("deletedAt"),
