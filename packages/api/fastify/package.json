@@ -21,10 +21,8 @@
     "openai": "^4.23.0"
   },
   "devDependencies": {
-    "@types/node": "*",
     "eslint": "^8.28.0",
     "fastify-tsconfig": "^2.0.0",
-    "nodemon": "^3.0.2",
     "typescript": "^5.3.3"
   },
   "engines": {
