@@ -5,9 +5,9 @@
   "types": "./index.d.ts",
   "license": "MIT",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "start": "node dist/index.js",
-    "dev": "nodemon --watch src --ext ts --exec \"pnpm build && pnpm start\"",
+    "dev": "bun --watch src/index.ts",
+    "build": "bun build src/index.ts --outdir ./build --sourcemap=external --minify",
+    "start": "bun build/index.js",
     "clean": "rm -rf .turbo node_modules",
     "lint": "eslint . --ext .ts,.tsx",
     "type-check": "tsc --noEmit"
@@ -26,5 +26,8 @@
     "fastify-tsconfig": "^2.0.0",
     "nodemon": "^3.0.2",
     "typescript": "^5.3.3"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
   }
 }

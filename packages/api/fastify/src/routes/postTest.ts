@@ -8,7 +8,7 @@ export default async function postTest(fastify: FastifyInstance) {
     async function (_request: FastifyRequest, reply: FastifyReply) {
       await client.sync();
       const result = await client.execute("SELECT * FROM test");
-      reply.send(result);
+      reply.send(result + "");
     },
   );
 }
