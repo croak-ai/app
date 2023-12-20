@@ -31,6 +31,8 @@ import Lottie from "lottie-react";
 
 import { successCheck } from "@acme/lottie-animations";
 import { reactTRPC } from "@next/utils/trpc/reactTRPCClient";
+import { Icons } from "@packages/ui/components/bonus/icons";
+import { CrossCircledIcon } from "@radix-ui/react-icons";
 
 export default function CreateWorkSpaceForm({
   currentStep,
@@ -41,10 +43,22 @@ export default function CreateWorkSpaceForm({
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [newWorkspaceSlug, setNewWorkspaceSlug] = useState<string>("");
+  const [timeoutId, setTimeoutId] = useState<number | null>(null);
   const router = useRouter();
 
   const createWorkspace =
     reactTRPC.createWorkspace.createWorkspace.useMutation();
+
+  const workspaceSlugExists =
+    reactTRPC.workspaceSlugExists.workspaceSlugExists.useQuery(
+      {
+        zSlug: newWorkspaceSlug,
+      },
+      {
+        enabled: newWorkspaceSlug?.length >= 2,
+      },
+    );
 
   if (error) {
     setLoading(false);
@@ -52,15 +66,27 @@ export default function CreateWorkSpaceForm({
   }
 
   const formSchema = z.object({
-    workspaceName: z.string().min(2, {
-      message: "workspaceName name must be at least 2 characters.",
-    }),
+    workspaceName: z
+      .string()
+      .min(2, {
+        message: "Workspace Name must be at least 2 characters.",
+      })
+      .max(256)
+      .transform((value) => value.trim())
+      .refine(
+        (value) => !value.includes("  "),
+        "Workspace Name should not contain more than one space in a row.",
+      ),
 
-    workspaceSlug: z.string().min(2, {
-      message: "workspaceSlug must be at least 2 characters.",
-    }),
+    workspaceSlug: z
+      .string()
+      .min(2, {
+        message: "Workspace Slug must be at least 2 characters.",
+      })
+      .max(256)
+      .trim(),
 
-    workspaceDescription: z.string().min(2).max(512),
+    workspaceDescription: z.string().min(2).max(512).trim(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -78,10 +104,60 @@ export default function CreateWorkSpaceForm({
 
     const slug = workspaceName
       .toLowerCase()
+      .trim()
       .replace(/ /g, "-")
       .replace(/[^\w-]+/g, "");
     form.setValue("workspaceSlug", slug);
   }, [workspaceName]);
+
+  const workspaceSlug = form.watch("workspaceSlug");
+
+  // This is to basically to only run the query when the user stops typing
+  useEffect(() => {
+    form.clearErrors("workspaceSlug");
+
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+
+    const id = window.setTimeout(() => {
+      setNewWorkspaceSlug(workspaceSlug);
+      setTimeoutId(null);
+    }, 750);
+
+    setTimeoutId(id);
+  }, [workspaceSlug]);
+
+  useEffect(() => {
+    if (workspaceSlugExists.data === true) {
+      form.setError("workspaceSlug", {
+        type: "manual",
+        message: "Workspace slug already exists",
+      });
+    }
+
+    if (workspaceSlugExists.data === false) {
+      form.clearErrors("workspaceSlug");
+    }
+  }, [workspaceSlugExists.data, form]);
+
+  const WorkspaceSlugIcon = () => {
+    if (workspaceSlug?.length < 2 || timeoutId) {
+      return <></>;
+    }
+    if (workspaceSlugExists.isFetching) {
+      return <Icons.spinner className="h-6 w-6 animate-spin" />;
+    }
+    if (workspaceSlugExists.data === true) {
+      return <Icons.crossCircled className="h-6 w-6 text-destructive" />;
+    }
+
+    if (workspaceSlugExists.data === false) {
+      return (
+        <Lottie animationData={successCheck} className="h-6 w-6" loop={false} />
+      );
+    }
+  };
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     //const onSubmit = async () => {
@@ -105,12 +181,7 @@ export default function CreateWorkSpaceForm({
 
       url.searchParams.set("workspaceId", id.toString());
 
-      //
-      if (true) {
-        router.replace(url.toString());
-      } else {
-        setError(new Error("Something went wrong. Please try again."));
-      }
+      router.replace(url.toString());
     } catch (e) {
       setError(e as Error);
     }
@@ -183,11 +254,16 @@ export default function CreateWorkSpaceForm({
                   <FormItem>
                     <FormLabel>Workspace Slug</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="data-engineering"
-                        {...field}
-                        disabled
-                      />
+                      <div className="flex items-center">
+                        <Input
+                          placeholder="data-engineering"
+                          {...field}
+                          disabled
+                        />
+                        <span className="mx-4">
+                          <WorkspaceSlugIcon />
+                        </span>
+                      </div>
                     </FormControl>
                     <FormDescription>
                       This is your workspace slug, it must be unique:{" "}
@@ -226,7 +302,15 @@ export default function CreateWorkSpaceForm({
             <Loading name="Submitting" />
           </Button>
         ) : (
-          <Button type="submit" onClick={form.handleSubmit(onSubmit)}>
+          <Button
+            type="submit"
+            onClick={form.handleSubmit(onSubmit)}
+            disabled={
+              workspaceSlugExists.data === true ||
+              workspaceSlugExists.isFetching ||
+              timeoutId !== null
+            }
+          >
             Submit
           </Button>
         )}

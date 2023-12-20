@@ -7,9 +7,9 @@ import crypto from "crypto";
 import { TRPCError } from "@trpc/server";
 
 export const zCreateWorkspace = z.object({
-  zName: z.string().min(1).max(256),
-  zDescription: z.string().min(1).max(256),
-  zSlug: z.string().min(1).max(256),
+  zName: z.string().min(2).max(256),
+  zDescription: z.string().min(2).max(512),
+  zSlug: z.string().min(2).max(256),
 });
 
 export const createWorkspace = router({

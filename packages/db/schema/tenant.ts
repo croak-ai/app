@@ -1,17 +1,24 @@
 import { sql } from "drizzle-orm";
-import { text, integer, sqliteTable } from "drizzle-orm/sqlite-core";
+import { text, integer, sqliteTable, index } from "drizzle-orm/sqlite-core";
 
-export const workspace = sqliteTable("workspace", {
-  id: integer("id").primaryKey(),
-  name: text("name", { length: 256 }).notNull(),
-  slug: text("slug", { length: 256 }).notNull().unique(),
-  description: text("description", { length: 256 }).notNull(),
-  createdAt: integer("createdAt").notNull(),
-  updatedAt: integer("updatedAt").notNull(),
-  deletedAt: integer("deletedAt"),
-  publicChannelEncryptionId: integer("publicEncryptionId").notNull(),
-});
-
+export const workspace = sqliteTable(
+  "workspace",
+  {
+    id: integer("id").primaryKey(),
+    name: text("name", { length: 256 }).notNull(),
+    slug: text("slug", { length: 256 }).notNull().unique(),
+    description: text("description", { length: 512 }).notNull(),
+    createdAt: integer("createdAt").notNull(),
+    updatedAt: integer("updatedAt").notNull(),
+    deletedAt: integer("deletedAt"),
+    publicChannelEncryptionId: integer("publicEncryptionId").notNull(),
+  },
+  (table) => {
+    return {
+      slugIdx: index("slug_idx").on(table.slug),
+    };
+  },
+);
 export const channel = sqliteTable("channel", {
   id: integer("id").primaryKey(),
   name: text("name", { length: 256 }).notNull(),
