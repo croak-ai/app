@@ -14,7 +14,7 @@ import { ContinueButton } from "@packages/ui/components/bonus/continue-button";
 export const StepSkeleton = () => {
   return (
     <>
-      <ScrollArea className="w-full rounded-md  sm:h-full md:h-[500px] ">
+      <ScrollArea className="w-full rounded-md  sm:h-full md:h-[650px] ">
         <div className="space-y-6 pb-6">
           <div>
             <h3 className="pb-2">
@@ -70,7 +70,33 @@ export const FirstTimeSteps: StepFunction[] = [
   async (props: StepFunctionProps) => {
     return (
       <>
-        <ScrollArea className="w-full rounded-md  sm:h-full md:h-[500px] ">
+        <ScrollArea className="w-full rounded-md  sm:h-full md:h-[650px] ">
+          <div className="space-y-6 pb-6">
+            <div>
+              <h3 className="text-lg font-medium">
+                Add an Icon to Your Workspace
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                This will help you and your team identify the workspace.
+              </p>
+            </div>
+            <Separator />
+            WE WILL HAVE THE ICON UPLOAD HERE
+          </div>
+        </ScrollArea>
+        <div className="flex justify-end py-4">
+          <BackwardButton currentStep={props.currentStep} />
+          <div className="ml-auto">
+            <ForwardButton currentStep={props.currentStep} />
+          </div>
+        </div>
+      </>
+    );
+  },
+  async (props: StepFunctionProps) => {
+    return (
+      <>
+        <ScrollArea className="w-full rounded-md  sm:h-full md:h-[650px] ">
           <div className="space-y-6 pb-6">
             <div>
               <h3 className="text-lg font-medium">

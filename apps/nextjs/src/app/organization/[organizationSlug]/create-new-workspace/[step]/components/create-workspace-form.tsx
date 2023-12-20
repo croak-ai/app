@@ -190,7 +190,7 @@ export default function CreateWorkSpaceForm({
   if (workspaceId) {
     return (
       <>
-        <div className="w-full rounded-md  sm:h-full md:h-[500px]">
+        <div className="w-full rounded-md  sm:h-full md:h-[650px]">
           <div className="space-y-6 pb-6">
             <div>
               <h3 className="text-lg font-medium">
@@ -200,7 +200,7 @@ export default function CreateWorkSpaceForm({
             <div className="flex justify-center">
               <Lottie
                 animationData={successCheck}
-                className="w-1/2"
+                className="w-3/4"
                 loop={false}
               />
             </div>
