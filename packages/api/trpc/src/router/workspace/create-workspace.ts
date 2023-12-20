@@ -17,7 +17,6 @@ export const createWorkspace = router({
     .input(zCreateWorkspace)
     .mutation(async ({ ctx, input }) => {
       try {
-        console.log("1");
         const key = crypto.getRandomValues(new Uint8Array(16)); // 16 bytes * 8 = 128 bits
         const keyHex = Array.from(key)
           .map((b) => b.toString(16).padStart(2, "0"))

@@ -16,7 +16,6 @@ export const workspaceSlugExists = router({
     .input(zCreateWorkspace)
     .query(async ({ ctx, input }) => {
       try {
-        console.log("YES");
         const workspaceRes = await ctx.db
           ?.select({ id: workspace.id })
           .from(workspace)
