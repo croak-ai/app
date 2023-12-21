@@ -13,7 +13,7 @@ import {
 } from "@acme/ui/components/ui/sheet";
 import { PlusCircledIcon } from "@radix-ui/react-icons";
 
-export const WorkspaceCreationSheet = () => {
+export const ChannelCreationSheet = () => {
   const [showNewWorkspaceSheet, setShowNewWorkspaceSheet] =
     React.useState(false);
 

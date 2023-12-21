@@ -18,37 +18,54 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@acme/ui/components/ui/popover";
-import { WorkspaceCreationSheet } from "./workspace-creation-sheet";
+import { useParams } from "next/navigation";
+import { Icons } from "@packages/ui/components/bonus/icons";
 
 export default function WorkspaceSelection() {
   const [open, setOpen] = React.useState(false);
+
+  const params = useParams();
+
+  if (!params) {
+    return <Skeleton className="h-5 w-5 rounded-full" />;
+  }
+
+  if (!params.workspaceId) {
+    return <></>;
+  }
 
   return (
     <>
       <Popover open={open} onOpenChange={setOpen}>
         <>
           <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              role="combobox"
-              aria-expanded={open}
-              aria-label="Select a Workspace"
-              className="max-w-2xl"
-            >
-              <Avatar className="mr-2 h-5 w-5 ">
-                <AvatarImage
-                  src={`https://avatar.vercel.sh/temp.png`}
-                  alt={"temp"}
-                />
-                <Skeleton className="h-5 w-5 rounded-full" />
-              </Avatar>
-              <span
-                className={`max-w-[72px] overflow-hidden overflow-ellipsis whitespace-nowrap pr-4 transition-all md:max-w-[118px] xl:max-w-[144px]`}
+            <div className="flex">
+              <Icons.slash
+                style={{ width: "50px", height: "50px" }}
+                className="bg-text"
+              />
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={open}
+                aria-label="Select a Workspace"
+                className="mt-1.5 max-w-2xl"
               >
-                NAME
-              </span>
-              <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
+                <Avatar className="mr-2 h-5 w-5 ">
+                  <AvatarImage
+                    src={`https://avatar.vercel.sh/temp.png`}
+                    alt={"temp"}
+                  />
+                  <Skeleton className="h-5 w-5 rounded-full" />
+                </Avatar>
+                <span
+                  className={`max-w-[72px] overflow-hidden overflow-ellipsis whitespace-nowrap pr-4 transition-all md:max-w-[118px] xl:max-w-[144px]`}
+                >
+                  NAME
+                </span>
+                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </div>
           </PopoverTrigger>
 
           <PopoverContent className="w-[320px] p-0 " align="start">
@@ -109,7 +126,6 @@ export default function WorkspaceSelection() {
               </CommandList>
               <CommandSeparator />
             </Command>
-            <WorkspaceCreationSheet />
           </PopoverContent>
         </>
       </Popover>

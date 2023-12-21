@@ -15,7 +15,7 @@ import { Icons } from "@acme/ui/components/bonus/icons";
 import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
 import { Button } from "@packages/ui/components/ui/button";
 
-export function WorkspaceLayout({ children }: { children: React.ReactNode }) {
+export function OrgLayout({ children }: { children: React.ReactNode }) {
   const [isSheetOpen, setSheetOpen] = useState(false);
   const [isMac, setIsMac] = useState(false);
 
@@ -86,11 +86,8 @@ export function WorkspaceLayout({ children }: { children: React.ReactNode }) {
           <div className="mt-2">
             <OrganizationSwitcher />
           </div>
-          <Icons.slash
-            style={{ width: "50px", height: "50px" }}
-            className="bg-text"
-          />
-          <div className="mt-1.5">
+
+          <div>
             <CourseSelection />
           </div>
         </span>
@@ -116,3 +113,5 @@ export function WorkspaceLayout({ children }: { children: React.ReactNode }) {
     </>
   );
 }
+
+export default OrgLayout;

@@ -7,7 +7,6 @@ import {
   UserProfile,
 } from "@clerk/nextjs";
 import { Icons } from "@packages/ui/components/bonus/icons";
-import { TopBar } from "./components/top-bar-without-workspace";
 
 const WelcomePage = ({ organizationSlug }: { organizationSlug: string }) => {
   return (
@@ -46,13 +45,8 @@ export default function Page({
   params: { organizationSlug: string; step: string };
 }) {
   return (
-    <TopBar>
-      <Protect
-        permission="org:workspace:create"
-        fallback={<YouDontHaveAccess />}
-      >
-        <WelcomePage organizationSlug={params.organizationSlug} />
-      </Protect>
-    </TopBar>
+    <Protect permission="org:workspace:create" fallback={<YouDontHaveAccess />}>
+      <WelcomePage organizationSlug={params.organizationSlug} />
+    </Protect>
   );
 }

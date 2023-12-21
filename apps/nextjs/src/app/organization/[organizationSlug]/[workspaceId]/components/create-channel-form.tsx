@@ -27,7 +27,7 @@ import Loading from "@acme/ui/components/bonus/loading";
 import { useState } from "react";
 import { redirect } from "next/navigation";
 
-export default function CreateWorkSpaceForm() {
+export default function CreateChannelForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
