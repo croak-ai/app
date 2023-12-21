@@ -16,68 +16,71 @@ export const createWorkspace = router({
   createWorkspace: protectedProcedureWithOrgDB
     .input(zCreateWorkspace)
     .mutation(async ({ ctx, input }) => {
-      try {
-        const key = crypto.getRandomValues(new Uint8Array(16)); // 16 bytes * 8 = 128 bits
-        const keyHex = Array.from(key)
-          .map((b) => b.toString(16).padStart(2, "0"))
-          .join("");
+      const hasRole = await ctx.auth.has({
+        permission: "org:workspace:create",
+      });
 
-        const newDEKEncryptionKey: newDEKEncryptionKeyType = {
-          dek: keyHex,
-          kekType: "plaintext",
-          kekId: "",
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
-        };
+      if (!hasRole) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "You do not have permission to create a workspace",
+        });
+      }
 
-        const newDekEncryptionKeyRes = await ctx.db
-          ?.insert(dekEncryptionKey)
-          .values(newDEKEncryptionKey)
-          .returning({ insertedId: dekEncryptionKey.id });
+      const key = crypto.getRandomValues(new Uint8Array(16)); // 16 bytes * 8 = 128 bits
+      const keyHex = Array.from(key)
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
 
-        if (
-          newDekEncryptionKeyRes.length !== 1 ||
-          !newDekEncryptionKeyRes ||
-          !newDekEncryptionKeyRes[0]
-        ) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to create new DEK encryption key",
-          });
-        }
+      const newDEKEncryptionKey: newDEKEncryptionKeyType = {
+        dek: keyHex,
+        kekType: "plaintext",
+        kekId: "",
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      };
 
-        const newWorkspace: newWorkspaceType = {
-          name: input.zName,
-          description: input.zDescription,
-          slug: input.zSlug,
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
-          publicChannelEncryptionId: newDekEncryptionKeyRes[0].insertedId,
-        };
+      const newDekEncryptionKeyRes = await ctx.db
+        ?.insert(dekEncryptionKey)
+        .values(newDEKEncryptionKey)
+        .returning({ insertedId: dekEncryptionKey.id });
 
-        const newWorkspaceRes = await ctx.db
-          ?.insert(workspace)
-          .values(newWorkspace)
-          .returning({
-            insertedId: workspace.id,
-            insertedName: workspace.name,
-            insertedDescription: workspace.description,
-          });
+      if (
+        newDekEncryptionKeyRes.length !== 1 ||
+        !newDekEncryptionKeyRes ||
+        !newDekEncryptionKeyRes[0]
+      ) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create new DEK encryption key",
+        });
+      }
 
-        if (!newWorkspaceRes) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to create new workspace",
-          });
-        }
+      const newWorkspace: newWorkspaceType = {
+        name: input.zName,
+        description: input.zDescription,
+        slug: input.zSlug,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        publicChannelEncryptionId: newDekEncryptionKeyRes[0].insertedId,
+      };
 
-        return newWorkspaceRes;
-      } catch (error) {
-        console.error(error);
+      const newWorkspaceRes = await ctx.db
+        ?.insert(workspace)
+        .values(newWorkspace)
+        .returning({
+          insertedId: workspace.id,
+          insertedName: workspace.name,
+          insertedDescription: workspace.description,
+        });
+
+      if (!newWorkspaceRes) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to create new workspace",
         });
       }
+
+      return newWorkspaceRes;
     }),
 });
