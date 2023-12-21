@@ -153,9 +153,7 @@ export default function CreateWorkSpaceForm({
     }
 
     if (workspaceSlugExists.data === false) {
-      return (
-        <Lottie animationData={successCheck} className="h-6 w-6" loop={false} />
-      );
+      return <Icons.checkCircled className="h-6 w-6 text-primary" />;
     }
   };
 
