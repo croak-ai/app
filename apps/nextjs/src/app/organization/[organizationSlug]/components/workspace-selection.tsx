@@ -30,7 +30,7 @@ export default function WorkspaceSelection() {
     return <Skeleton className="h-5 w-5 rounded-full" />;
   }
 
-  if (!params.workspaceId) {
+  if (!params.workspaceSlug) {
     return <></>;
   }
 
@@ -61,7 +61,7 @@ export default function WorkspaceSelection() {
                 <span
                   className={`max-w-[72px] overflow-hidden overflow-ellipsis whitespace-nowrap pr-4 transition-all md:max-w-[118px] xl:max-w-[144px]`}
                 >
-                  NAME
+                  {params.workspaceSlug}
                 </span>
                 <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
