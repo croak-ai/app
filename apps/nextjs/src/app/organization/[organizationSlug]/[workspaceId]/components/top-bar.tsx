@@ -9,7 +9,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@packages/ui/components/ui/sheet";
-import { X } from "lucide-react";
 
 import CourseSelection from "../components/workspace-selection";
 import { Icons } from "@acme/ui/components/bonus/icons";
