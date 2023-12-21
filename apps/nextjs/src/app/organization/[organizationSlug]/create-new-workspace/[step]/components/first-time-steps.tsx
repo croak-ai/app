@@ -45,7 +45,7 @@ export const StepSkeleton = () => {
 
 type StepFunctionProps = {
   organizationSlug: string;
-  workspaceId: string;
+  workspaceSlug: string;
   currentStep: number;
 };
 
@@ -59,7 +59,7 @@ export const FirstTimeSteps: StepFunction[] = [
       <>
         <CreateWorkSpaceForm
           currentStep={props.currentStep}
-          workspaceId={props.workspaceId}
+          createdWorkspaceSlug={props.workspaceSlug}
         />
       </>
     );
@@ -111,7 +111,7 @@ export const FirstTimeSteps: StepFunction[] = [
           <BackwardButton currentStep={props.currentStep} />
           <div className="ml-auto">
             <Link
-              href={`/organization/${props.organizationSlug}/${props.workspaceId}`}
+              href={`/organization/${props.organizationSlug}/${props.workspaceSlug}`}
             >
               <ContinueButton name="Go To Workspace" />
             </Link>

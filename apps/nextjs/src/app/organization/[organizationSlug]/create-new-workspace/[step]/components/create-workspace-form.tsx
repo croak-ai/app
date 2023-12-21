@@ -36,10 +36,10 @@ import { CrossCircledIcon } from "@radix-ui/react-icons";
 
 export default function CreateWorkSpaceForm({
   currentStep,
-  workspaceId,
+  createdWorkspaceSlug,
 }: {
   currentStep: number;
-  workspaceId: string;
+  createdWorkspaceSlug: string;
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -162,7 +162,7 @@ export default function CreateWorkSpaceForm({
     try {
       setLoading(true);
 
-      const { insertedId } = await createWorkspace.mutateAsync({
+      const { insertedWorkspaceSlug } = await createWorkspace.mutateAsync({
         zName: data.workspaceName,
         zSlug: data.workspaceSlug,
         zDescription: data.workspaceDescription,
@@ -170,7 +170,7 @@ export default function CreateWorkSpaceForm({
 
       const url = new URL(window.location.href);
 
-      url.searchParams.set("workspaceId", insertedId.toString());
+      url.searchParams.set("workspaceSlug", insertedWorkspaceSlug);
 
       router.replace(url.toString());
     } catch (e) {
@@ -178,7 +178,7 @@ export default function CreateWorkSpaceForm({
     }
   };
 
-  if (workspaceId) {
+  if (createdWorkspaceSlug) {
     return (
       <>
         <div className="w-full rounded-md  sm:h-full md:h-[650px]">

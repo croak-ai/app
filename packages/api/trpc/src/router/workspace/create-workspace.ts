@@ -75,8 +75,7 @@ export const createWorkspace = router({
         .values(newWorkspace)
         .returning({
           insertedId: workspace.id,
-          insertedName: workspace.name,
-          insertedDescription: workspace.description,
+          insertedWorkspaceSlug: workspace.slug,
         });
 
       const newlyCreatedWorkspace = newWorkspaceRes[0];
@@ -88,25 +87,21 @@ export const createWorkspace = router({
         });
       }
 
-      const newWorkspaceMembership = await ctx.db
-        ?.insert(workspaceMember)
-        .values({
-          workspaceId: newlyCreatedWorkspace.insertedId,
-          userId: ctx.auth.userId,
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
-        });
+      await ctx.db?.insert(workspaceMember).values({
+        workspaceId: newlyCreatedWorkspace.insertedId,
+        userId: ctx.auth.userId,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
 
       const newDekEncryptionKey = newDekEncryptionKeyRes[0];
 
-      const newEncryptionKeyUserAccess = await ctx.db
-        ?.insert(dekEncryptionKeyUserAccess)
-        .values({
-          dekId: newDekEncryptionKey.insertedId,
-          userId: ctx.auth.userId,
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
-        });
+      await ctx.db?.insert(dekEncryptionKeyUserAccess).values({
+        dekId: newDekEncryptionKey.insertedId,
+        userId: ctx.auth.userId,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
 
       return newlyCreatedWorkspace;
     }),

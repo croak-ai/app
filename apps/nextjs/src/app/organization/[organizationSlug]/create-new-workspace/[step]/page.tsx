@@ -6,7 +6,7 @@ export default async function Step({
   searchParams,
 }: {
   params: { organizationSlug: string; step: string };
-  searchParams: { workspaceId: string };
+  searchParams: { workspaceSlug: string };
 }) {
   const GetStepFunction = async () => {
     const StepFunction = FirstTimeSteps[Number(params.step)];
@@ -18,7 +18,7 @@ export default async function Step({
         <StepFunction
           organizationSlug={params.organizationSlug}
           currentStep={Number(params.step)}
-          workspaceId={searchParams.workspaceId}
+          workspaceSlug={searchParams.workspaceSlug}
         />
       </>
     );
