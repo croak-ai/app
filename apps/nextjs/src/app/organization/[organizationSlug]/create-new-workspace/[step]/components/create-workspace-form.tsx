@@ -143,7 +143,7 @@ export default function CreateWorkSpaceForm({
 
   const WorkspaceSlugIcon = () => {
     if (workspaceSlug?.length < 2 || timeoutId) {
-      return <></>;
+      return <div className="h-6 w-6" />;
     }
     if (workspaceSlugExists.isFetching) {
       return <Icons.spinner className="h-6 w-6 animate-spin" />;
