@@ -30,9 +30,35 @@ export default function WorkspaceSelection() {
     return <Skeleton className="h-5 w-5 rounded-full" />;
   }
 
-  if (!params.workspaceSlug) {
+  const CurrentWorkspaceAvatar = () => {
+    if (typeof params.workspaceSlug === "string") {
+      return (
+        <Avatar className="mr-2 h-5 w-5">
+          <AvatarImage
+            src={`https://avatar.vercel.sh/${params.workspaceSlug}.png`}
+            alt={params.workspaceSlug}
+          />
+          <Skeleton className="h-5 w-5 rounded-full" />
+        </Avatar>
+      );
+    }
+
     return <></>;
-  }
+  };
+
+  const CurrentWorkspaceText = () => {
+    return (
+      <span
+        className={`max-w-[72px] overflow-hidden overflow-ellipsis whitespace-nowrap pr-4 transition-all md:max-w-[118px] xl:max-w-[244px]`}
+      >
+        {params.workspaceSlug ? (
+          params.workspaceSlug
+        ) : (
+          <span className="opacity-50">No Workspace Selected </span>
+        )}
+      </span>
+    );
+  };
 
   return (
     <>
@@ -51,18 +77,8 @@ export default function WorkspaceSelection() {
                 aria-label="Select a Workspace"
                 className="mt-1.5 max-w-2xl"
               >
-                <Avatar className="mr-2 h-5 w-5 ">
-                  <AvatarImage
-                    src={`https://avatar.vercel.sh/temp.png`}
-                    alt={"temp"}
-                  />
-                  <Skeleton className="h-5 w-5 rounded-full" />
-                </Avatar>
-                <span
-                  className={`max-w-[72px] overflow-hidden overflow-ellipsis whitespace-nowrap pr-4 transition-all md:max-w-[118px] xl:max-w-[144px]`}
-                >
-                  {params.workspaceSlug}
-                </span>
+                <CurrentWorkspaceAvatar />
+                <CurrentWorkspaceText />
                 <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </div>
