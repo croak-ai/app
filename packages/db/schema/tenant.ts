@@ -46,7 +46,7 @@ export const channelWriteAccess = sqliteTable("channelWriteAccess", {
 export const workspaceMember = sqliteTable("workspaceMember", {
   id: integer("id").primaryKey(),
   workspaceId: integer("workspaceId").notNull(),
-  userId: integer("userId").notNull(),
+  userId: text("userId").notNull(),
   createdAt: integer("createdAt").notNull(),
   updatedAt: integer("updatedAt").notNull(),
   deletedAt: integer("deletedAt"),
@@ -80,7 +80,7 @@ export const dekEncryptionKeyUserAccess = sqliteTable(
   {
     id: integer("id").primaryKey(),
     dekId: integer("dekId").notNull(),
-    userId: integer("userId").notNull(),
+    userId: text("userId").notNull(),
     createdAt: integer("createdAt").notNull(),
     updatedAt: integer("updatedAt").notNull(),
     deletedAt: integer("deletedAt"),

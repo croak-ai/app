@@ -162,22 +162,15 @@ export default function CreateWorkSpaceForm({
     try {
       setLoading(true);
 
-      const workspace = await createWorkspace.mutateAsync({
+      const { insertedId } = await createWorkspace.mutateAsync({
         zName: data.workspaceName,
         zSlug: data.workspaceSlug,
         zDescription: data.workspaceDescription,
       });
 
-      if (workspace.length !== 1 || !workspace[0]?.insertedId) {
-        setError(new Error("Something went wrong. Please try again."));
-        return;
-      }
-
-      const id = workspace[0].insertedId;
-
       const url = new URL(window.location.href);
 
-      url.searchParams.set("workspaceId", id.toString());
+      url.searchParams.set("workspaceId", insertedId.toString());
 
       router.replace(url.toString());
     } catch (e) {

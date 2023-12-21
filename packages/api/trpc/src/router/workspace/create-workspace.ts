@@ -1,4 +1,9 @@
-import { dekEncryptionKey, workspace } from "@packages/db/schema/tenant";
+import {
+  dekEncryptionKey,
+  dekEncryptionKeyUserAccess,
+  workspace,
+  workspaceMember,
+} from "@packages/db/schema/tenant";
 import { protectedProcedureWithOrgDB, router } from "../../trpc";
 import { z } from "zod";
 type newWorkspaceType = typeof workspace.$inferInsert;
@@ -74,13 +79,35 @@ export const createWorkspace = router({
           insertedDescription: workspace.description,
         });
 
-      if (!newWorkspaceRes) {
+      const newlyCreatedWorkspace = newWorkspaceRes[0];
+
+      if (!newlyCreatedWorkspace) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to create new workspace",
         });
       }
 
-      return newWorkspaceRes;
+      const newWorkspaceMembership = await ctx.db
+        ?.insert(workspaceMember)
+        .values({
+          workspaceId: newlyCreatedWorkspace.insertedId,
+          userId: ctx.auth.userId,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        });
+
+      const newDekEncryptionKey = newDekEncryptionKeyRes[0];
+
+      const newEncryptionKeyUserAccess = await ctx.db
+        ?.insert(dekEncryptionKeyUserAccess)
+        .values({
+          dekId: newDekEncryptionKey.insertedId,
+          userId: ctx.auth.userId,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        });
+
+      return newlyCreatedWorkspace;
     }),
 });

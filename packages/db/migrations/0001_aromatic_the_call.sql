@@ -14,7 +14,7 @@ CREATE TABLE `channel` (
 CREATE TABLE `channelWriteAccess` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`channelId` integer NOT NULL,
-	`userId` integer NOT NULL,
+	`userId` text(256) NOT NULL,
 	`createdAt` integer NOT NULL,
 	`updatedAt` integer NOT NULL,
 	`deletedAt` integer
@@ -33,7 +33,7 @@ CREATE TABLE `dekEncryptionKey` (
 CREATE TABLE `dekEncryptionKeyUserAccess` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`dekId` integer NOT NULL,
-	`userId` integer NOT NULL,
+	`userId` text(256) NOT NULL,
 	`createdAt` integer NOT NULL,
 	`updatedAt` integer NOT NULL,
 	`deletedAt` integer
@@ -52,7 +52,7 @@ CREATE TABLE `workspace` (
 CREATE TABLE `workspaceMember` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`workspaceId` integer NOT NULL,
-	`userId` integer NOT NULL,
+	`userId` text(256) NOT NULL,
 	`createdAt` integer NOT NULL,
 	`updatedAt` integer NOT NULL,
 	`deletedAt` integer
