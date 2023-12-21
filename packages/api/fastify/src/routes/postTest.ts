@@ -6,9 +6,12 @@ export default async function postTest(fastify: FastifyInstance) {
   fastify.get(
     "/test",
     async function (_request: FastifyRequest, reply: FastifyReply) {
-      await client.sync();
+      const path = "./src/ai/assistant.json";
+      const existingConfig = fs.existsSync(path);
+
+      //await client.sync();
       const result = await client.execute("SELECT * FROM test");
-      reply.send(result + "");
+      reply.send(result);
     },
   );
 }
