@@ -1,0 +1,25 @@
+{
+  "assistantId": "asst_EOCNQzZST7R0CeBluPIIqcpl",
+  "name": "Country helper",
+  "instructions": "You're a travelling assistant, helping with information about destination countries.",
+  "model": "gpt-4-1106-preview",
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "getCountryInformation",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "country": {
+              "type": "string",
+              "description": "Country name, e.g. Sweden"
+            }
+          },
+          "required": ["country"]
+        },
+        "description": "Determine information about a country"
+      }
+    }
+  ]
+}
