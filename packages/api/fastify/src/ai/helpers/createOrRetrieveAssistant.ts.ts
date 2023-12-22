@@ -3,13 +3,13 @@
 //Will have no params. Will return openai assistant.
 //Check if assistant already exists (we will pull a json file )
 import * as fs from "fs";
-import OpenAI from "openai";
+import openai from "../client";
 import { AssistantCreateParams } from "openai/resources/beta/assistants/assistants";
-const openai = new OpenAI();
 const assistantPath = "./src/ai/assistant.json";
 
 export async function createOrRetrieveAssistant() {
   try {
+    // Attempt to pull assistant config locally
     const assistantData = await fs.promises.readFile(assistantPath, "utf8");
     const assistantDetails = JSON.parse(assistantData);
     const assistantId = assistantDetails.assistantId;
@@ -17,7 +17,8 @@ export async function createOrRetrieveAssistant() {
 
     return await openai.beta.assistants.retrieve(assistantId);
   } catch (error) {
-    console.error(error);
+    // Create new assistant config and write to local file
+    // console.error(error);
     console.log("Assistant does not exist. Creating fresh assistant");
 
     //In the future we can pull this config from a database.
@@ -25,7 +26,7 @@ export async function createOrRetrieveAssistant() {
       name: "Country helper",
       instructions:
         "You're a travelling assistant, helping with information about destination countries.",
-      model: "gpt-4-1106-preview",
+      model: "gpt-3.5-turbo-1106",
       tools: [
         {
           type: "function",
