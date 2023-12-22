@@ -18,15 +18,13 @@ export default async function postTest(fastify: FastifyInstance) {
       //Add message to thread
       await openai.beta.threads.messages.create(thread.id, {
         role: "user",
-        content: "Can you tell me what the capital city of Russia is?",
+        content: "How do you say Russia in Russian?",
       });
 
       //Run the assistant with the thread we just created
       const run = await openai.beta.threads.runs.create(thread.id, {
         assistant_id: assistant.id,
       });
-
-      // console.log(run);
 
       //Check run status periodically
       // (Wait until assistant chooses a function for us to use, then run it)
@@ -38,20 +36,12 @@ export default async function postTest(fastify: FastifyInstance) {
           run.id,
         );
 
-        //console.log("RUN DETAILS HERE: \n\n", runDetails);
-
         status = runDetails.status;
         finalRunDetails = runDetails;
         // Introduce a 2-second delay before the next iteration
         await new Promise((resolve) => setTimeout(resolve, 2000)); // Delay for 2000 milliseconds (2 seconds)
       }
-      // Grab tool call off run (function call)
-      // const toolCalls = finalRunDetails
-      //   ? finalRunDetails.required_action?.submit_tool_outputs.tool_calls
-      //   : null;
 
-      //console.log("RUN DETAILS HERE: \n\n", finalRunDetails);
-      console.log("STATUS: ", status);
       const tool =
         finalRunDetails?.required_action?.submit_tool_outputs.tool_calls[0];
 
@@ -61,7 +51,6 @@ export default async function postTest(fastify: FastifyInstance) {
       }
 
       //This is how we will map string function names to actual functions
-
       // eslint-disable-next-line @typescript-eslint/ban-types
       const aiFunctionsByName: { [key: string]: Function } = {
         getCountryInformation,
@@ -76,6 +65,7 @@ export default async function postTest(fastify: FastifyInstance) {
         );
         return;
       }
+
       //Give assistant the results of our function it wanted
       const toolSubmit = await openai.beta.threads.runs.submitToolOutputs(
         thread.id,
@@ -84,7 +74,7 @@ export default async function postTest(fastify: FastifyInstance) {
           tool_outputs: [
             {
               tool_call_id: tool?.id,
-              output: aiFunction(JSON.parse(tool?.function.arguments)),
+              output: await aiFunction(JSON.parse(tool?.function.arguments)),
             },
           ],
         },
@@ -92,7 +82,6 @@ export default async function postTest(fastify: FastifyInstance) {
 
       /* Now we must check the run status again until it is 
         complete and our response is waiting*/
-
       while (status !== "completed" && finalRunDetails !== null) {
         const runDetails = await openai.beta.threads.runs.retrieve(
           thread.id,
@@ -105,10 +94,7 @@ export default async function postTest(fastify: FastifyInstance) {
 
       // List the assistants response messages
       const messages = await openai.beta.threads.messages.list(thread.id);
-      //await client.sync();
-      //const result = await client.execute("SELECT * FROM test");
-      //reply.send("assistant should be running");
-      reply.send(messages);
+      reply.send(messages.data[0]?.content[0]);
     },
   );
 }
