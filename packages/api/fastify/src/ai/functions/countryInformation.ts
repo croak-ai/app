@@ -10,8 +10,8 @@ export async function getCountryInformation(params: countryInput) {
       country,
     )}`;
     const response = await fetch(url);
-    // console.log(response.data); if you want to inspect the output
-    return JSON.stringify(response);
+    const jsonResponse = await response.json();
+    return JSON.stringify(jsonResponse);
   } catch (error) {
     console.error(error);
     return null;
