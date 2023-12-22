@@ -5,9 +5,9 @@
   "types": "./index.d.ts",
   "license": "MIT",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "start": "node dist/index.js",
-    "dev": "nodemon --watch src --ext ts --exec \"pnpm build && pnpm start\"",
+    "dev": "bun --watch src/index.ts",
+    "build": "bun build src/index.ts --outdir ./build --sourcemap=external --minify",
+    "start": "bun build/index.js",
     "clean": "rm -rf .turbo node_modules",
     "lint": "eslint . --ext .ts,.tsx",
     "type-check": "tsc --noEmit"
@@ -17,13 +17,15 @@
     "@acme/shared-functions": "*",
     "@clerk/clerk-js": "^4.65.6",
     "@clerk/nextjs": "^4.27.1",
-    "fastify": "^4.24.3"
+    "fastify": "^4.24.3",
+    "openai": "^4.23.0"
   },
   "devDependencies": {
-    "@types/node": "*",
     "eslint": "^8.28.0",
     "fastify-tsconfig": "^2.0.0",
-    "nodemon": "^3.0.2",
     "typescript": "^5.3.3"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
   }
 }
