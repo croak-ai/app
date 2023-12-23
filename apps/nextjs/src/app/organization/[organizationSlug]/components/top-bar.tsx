@@ -84,7 +84,9 @@ export function OrgLayout({ children }: { children: React.ReactNode }) {
       <div className="grid w-full grid-cols-3 items-center py-3">
         <span className="flex px-6">
           <div className="mt-2">
-            <OrganizationSwitcher />
+            <OrganizationSwitcher
+              afterSelectOrganizationUrl={`/organization/:slug`}
+            />
           </div>
 
           <div>

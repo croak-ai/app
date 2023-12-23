@@ -26,7 +26,7 @@ import { reactTRPC } from "@next/utils/trpc/reactTRPCClient";
 import { CheckIcon, PlusCircledIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import Loading from "@packages/ui/components/bonus/loading";
-import { Protect } from "@clerk/nextjs";
+import { Protect, useAuth } from "@clerk/nextjs";
 
 export default function WorkspaceSelection() {
   const [open, setOpen] = React.useState(false);
@@ -84,7 +84,7 @@ export default function WorkspaceSelection() {
     }
 
     return (
-      <CommandGroup>
+      <CommandGroup heading="Memberships">
         {workspaceMemberships.data?.map((membership) => {
           return (
             <Link
@@ -127,6 +127,71 @@ export default function WorkspaceSelection() {
     );
   };
 
+  const NotEnrolledWorkspaceOptions = () => {
+    const allWorkspaces =
+      reactTRPC.getAllWorkspaces.getAllWorkspaces.useQuery();
+    const params = useParams();
+
+    if (!params) {
+      return <Skeleton className="h-5 w-5 rounded-full" />;
+    }
+
+    if (!workspaceMemberships.isFetched || !allWorkspaces.isFetched) {
+      return <Loading />;
+    }
+
+    return (
+      <CommandGroup heading="Not Enrolled (you have all access)">
+        {allWorkspaces.data?.map((workspace) => {
+          if (
+            workspaceMemberships.data?.find(
+              (membership) => membership.workspace.id === workspace.id,
+            )
+          ) {
+            return <></>;
+          }
+
+          return (
+            <Link
+              key={workspace.slug}
+              href={`/organization/${params.organizationSlug}/${workspace.slug}`}
+            >
+              <CommandItem
+                key={workspace.id}
+                onSelect={() => {
+                  setOpen(false);
+                }}
+                className="text-sm"
+              >
+                <Avatar className="mr-2 h-5 w-5">
+                  <AvatarImage
+                    src={`https://avatar.vercel.sh/${workspace.slug}.png`}
+                    alt={workspace.slug}
+                    className="grayscale"
+                  />
+                  <Skeleton className="h-5 w-5 rounded-full" />
+                </Avatar>
+                <span
+                  className="max-w-85 overflow-hidden overflow-ellipsis whitespace-nowrap"
+                  style={{ maxWidth: "85%" }}
+                >
+                  {workspace.name}
+                </span>
+                <CheckIcon
+                  className={
+                    params.workspaceSlug === workspace.slug
+                      ? "ml-auto h-4 w-4 opacity-100"
+                      : "ml-auto h-4 w-4 opacity-0"
+                  }
+                />
+              </CommandItem>
+            </Link>
+          );
+        })}
+      </CommandGroup>
+    );
+  };
+
   return (
     <>
       <Popover open={open} onOpenChange={setOpen}>
@@ -152,14 +217,16 @@ export default function WorkspaceSelection() {
           </PopoverTrigger>
 
           <PopoverContent className="w-[320px] p-0 " align="start">
-            <Command>
+            <Command className="rounded-lg border shadow-md">
+              <CommandInput placeholder="Type a command or search..." />
               <CommandList>
-                <CommandInput placeholder="Search Workspace..." />
-                <CommandGroup>
-                  <WorkspaceOptions />
-                </CommandGroup>
+                <CommandEmpty>No results found.</CommandEmpty>
+                <WorkspaceOptions />
+                <Protect permission="org:workspace:all_access">
+                  <NotEnrolledWorkspaceOptions />
+                </Protect>
+                <CommandSeparator />
               </CommandList>
-              <CommandSeparator />
             </Command>
             <Protect permission="org:workspace:create">
               <Link

@@ -1,12 +1,8 @@
 import { ContinueButton } from "@packages/ui/components/bonus/continue-button";
 import Link from "next/link";
-import {
-  OrganizationSwitcher,
-  Protect,
-  UserButton,
-  UserProfile,
-} from "@clerk/nextjs";
-import { Icons } from "@packages/ui/components/bonus/icons";
+import { Protect } from "@clerk/nextjs";
+import { getServerTRPCClient } from "@next/utils/trpc/serverTRPCClient";
+import { redirect } from "next/navigation";
 
 const WelcomePage = ({ organizationSlug }: { organizationSlug: string }) => {
   return (
@@ -39,14 +35,38 @@ const YouDontHaveAccess = () => {
   );
 };
 
+import { Suspense } from "react";
+
+const PageContent = async ({
+  params,
+}: {
+  params: { organizationSlug: string; step: string };
+}) => {
+  const trpc = await getServerTRPCClient();
+  const workspaces =
+    await trpc.getWorkspaceMemberships.getWorkspaceMemberships.query();
+
+  if (workspaces[0]) {
+    redirect(
+      `/organization/${params.organizationSlug}/${workspaces[0].workspace.slug}`,
+    );
+  }
+
+  return (
+    <Protect permission="org:workspace:create" fallback={<YouDontHaveAccess />}>
+      <WelcomePage organizationSlug={params.organizationSlug} />
+    </Protect>
+  );
+};
+
 export default function Page({
   params,
 }: {
   params: { organizationSlug: string; step: string };
 }) {
   return (
-    <Protect permission="org:workspace:create" fallback={<YouDontHaveAccess />}>
-      <WelcomePage organizationSlug={params.organizationSlug} />
-    </Protect>
+    <Suspense fallback={<div>Loading...</div>}>
+      <PageContent params={params} />
+    </Suspense>
   );
 }

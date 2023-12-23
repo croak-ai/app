@@ -6,6 +6,7 @@ import { checkDBForOrg } from "./router/turso-meta/check-db-for-org";
 import { createWorkspace } from "./router/workspace/create-workspace";
 import { workspaceSlugExists } from "./router/workspace/workspace-slug-exists";
 import { getWorkspaceMemberships } from "./router/workspace/get-workspace-memberships";
+import { getAllWorkspaces } from "./router/workspace/get-all-workspaces";
 
 export const appRouter = router({
   post: postRouter,
@@ -15,6 +16,7 @@ export const appRouter = router({
   createWorkspace: createWorkspace,
   workspaceSlugExists: workspaceSlugExists,
   getWorkspaceMemberships: getWorkspaceMemberships,
+  getAllWorkspaces: getAllWorkspaces,
 });
 
 // export type definition of API
