@@ -1,7 +1,7 @@
 import { getServerTRPCClient } from "@next/utils/trpc/serverTRPCClient";
 
 import { Suspense } from "react";
-import { OrgLayout } from "./components/top-bar";
+import { OrgLayout } from "./components/org-layout";
 async function EnsureOrg({ children }: { children: React.ReactNode }) {
   const tRPCClient = getServerTRPCClient();
 

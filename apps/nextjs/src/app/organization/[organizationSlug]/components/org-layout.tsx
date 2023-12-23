@@ -10,7 +10,7 @@ import {
   SheetTrigger,
 } from "@packages/ui/components/ui/sheet";
 
-import CourseSelection from "../components/workspace-selection";
+import CourseSelection from "./workspace-selection";
 import { Icons } from "@acme/ui/components/bonus/icons";
 import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
 import { Button } from "@packages/ui/components/ui/button";
@@ -46,7 +46,7 @@ export function OrgLayout({ children }: { children: React.ReactNode }) {
             </kbd>
           </Button>
         )}
-        <Sheet modal={false} open={isSheetOpen}>
+        {/* <Sheet modal={false} open={isSheetOpen}>
           <SheetContent className="w-[600px]" side="rightNoBlur">
             <SheetHeader>
               <SheetTitle>
@@ -74,7 +74,7 @@ export function OrgLayout({ children }: { children: React.ReactNode }) {
             </SheetHeader>
             <div className="grid gap-4 py-4">adsasddasdsaasd</div>
           </SheetContent>
-        </Sheet>
+        </Sheet> */}
       </>
     );
   };
