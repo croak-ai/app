@@ -52,12 +52,17 @@
     "clsx": "^1.2.1",
     "cmdk": "^0.2.0",
     "date-fns": "^2.30.0",
+    "embla-carousel-react": "8.0.0-rc17",
     "lucide-react": "^0.244.0",
+    "next-themes": "^0.2.1",
     "react-day-picker": "^8.9.1",
-    "react-hook-form": "^7.49.0",
+    "react-hook-form": "^7.49.2",
+    "react-resizable-panels": "^1.0.4",
+    "sonner": "^1.2.4",
     "tailwind-merge": "^1.13.2",
     "tailwindcss-animate": "^1.0.6",
-    "zod": "^3.18.0"
+    "vaul": "^0.8.0",
+    "zod": "^3.22.4"
   },
   "peerDependencies": {
     "react": "18.2.0",
