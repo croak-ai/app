@@ -9,7 +9,9 @@ import { Button } from "@acme/ui/components/ui/button";
 import {
   Command,
   CommandEmpty,
+  CommandGroup,
   CommandInput,
+  CommandItem,
   CommandList,
   CommandSeparator,
 } from "@acme/ui/components/ui/command";
@@ -20,9 +22,16 @@ import {
 } from "@acme/ui/components/ui/popover";
 import { useParams } from "next/navigation";
 import { Icons } from "@packages/ui/components/bonus/icons";
+import { reactTRPC } from "@next/utils/trpc/reactTRPCClient";
+import { CheckIcon, PlusCircledIcon } from "@radix-ui/react-icons";
+import Link from "next/link";
+import Loading from "@packages/ui/components/bonus/loading";
 
 export default function WorkspaceSelection() {
   const [open, setOpen] = React.useState(false);
+
+  const workspaceMemberships =
+    reactTRPC.getWorkspaceMemberships.getWorkspaceMemberships.useQuery();
 
   const params = useParams();
 
@@ -60,6 +69,63 @@ export default function WorkspaceSelection() {
     );
   };
 
+  const WorkspaceOptions = () => {
+    if (!workspaceMemberships.isFetched) {
+      return <Loading />;
+    }
+
+    if (workspaceMemberships.data?.length === 0) {
+      return (
+        <div className="mx-4 my-8 text-sm">
+          You are not a member of any workspace.
+        </div>
+      );
+    }
+
+    return (
+      <CommandGroup>
+        {workspaceMemberships.data?.map((membership) => {
+          return (
+            <Link
+              key={membership.workspace.slug}
+              href={`/organization/${params.organizationSlug}/${membership.workspace.slug}`}
+            >
+              <CommandItem
+                key={membership.workspace.id}
+                onSelect={() => {
+                  setOpen(false);
+                }}
+                className="text-sm"
+              >
+                <Avatar className="mr-2 h-5 w-5">
+                  <AvatarImage
+                    src={`https://avatar.vercel.sh/${membership.workspace.slug}.png`}
+                    alt={membership.workspace.slug}
+                    className="grayscale"
+                  />
+                  <Skeleton className="h-5 w-5 rounded-full" />
+                </Avatar>
+                <span
+                  className="max-w-85 overflow-hidden overflow-ellipsis whitespace-nowrap"
+                  style={{ maxWidth: "85%" }}
+                >
+                  {membership.workspace.name}
+                </span>
+                <CheckIcon
+                  className={
+                    params.workspaceSlug === membership.workspace.slug
+                      ? "ml-auto h-4 w-4 opacity-100"
+                      : "ml-auto h-4 w-4 opacity-0"
+                  }
+                />
+              </CommandItem>
+            </Link>
+          );
+        })}
+      </CommandGroup>
+    );
+  };
+
   return (
     <>
       <Popover open={open} onOpenChange={setOpen}>
@@ -88,60 +154,24 @@ export default function WorkspaceSelection() {
             <Command>
               <CommandList>
                 <CommandInput placeholder="Search Workspace..." />
-                <CommandEmpty>No Workspace found.</CommandEmpty>
-                {/* {workspacesWithKeys.map((uniqueRole) => {
-                  if (uniqueRole.workspaces.length > 0) {
-                    return (
-                      <CommandGroup
-                        key={uniqueRole.key}
-                        heading={formatString(uniqueRole.key)}
-                      >
-                        {uniqueRole.workspaces.map((workspace) => {
-                          return (
-                            <Link
-                              key={workspace.id}
-                              href={`${organizationUrl}/${workspace.workspaceCode}`}
-                            >
-                              <CommandItem
-                                key={workspace.id}
-                                onSelect={() => {
-                                  setOpen(false);
-                                }}
-                                className="text-sm"
-                              >
-                                <Avatar className="mr-2 h-5 w-5">
-                                  <AvatarImage
-                                    src={`https://avatar.vercel.sh/${workspace.workspaceCode}.png`}
-                                    alt={workspace.workspaceCode}
-                                    className="grayscale"
-                                  />
-                                  <Skeleton className="h-5 w-5 rounded-full" />
-                                </Avatar>
-                                <span
-                                  className="overflow-ellipsis overflow-hidden max-w-85 whitespace-nowrap"
-                                  style={{ maxWidth: '85%' }}
-                                >
-                                  {workspace.name}
-                                </span>
-                                <CheckIcon
-                                  className={cn(
-                                    'ml-auto h-4 w-4',
-                                    selectedWorkspaceId === workspace.id
-                                      ? 'opacity-100'
-                                      : 'opacity-0'
-                                  )}
-                                />
-                              </CommandItem>
-                            </Link>
-                          );
-                        })}
-                      </CommandGroup>
-                    );
-                  }
-                })} */}
+                <CommandGroup>
+                  <WorkspaceOptions />
+                </CommandGroup>
               </CommandList>
               <CommandSeparator />
             </Command>
+            <Link
+              href={`/organization/${params.organizationSlug}/create-new-workspace/0`}
+            >
+              <Button
+                variant="outline"
+                className="w-full rounded-none border-none"
+                onClick={() => setOpen(false)}
+              >
+                <PlusCircledIcon className="mr-2 h-5 w-5" />
+                Create Workspace
+              </Button>
+            </Link>
           </PopoverContent>
         </>
       </Popover>

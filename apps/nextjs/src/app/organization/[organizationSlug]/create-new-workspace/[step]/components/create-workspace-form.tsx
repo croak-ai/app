@@ -32,7 +32,6 @@ import Lottie from "lottie-react";
 import { successCheck } from "@acme/lottie-animations";
 import { reactTRPC } from "@next/utils/trpc/reactTRPCClient";
 import { Icons } from "@packages/ui/components/bonus/icons";
-import { CrossCircledIcon } from "@radix-ui/react-icons";
 
 export default function CreateWorkSpaceForm({
   currentStep,
@@ -46,6 +45,8 @@ export default function CreateWorkSpaceForm({
   const [newWorkspaceSlug, setNewWorkspaceSlug] = useState<string>("");
   const [timeoutId, setTimeoutId] = useState<number | null>(null);
   const router = useRouter();
+
+  const utils = reactTRPC.useUtils();
 
   const createWorkspace =
     reactTRPC.createWorkspace.createWorkspace.useMutation();
@@ -167,6 +168,8 @@ export default function CreateWorkSpaceForm({
         zSlug: data.workspaceSlug,
         zDescription: data.workspaceDescription,
       });
+
+      utils.getWorkspaceMemberships.invalidate();
 
       const url = new URL(window.location.href);
 
