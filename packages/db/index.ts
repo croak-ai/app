@@ -1,9 +1,9 @@
 import { drizzle } from "drizzle-orm/libsql";
 import { createClient } from "@libsql/client";
 
-import * as test from "./schema/test";
+import * as tenant from "./schema/tenant";
 
-export const schema = { ...test };
+export const schema = { ...tenant };
 
 export * from "drizzle-orm";
 

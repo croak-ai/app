@@ -1,4 +1,3 @@
-import { getServerTRPCClient } from "@next/utils/trpc/serverTRPCClient";
 import { Button } from "@packages/ui/components/ui/button";
 
 import { Suspense } from "react";

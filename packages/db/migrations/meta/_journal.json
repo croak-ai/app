@@ -1,5 +1,48 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "entries": []
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1701762945485,
+      "tag": "0000_mysterious_thing",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1702874636649,
+      "tag": "0001_aromatic_the_call",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1703019830075,
+      "tag": "0002_little_malice",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1703020977652,
+      "tag": "0003_exotic_nicolaos",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1703024598288,
+      "tag": "0004_vengeful_taskmaster",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1703145092150,
+      "tag": "0005_many_elektra",
+      "breakpoints": true
+    }
+  ]
 }

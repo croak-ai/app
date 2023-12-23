@@ -1,6 +1,7 @@
 import { getServerTRPCClient } from "@next/utils/trpc/serverTRPCClient";
 
 import { Suspense } from "react";
+import { OrgLayout } from "./components/top-bar";
 async function EnsureOrg({ children }: { children: React.ReactNode }) {
   const tRPCClient = getServerTRPCClient();
 
@@ -21,7 +22,9 @@ export default async function Page({
 }) {
   return (
     <Suspense fallback={<>SUIS</>}>
-      <EnsureOrg>{children}</EnsureOrg>
+      <EnsureOrg>
+        <OrgLayout>{children}</OrgLayout>
+      </EnsureOrg>
     </Suspense>
   );
 }

@@ -13,7 +13,7 @@ import {
 } from "@acme/ui/components/ui/sheet";
 import { PlusCircledIcon } from "@radix-ui/react-icons";
 
-export const WorkspaceCreationSheet = () => {
+export const ChannelCreationSheet = () => {
   const [showNewWorkspaceSheet, setShowNewWorkspaceSheet] =
     React.useState(false);
 
@@ -48,12 +48,6 @@ export const WorkspaceCreationSheet = () => {
             width: "calc(100% - 15px)",
           }}
         >
-          {/* <WorkspaceCreationForm
-            onSuccess={() => {
-              setShowNewWorkspaceSheet(false);
-            }}
-          /> */}
-
           {/* Add an empty space div */}
           <div style={{ height: "200px" }}></div>
         </div>
