@@ -140,8 +140,12 @@ export default function WorkspaceSelection() {
       return <Loading />;
     }
 
+    if (workspaceMemberships.data?.length === allWorkspaces.data?.length) {
+      return <></>;
+    }
+
     return (
-      <CommandGroup heading="Not Enrolled (you have all access)">
+      <CommandGroup heading="Not Enrolled (you have all access to all workspaces)">
         {allWorkspaces.data?.map((workspace) => {
           if (
             workspaceMemberships.data?.find(
