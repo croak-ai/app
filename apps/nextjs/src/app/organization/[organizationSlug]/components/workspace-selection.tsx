@@ -26,6 +26,7 @@ import { reactTRPC } from "@next/utils/trpc/reactTRPCClient";
 import { CheckIcon, PlusCircledIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import Loading from "@packages/ui/components/bonus/loading";
+import { Protect } from "@clerk/nextjs";
 
 export default function WorkspaceSelection() {
   const [open, setOpen] = React.useState(false);
@@ -160,18 +161,20 @@ export default function WorkspaceSelection() {
               </CommandList>
               <CommandSeparator />
             </Command>
-            <Link
-              href={`/organization/${params.organizationSlug}/create-new-workspace/0`}
-            >
-              <Button
-                variant="outline"
-                className="w-full rounded-none border-none"
-                onClick={() => setOpen(false)}
+            <Protect permission="org:workspace:create">
+              <Link
+                href={`/organization/${params.organizationSlug}/create-new-workspace/0`}
               >
-                <PlusCircledIcon className="mr-2 h-5 w-5" />
-                Create Workspace
-              </Button>
-            </Link>
+                <Button
+                  variant="outline"
+                  className="w-full rounded-none border-none"
+                  onClick={() => setOpen(false)}
+                >
+                  <PlusCircledIcon className="mr-2 h-5 w-5" />
+                  Create Workspace
+                </Button>
+              </Link>
+            </Protect>
           </PopoverContent>
         </>
       </Popover>
