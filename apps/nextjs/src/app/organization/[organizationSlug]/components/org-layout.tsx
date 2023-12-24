@@ -51,7 +51,7 @@ export function OrgLayout({
       <>
         {isAICollapsed && (
           <Button variant="outline" onClick={() => setAICollapsed(false)}>
-            Ask Voyaging AI <Icons.magicWand className="mx-2 h-4 w-4" />
+            Ask Croak AI <Icons.magicWand className="mx-2 h-4 w-4" />
             <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
               <span className="text-base">{isMac ? "⌘ J" : "Ctrl + J"}</span>
             </kbd>
