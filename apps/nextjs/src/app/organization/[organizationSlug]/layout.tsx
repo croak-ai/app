@@ -1,4 +1,5 @@
 import { getServerTRPCClient } from "@next/utils/trpc/serverTRPCClient";
+import { cookies } from "next/headers";
 
 import { Suspense } from "react";
 import { OrgLayout } from "./components/org-layout";
@@ -20,10 +21,30 @@ export default async function Page({
 }: {
   children: React.ReactNode;
 }) {
+  const collapsibleLayoutValues = cookies().get(
+    "react-resizable-panels:layout",
+  );
+  const collapsibleIsAICollapsed = cookies().get(
+    "react-resizable-panels:collapsed",
+  );
+
+  const defaultCollapsibleLayoutValues: number[] = collapsibleLayoutValues
+    ? JSON.parse(collapsibleLayoutValues.value)
+    : [10, 50, 25];
+
+  const defaultCollapsibleIsAICollapsed: boolean = collapsibleIsAICollapsed
+    ? JSON.parse(collapsibleIsAICollapsed.value)
+    : true;
+
   return (
     <Suspense fallback={<>SUIS</>}>
       <EnsureOrg>
-        <OrgLayout>{children}</OrgLayout>
+        <OrgLayout
+          defaultCollapsibleIsAICollapsed={defaultCollapsibleIsAICollapsed}
+          defaultCollapsibleLayoutValues={defaultCollapsibleLayoutValues}
+        >
+          {children}
+        </OrgLayout>
       </EnsureOrg>
     </Suspense>
   );
