@@ -6,6 +6,7 @@ export default function OrganizationListPage() {
       afterCreateOrganizationUrl="/organization/:slug/create-db"
       afterSelectPersonalUrl="/user/:id"
       afterSelectOrganizationUrl="/organization/:slug"
+      hidePersonal={true}
     />
   );
 }

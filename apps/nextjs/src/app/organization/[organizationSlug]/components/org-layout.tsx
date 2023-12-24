@@ -76,6 +76,7 @@ export function OrgLayout({
             <div className="mt-2">
               <OrganizationSwitcher
                 afterSelectOrganizationUrl={`/organization/:slug`}
+                hidePersonal={true}
               />
             </div>
 
