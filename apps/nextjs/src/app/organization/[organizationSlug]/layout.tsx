@@ -28,13 +28,16 @@ export default async function Page({
     "react-resizable-panels:collapsed",
   );
 
+  console.log({ collapsibleLayoutValues, collapsibleIsAICollapsed });
+
   const defaultCollapsibleLayoutValues: number[] = collapsibleLayoutValues
     ? JSON.parse(collapsibleLayoutValues.value)
     : [10, 50, 25];
 
-  const defaultCollapsibleIsAICollapsed: boolean = collapsibleIsAICollapsed
-    ? JSON.parse(collapsibleIsAICollapsed.value)
-    : true;
+  const defaultCollapsibleIsAICollapsed: boolean =
+    collapsibleIsAICollapsed && collapsibleIsAICollapsed.value !== "undefined"
+      ? JSON.parse(collapsibleIsAICollapsed.value) === "true"
+      : true;
 
   return (
     <Suspense fallback={<>SUIS</>}>

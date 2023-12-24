@@ -80,8 +80,8 @@ export function OrgLayout({
       </div>
       <ResizableWindows
         defaultLayout={defaultCollapsibleLayoutValues}
-        isCollapsed={isAICollapsed}
-        setCollapsed={setAICollapsed}
+        isAICollapsed={isAICollapsed}
+        setAICollapsed={setAICollapsed}
       >
         {children}
       </ResizableWindows>
