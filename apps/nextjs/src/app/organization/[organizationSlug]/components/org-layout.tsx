@@ -14,6 +14,7 @@ import {
   TextQuote,
   MessageCircle,
   BellDot,
+  User,
 } from "lucide-react";
 
 export function OrgLayout({
@@ -86,34 +87,21 @@ export function OrgLayout({
               <CourseSelection />
             </div>
           </span>
-          <div className="justify-self-center">
+          <div className="flex space-x-4 justify-self-center">
             <Nav
-              links={[
-                {
-                  title: "Workspace",
-                  href: `/organization/${organizationSlug}/workspace`,
-                  label: "",
-                  icon: TextQuote,
-                },
-                {
-                  title: "Direct Messages",
-                  label: "",
-                  href: `/organization/${organizationSlug}/dm`,
-                  icon: Inbox,
-                },
-                {
-                  title: "Calendar",
-                  label: "",
-                  href: `/organization/${organizationSlug}/calendar`,
-                  icon: Calendar,
-                },
-                {
-                  title: "Notifications",
-                  label: "",
-                  href: `/organization/${organizationSlug}/notifications`,
-                  icon: BellDot,
-                },
-              ]}
+              title="Workspace"
+              href={`/organization/${organizationSlug}/workspace`}
+              icon={TextQuote}
+            />
+            <Nav
+              title="Inbox"
+              href={`/organization/${organizationSlug}/inbox`}
+              icon={Inbox}
+            />
+            <Nav
+              title="Notifications"
+              href={`/organization/${organizationSlug}/user`}
+              icon={BellDot}
             />
           </div>
           <div className="justify-self-end">
