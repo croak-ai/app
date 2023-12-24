@@ -94,28 +94,24 @@ export function OrgLayout({
                   href: `/organization/${organizationSlug}/workspace`,
                   label: "",
                   icon: TextQuote,
-                  variant: "ghost",
                 },
                 {
                   title: "Direct Messages",
                   label: "",
-                  href: `/organization/${organizationSlug}/workspace`,
+                  href: `/organization/${organizationSlug}/dm`,
                   icon: Inbox,
-                  variant: "default",
                 },
                 {
                   title: "Calendar",
                   label: "",
-                  href: `/organization/${organizationSlug}/workspace`,
+                  href: `/organization/${organizationSlug}/calendar`,
                   icon: Calendar,
-                  variant: "ghost",
                 },
                 {
                   title: "Notifications",
                   label: "",
-                  href: `/organization/${organizationSlug}/workspace`,
+                  href: `/organization/${organizationSlug}/notifications`,
                   icon: BellDot,
-                  variant: "ghost",
                 },
               ]}
             />
