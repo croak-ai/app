@@ -28,8 +28,6 @@ export default async function Page({
     "react-resizable-panels:collapsed",
   );
 
-  console.log({ collapsibleLayoutValues, collapsibleIsAICollapsed });
-
   const defaultCollapsibleLayoutValues: number[] = collapsibleLayoutValues
     ? JSON.parse(collapsibleLayoutValues.value)
     : [10, 50, 25];
