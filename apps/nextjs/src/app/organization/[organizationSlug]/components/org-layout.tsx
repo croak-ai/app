@@ -11,7 +11,7 @@ import {
   Settings,
   Inbox,
   Calendar,
-  Bot,
+  TextQuote,
   MessageCircle,
   BellDot,
 } from "lucide-react";
@@ -88,9 +88,9 @@ export function OrgLayout({
             <Nav
               links={[
                 {
-                  title: "Messages",
+                  title: "Workspace",
                   label: "",
-                  icon: MessageCircle,
+                  icon: TextQuote,
                   variant: "ghost",
                 },
                 {

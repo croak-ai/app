@@ -89,7 +89,7 @@ export default function WorkspaceSelection() {
           return (
             <Link
               key={membership.workspace.slug}
-              href={`/organization/${params.organizationSlug}/${membership.workspace.slug}`}
+              href={`/organization/${params.organizationSlug}/workspace/${membership.workspace.slug}`}
             >
               <CommandItem
                 key={membership.workspace.id}
@@ -158,7 +158,7 @@ export default function WorkspaceSelection() {
           return (
             <Link
               key={workspace.slug}
-              href={`/organization/${params.organizationSlug}/${workspace.slug}`}
+              href={`/organization/${params.organizationSlug}/workspace/${workspace.slug}`}
             >
               <CommandItem
                 key={workspace.id}

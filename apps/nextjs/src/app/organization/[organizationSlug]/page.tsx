@@ -48,7 +48,7 @@ const PageContent = async ({
 
   if (workspaces[0]) {
     redirect(
-      `/organization/${params.organizationSlug}/${workspaces[0].workspace.slug}`,
+      `/organization/${params.organizationSlug}/workspace/${workspaces[0].workspace.slug}`,
     );
   }
 

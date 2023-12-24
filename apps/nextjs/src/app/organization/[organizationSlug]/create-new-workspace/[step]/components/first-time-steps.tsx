@@ -111,7 +111,7 @@ export const FirstTimeSteps: StepFunction[] = [
           <BackwardButton currentStep={props.currentStep} />
           <div className="ml-auto">
             <Link
-              href={`/organization/${props.organizationSlug}/${props.workspaceSlug}`}
+              href={`/organization/${props.organizationSlug}/workspace/${props.workspaceSlug}`}
             >
               <ContinueButton name="Go To Workspace" />
             </Link>
