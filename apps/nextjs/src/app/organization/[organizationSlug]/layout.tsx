@@ -30,7 +30,7 @@ export default async function Page({
 
   const defaultCollapsibleLayoutValues: number[] = collapsibleLayoutValues
     ? JSON.parse(collapsibleLayoutValues.value)
-    : [10, 50, 25];
+    : [50, 25];
 
   const defaultCollapsibleIsAICollapsed: boolean =
     collapsibleIsAICollapsed && collapsibleIsAICollapsed.value !== "undefined"

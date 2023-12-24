@@ -67,6 +67,13 @@ export function OrgLayout({
         <div className="box-border grid w-full grid-cols-3 items-center py-3">
           <span className="flex px-6">
             <div className="mt-2">
+              <UserButton />
+            </div>
+            <Icons.slash
+              style={{ width: "50px", height: "50px" }}
+              className="bg-text"
+            />
+            <div className="mt-2">
               <OrganizationSwitcher
                 afterSelectOrganizationUrl={`/organization/:slug`}
               />
