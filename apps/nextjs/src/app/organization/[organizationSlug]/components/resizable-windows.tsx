@@ -42,22 +42,18 @@ const ResizableWindows: React.FC<MailProps> = ({
           sizes,
         )}`;
       }}
-      className="h-full max-h-[800px] items-stretch"
     >
-      <ResizablePanel defaultSize={defaultLayout[0]}>
-        <div className="flex h-[200px] items-center justify-center p-6">
-          <span className="font-semibold">One</span>
+      <ResizablePanel defaultSize={defaultLayout[1]}>
+        <div className="h-full w-full rounded-xl border bg-card text-card-foreground shadow">
+          {children}
         </div>
       </ResizablePanel>
-      <ResizableHandle />
-
-      <ResizablePanel defaultSize={defaultLayout[1]}>{children}</ResizablePanel>
-      <ResizableHandle />
+      <ResizableHandle withHandle={true} withBorder={false} />
       <ResizablePanel
         collapsible={true}
         defaultSize={defaultLayout[2]}
         minSize={15}
-        maxSize={20}
+        maxSize={40}
         onCollapse={() => {
           setAICollapsed(true);
         }}
@@ -69,9 +65,7 @@ const ResizableWindows: React.FC<MailProps> = ({
         )}
         ref={aiPanelRef}
       >
-        <div className="flex h-full items-center justify-center p-6">
-          <span className="font-semibold">Two</span>
-        </div>
+        <span className="font-semibold">Two</span>
       </ResizablePanel>
     </ResizablePanelGroup>
   );

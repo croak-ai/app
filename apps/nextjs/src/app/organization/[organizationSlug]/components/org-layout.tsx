@@ -6,6 +6,15 @@ import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
 import { Button } from "@packages/ui/components/ui/button";
 import ResizableWindows from "./resizable-windows";
 import { useState, useEffect } from "react";
+import { Nav } from "./main-nav-button";
+import {
+  Settings,
+  Inbox,
+  Calendar,
+  Bot,
+  MessageCircle,
+  BellDot,
+} from "lucide-react";
 
 export function OrgLayout({
   children,
@@ -37,7 +46,7 @@ export function OrgLayout({
     return () => document.removeEventListener("keydown", down);
   }, []);
 
-  const AISheet = () => {
+  const AIButton = () => {
     return (
       <>
         {isAICollapsed && (
@@ -53,29 +62,60 @@ export function OrgLayout({
   };
 
   return (
-    <>
-      <div className="grid w-full grid-cols-3 items-center py-3">
-        <span className="flex px-6">
-          <div className="mt-2">
-            <OrganizationSwitcher
-              afterSelectOrganizationUrl={`/organization/:slug`}
+    <div className="box-border flex h-screen flex-col overflow-hidden">
+      <div className="flex-grow overflow-hidden">
+        <div className="box-border grid w-full grid-cols-3 items-center py-3">
+          <span className="flex px-6">
+            <div className="mt-2">
+              <OrganizationSwitcher
+                afterSelectOrganizationUrl={`/organization/:slug`}
+              />
+            </div>
+
+            <div>
+              <CourseSelection />
+            </div>
+          </span>
+          <div className="justify-self-center">
+            <Nav
+              links={[
+                {
+                  title: "Messages",
+                  label: "",
+                  icon: MessageCircle,
+                  variant: "ghost",
+                },
+                {
+                  title: "Direct Messages",
+                  label: "",
+                  icon: Inbox,
+                  variant: "default",
+                },
+                {
+                  title: "Calendar",
+                  label: "",
+                  icon: Calendar,
+                  variant: "ghost",
+                },
+
+                {
+                  title: "Notifications",
+                  label: "",
+                  icon: BellDot,
+                  variant: "ghost",
+                },
+                {
+                  title: "Settings",
+                  label: "",
+                  icon: Settings,
+                  variant: "ghost",
+                },
+              ]}
             />
           </div>
-
-          <div>
-            <CourseSelection />
+          <div className="justify-self-end">
+            <AIButton />
           </div>
-        </span>
-        <div className="justify-self-center">
-          <Button className="w-72 ">
-            Notifications
-            <span className="ml-2">
-              <Icons.bell className="h-4 w-4" />
-            </span>
-          </Button>
-        </div>
-        <div className="mr-12 justify-self-end">
-          <AISheet />
         </div>
       </div>
       <ResizableWindows
@@ -85,7 +125,7 @@ export function OrgLayout({
       >
         {children}
       </ResizableWindows>
-    </>
+    </div>
   );
 }
 
