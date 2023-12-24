@@ -18,8 +18,10 @@ async function EnsureOrg({ children }: { children: React.ReactNode }) {
 
 export default async function Page({
   children,
+  params,
 }: {
   children: React.ReactNode;
+  params: { organizationSlug: string };
 }) {
   const collapsibleLayoutValues = cookies().get(
     "react-resizable-panels:layout",
@@ -43,6 +45,7 @@ export default async function Page({
         <OrgLayout
           defaultCollapsibleIsAICollapsed={defaultCollapsibleIsAICollapsed}
           defaultCollapsibleLayoutValues={defaultCollapsibleLayoutValues}
+          organizationSlug={params.organizationSlug}
         >
           {children}
         </OrgLayout>

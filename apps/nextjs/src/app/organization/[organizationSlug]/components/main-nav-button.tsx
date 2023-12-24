@@ -15,6 +15,7 @@ interface NavProps {
   links: {
     title: string;
     label?: string;
+    href: string;
     icon: LucideIcon;
     variant: "default" | "ghost";
   }[];
@@ -29,7 +30,7 @@ export function Nav({ links }: NavProps) {
             <Tooltip key={index} delayDuration={0}>
               <TooltipTrigger asChild>
                 <Link
-                  href="#"
+                  href={link.href}
                   className={cn(
                     buttonVariants({ variant: link.variant, size: "icon" }),
                     "h-8 w-8",

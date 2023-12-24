@@ -20,10 +20,12 @@ export function OrgLayout({
   children,
   defaultCollapsibleLayoutValues,
   defaultCollapsibleIsAICollapsed,
+  organizationSlug,
 }: {
   children: React.ReactNode;
   defaultCollapsibleLayoutValues: number[];
   defaultCollapsibleIsAICollapsed: boolean;
+  organizationSlug: string;
 }) {
   const [isAICollapsed, setAICollapsed] = useState(
     defaultCollapsibleIsAICollapsed,
@@ -89,6 +91,7 @@ export function OrgLayout({
               links={[
                 {
                   title: "Workspace",
+                  href: `/organization/${organizationSlug}/workspace`,
                   label: "",
                   icon: TextQuote,
                   variant: "ghost",
@@ -96,26 +99,22 @@ export function OrgLayout({
                 {
                   title: "Direct Messages",
                   label: "",
+                  href: `/organization/${organizationSlug}/workspace`,
                   icon: Inbox,
                   variant: "default",
                 },
                 {
                   title: "Calendar",
                   label: "",
+                  href: `/organization/${organizationSlug}/workspace`,
                   icon: Calendar,
                   variant: "ghost",
                 },
-
                 {
                   title: "Notifications",
                   label: "",
+                  href: `/organization/${organizationSlug}/workspace`,
                   icon: BellDot,
-                  variant: "ghost",
-                },
-                {
-                  title: "Settings",
-                  label: "",
-                  icon: Settings,
                   variant: "ghost",
                 },
               ]}
