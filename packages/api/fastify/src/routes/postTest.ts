@@ -3,7 +3,7 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import openai from "../ai/client";
 import { createOrRetrieveAssistant } from "../ai/helpers/createOrRetrieveAssistant.ts";
 import { Run } from "openai/resources/beta/threads/runs/runs";
-import { getCountryInformation } from "../ai/functions/countryInformation";
+import { query } from "../ai/functions/query";
 
 export default async function postTest(fastify: FastifyInstance) {
   // GET /
@@ -53,7 +53,7 @@ export default async function postTest(fastify: FastifyInstance) {
       //This is how we will map string function names to actual functions
       // eslint-disable-next-line @typescript-eslint/ban-types
       const aiFunctionsByName: { [key: string]: Function } = {
-        getCountryInformation,
+        query,
       };
 
       //Get function ai wants
