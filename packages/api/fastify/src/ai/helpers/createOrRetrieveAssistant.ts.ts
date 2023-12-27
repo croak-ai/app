@@ -124,7 +124,8 @@ export async function createOrRetrieveAssistant() {
               },
               required: ["sql"],
             },
-            description: "Query information in the SQL database.",
+            description: `Query information in the SQL database. If a user asks you for
+            specific information run this function to look for what the user wants in the database`,
           },
         },
       ],
