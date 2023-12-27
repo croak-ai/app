@@ -18,7 +18,7 @@ export default async function postTest(fastify: FastifyInstance) {
       //Add message to thread
       await openai.beta.threads.messages.create(thread.id, {
         role: "user",
-        content: "How do you say Russia in Russian?",
+        content: "Can you give me the workspaceId of Ben (userId = 888)?",
       });
 
       //Run the assistant with the thread we just created
