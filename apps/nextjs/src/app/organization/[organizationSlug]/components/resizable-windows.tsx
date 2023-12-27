@@ -43,11 +43,7 @@ const ResizableWindows: React.FC<MailProps> = ({
         )}`;
       }}
     >
-      <ResizablePanel defaultSize={defaultLayout[0]}>
-        <div className="h-full w-full rounded-xl border bg-card text-card-foreground shadow">
-          {children}
-        </div>
-      </ResizablePanel>
+      <ResizablePanel defaultSize={defaultLayout[0]}>{children}</ResizablePanel>
       <ResizableHandle withHandle={!isAICollapsed} withBorder={false} />
       <ResizablePanel
         collapsible={true}

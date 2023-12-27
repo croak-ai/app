@@ -82,10 +82,6 @@ export function OrgLayout({
                 hidePersonal={true}
               />
             </div>
-
-            <div>
-              <CourseSelection />
-            </div>
           </span>
           <div className="flex space-x-4 justify-self-center">
             <Nav
