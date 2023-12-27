@@ -10,8 +10,10 @@ export async function query(params: queryInput) {
 
   try {
     console.log("AI SQL: ", sql);
-    const data = await db.execute(sql);
-    return data;
+    const rawData = await db.execute(sql);
+    const stringData = JSON.stringify(rawData.rows);
+    console.log("DB Data: ", stringData);
+    return stringData;
   } catch (error) {
     console.error(error);
     return null;

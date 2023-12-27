@@ -11,4 +11,6 @@ const db = createClient({
   authToken,
 });
 
+await db.sync();
+
 export default db;
