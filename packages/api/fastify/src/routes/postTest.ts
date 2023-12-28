@@ -56,7 +56,7 @@ export default async function postTest(fastify: FastifyInstance) {
         query,
       };
 
-      //Get function ai wants
+      //Get function ai chose
       const aiFunction = aiFunctionsByName[tool.function.name];
 
       if (!aiFunction) {
@@ -66,7 +66,7 @@ export default async function postTest(fastify: FastifyInstance) {
         return;
       }
 
-      //Give assistant the results of our function it wanted
+      //Running our chosen function and feeding the results back to OpenAI
       const toolSubmit = await openai.beta.threads.runs.submitToolOutputs(
         thread.id,
         run.id,

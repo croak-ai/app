@@ -32,11 +32,10 @@ export async function createOrRetrieveAssistant() {
       of creating queries to find this information. After querying the information 
       communicate this information in a succint and professional way.
 
-      NOTE: When sending results back to the user do NOT reference any of the 
-      metadata given to answer their question.
-      for example, In "Can you give me the workspaceId of Ben !(userId = 888)!?" the
-      metadata will be enclosed by a starting '!(' and ending ')!'.
-      When typing your responses after running the function do NOT include anything enclosed by the metadata tags.
+      NOTE: When typing your responses using function results do NOT 
+      include anything enclosed by the metadata tags.
+      for example, In "Can you give me the workspaceId of Ben !(userId = 888)!?" 
+      the metadata will be enclosed by a starting '!(' and ending ')!'.
       
       Provided below is the database schema (written using Drizzle) you will use to construct your queries
 
@@ -113,7 +112,7 @@ export async function createOrRetrieveAssistant() {
         },
       );
       `,
-      model: "gpt-3.5-turbo-1106",
+      model: "gpt-4",
       tools: [
         {
           type: "function",
@@ -136,7 +135,7 @@ export async function createOrRetrieveAssistant() {
         },
       ],
     };
-
+    //gpt-3.5-turbo-1106
     const assistant = await openai.beta.assistants.create(assistantConfig);
     const assistantObj = { assistantId: assistant.id, ...assistantConfig };
     await fs.promises.writeFile(assistantPath, JSON.stringify(assistantObj));
