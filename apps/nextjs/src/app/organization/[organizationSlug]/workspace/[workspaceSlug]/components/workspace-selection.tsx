@@ -21,12 +21,11 @@ import {
   PopoverTrigger,
 } from "@acme/ui/components/ui/popover";
 import { useParams } from "next/navigation";
-import { Icons } from "@packages/ui/components/bonus/icons";
 import { reactTRPC } from "@next/utils/trpc/reactTRPCClient";
 import { CheckIcon, PlusCircledIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import Loading from "@packages/ui/components/bonus/loading";
-import { Protect, useAuth } from "@clerk/nextjs";
+import { Protect } from "@clerk/nextjs";
 
 export default function WorkspaceSelection() {
   const [open, setOpen] = React.useState(false);
@@ -59,7 +58,7 @@ export default function WorkspaceSelection() {
   const CurrentWorkspaceText = () => {
     return (
       <span
-        className={`max-w-[72px] overflow-hidden overflow-ellipsis whitespace-nowrap pr-4 transition-all md:max-w-[118px] xl:max-w-[244px]`}
+        className={` overflow-hidden overflow-ellipsis whitespace-nowrap pr-4 transition-all`}
       >
         {params.workspaceSlug ? (
           params.workspaceSlug
@@ -89,7 +88,7 @@ export default function WorkspaceSelection() {
           return (
             <Link
               key={membership.workspace.slug}
-              href={`/organization/${params.organizationSlug}/${membership.workspace.slug}`}
+              href={`/organization/${params.organizationSlug}/workspace/${membership.workspace.slug}`}
             >
               <CommandItem
                 key={membership.workspace.id}
@@ -158,7 +157,7 @@ export default function WorkspaceSelection() {
           return (
             <Link
               key={workspace.slug}
-              href={`/organization/${params.organizationSlug}/${workspace.slug}`}
+              href={`/organization/${params.organizationSlug}/workspace/${workspace.slug}`}
             >
               <CommandItem
                 key={workspace.id}
@@ -201,30 +200,23 @@ export default function WorkspaceSelection() {
       <Popover open={open} onOpenChange={setOpen}>
         <>
           <PopoverTrigger asChild>
-            <div className="flex">
-              <Icons.slash
-                style={{ width: "50px", height: "50px" }}
-                className="bg-text"
-              />
-              <Button
-                variant="outline"
-                role="combobox"
-                aria-expanded={open}
-                aria-label="Select a Workspace"
-                className="mt-1.5 max-w-2xl"
-              >
-                <CurrentWorkspaceAvatar />
-                <CurrentWorkspaceText />
-                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              aria-label="Select a Workspace"
+              className="w-full"
+            >
+              <CurrentWorkspaceAvatar />
+              <CurrentWorkspaceText />
+              <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
           </PopoverTrigger>
 
           <PopoverContent className="w-[320px] p-0 " align="start">
             <Command className="rounded-lg border shadow-md">
               <CommandInput placeholder="Type a command or search..." />
               <CommandList>
-                <CommandEmpty>No results found.</CommandEmpty>
                 <WorkspaceOptions />
                 <Protect permission="org:workspace:all_access">
                   <NotEnrolledWorkspaceOptions />

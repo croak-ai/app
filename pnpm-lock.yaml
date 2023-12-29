@@ -158,6 +158,9 @@ importers:
       '@clerk/nextjs':
         specifier: ^4.29.1
         version: 4.29.1(next@14.0.4)(react-dom@18.2.0)(react@18.2.0)
+      '@clerk/themes':
+        specifier: ^1.7.9
+        version: 1.7.9(react@18.2.0)
       '@radix-ui/react-slot':
         specifier: ^1.0.2
         version: 1.0.2(@types/react@18.2.45)(react@18.2.0)
@@ -335,7 +338,7 @@ importers:
         version: 0.19.13
       ts-node:
         specifier: ^10.9.2
-        version: 10.9.2(@types/node@18.19.3)(typescript@5.3.3)
+        version: 10.9.2(@types/node@20.10.5)(typescript@5.3.3)
       typescript:
         specifier: ^5.1.6
         version: 5.3.3
@@ -457,8 +460,8 @@ importers:
         specifier: 8.0.0-rc17
         version: 8.0.0-rc17(react@17.0.2)
       lucide-react:
-        specifier: ^0.244.0
-        version: 0.244.0(react@17.0.2)
+        specifier: ^0.250.0
+        version: 0.250.0(react@17.0.2)
       next-themes:
         specifier: ^0.2.1
         version: 0.2.1(next@14.0.4)(react-dom@18.2.0)(react@17.0.2)
@@ -2163,6 +2166,15 @@ packages:
       js-cookie: 3.0.1
       react: 18.2.0
       swr: 2.2.0(react@18.2.0)
+    dev: false
+
+  /@clerk/themes@1.7.9(react@18.2.0):
+    resolution: {integrity: sha512-9hXxgoPuUSlZ7sH9diJEK1rTWEnk0zGKBYw4Tqaqp0RA1dtB+OHE02DK5pnTypZTnreBJYac3VmxFVTxVV35xg==}
+    engines: {node: '>=14'}
+    peerDependencies:
+      react: '>=16'
+    dependencies:
+      react: 18.2.0
     dev: false
 
   /@clerk/types@3.60.0:
@@ -5264,6 +5276,12 @@ packages:
     resolution: {integrity: sha512-k5fggr14DwAytoA/t8rPrIz++lXK7/DqckthCmoZOKNsEbJkId4Z//BqgApXBUGrGddrigYa1oqheo/7YmW4rg==}
     dependencies:
       undici-types: 5.26.5
+
+  /@types/node@20.10.5:
+    resolution: {integrity: sha512-nNPsNE65wjMxEKI93yOP+NPGGBJz/PoN3kZsVLee0XMiJolxSekEVD8wRwBUBqkwc7UWop0edW50yrCQW4CyRw==}
+    dependencies:
+      undici-types: 5.26.5
+    dev: true
 
   /@types/parse-json@4.0.2:
     resolution: {integrity: sha512-dISoDXWWQwUquiKsyZ4Ng+HX2KsPL7LyHKHQwgGFEA3IaKac4Obd+h2a/a6waisAoepJlBcx9paWqjA8/HVjCw==}
@@ -9609,8 +9627,8 @@ packages:
       es5-ext: 0.10.62
     dev: true
 
-  /lucide-react@0.244.0(react@17.0.2):
-    resolution: {integrity: sha512-PeDVbx5PlIRrVvdxiuSxPfBo7sK5qrL3LbvvRoGVNiHYRAkBm/48lKqoioxcmp0bgsyJs9lMw7CdtGFvnMJbVg==}
+  /lucide-react@0.250.0(react@17.0.2):
+    resolution: {integrity: sha512-AdboVcX2IMQs5NcyFu6vSbZWkn0Z07TjVvb9uPLI2IetNbygE0/6mPbHLwJwgD7AS/t0JJPwmP2vhVD1xA+P+w==}
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0
     dependencies:
@@ -12843,7 +12861,7 @@ packages:
   /ts-interface-checker@0.1.13:
     resolution: {integrity: sha512-Y/arvbn+rrz3JCKl9C4kVNfTfSm2/mEp5FSz5EsZSANGPSlQrpRI5M4PKF+mJnE52jOO90PnPSc3Ur3bTQw0gA==}
 
-  /ts-node@10.9.2(@types/node@18.19.3)(typescript@5.3.3):
+  /ts-node@10.9.2(@types/node@20.10.5)(typescript@5.3.3):
     resolution: {integrity: sha512-f0FFpIdcHgn8zcPSbf1dRevwt047YMnaiJM3u2w2RewrB+fob/zePZcrOyQoLMMO7aBIddLcQIEK5dYjkLnGrQ==}
     hasBin: true
     peerDependencies:
@@ -12862,7 +12880,7 @@ packages:
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
-      '@types/node': 18.19.3
+      '@types/node': 20.10.5
       acorn: 8.11.2
       acorn-walk: 8.3.1
       arg: 4.1.3
