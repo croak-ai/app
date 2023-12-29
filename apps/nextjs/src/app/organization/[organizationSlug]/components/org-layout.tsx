@@ -46,8 +46,8 @@ export function OrgLayout({ children }: { children: React.ReactNode }) {
             </kbd>
           </Button>
         )}
-        {/* <Sheet modal={false} open={isSheetOpen}>
-          <SheetContent className="w-[600px]" side="rightNoBlur">
+        <Sheet modal={false} open={isSheetOpen}>
+          <SheetContent className="w-[600px]" side="right">
             <SheetHeader>
               <SheetTitle>
                 <div className="flex items-center justify-between">
@@ -74,7 +74,7 @@ export function OrgLayout({ children }: { children: React.ReactNode }) {
             </SheetHeader>
             <div className="grid gap-4 py-4">adsasddasdsaasd</div>
           </SheetContent>
-        </Sheet> */}
+        </Sheet>
       </>
     );
   };
@@ -107,7 +107,7 @@ export function OrgLayout({ children }: { children: React.ReactNode }) {
       </div>
       <div
         className={`main-content ${
-          isSheetOpen ? "mr-[600px]" : "mr-0"
+          isSheetOpen ? "mr-[400px]" : "mr-0"
         } transition-margin duration-500`}
       >
         {children}
