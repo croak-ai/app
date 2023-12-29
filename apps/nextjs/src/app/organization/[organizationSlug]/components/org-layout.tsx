@@ -107,7 +107,7 @@ export function OrgLayout({ children }: { children: React.ReactNode }) {
       </div>
       <div
         className={`main-content ${
-          isSheetOpen ? "mr-[400px]" : "mr-0"
+          isSheetOpen ? "mr-[384px]" : "mr-0"
         } transition-margin duration-500`}
       >
         {children}
