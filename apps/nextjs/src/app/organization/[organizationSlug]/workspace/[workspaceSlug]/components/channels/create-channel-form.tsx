@@ -38,12 +38,10 @@ export default function CreateChannelForm() {
 
   const formSchema = z.object({
     channelSlug: z.string().min(2, {
-      message: "Organization name must be at least 2 characters.",
+      message: "Channel name must be at least 2 characters.",
     }),
 
-    type: z.string().min(2, {
-      message: "Email must be at least 2 characters.",
-    }),
+    type: z.enum(["text", "voice", "category"]),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -54,12 +52,6 @@ export default function CreateChannelForm() {
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
       setLoading(true);
-
-      if (true) {
-        redirect(`/`);
-      } else {
-        setError(new Error("Something went wrong. Please try again."));
-      }
     } catch (e) {
       setError(e as Error);
     }
@@ -74,16 +66,12 @@ export default function CreateChannelForm() {
             name="channelSlug"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Organization Name</FormLabel>
+                <FormLabel>Channel Name</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="University Of Central Florida"
-                    {...field}
-                  />
+                  <Input placeholder="General Chat" {...field} />
                 </FormControl>
                 <FormDescription>
-                  This is your full Organization name. For Example:{" "}
-                  <b>University of Central Florida</b>
+                  This is the name of your channel.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -105,13 +93,12 @@ export default function CreateChannelForm() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="m@example.com">Text</SelectItem>
-                    <SelectItem value="m@google.com">Canvas</SelectItem>
-                    <SelectItem value="m@support.com">Tasks</SelectItem>
+                    <SelectItem value="text">Text</SelectItem>
+                    <SelectItem value="voice">Voice</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormDescription>
-                  You can manage verified email addresses in your
+                  This is the type of your channel.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
