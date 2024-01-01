@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "ccdfdd97-56c0-49cb-9036-45a7c69cbda3",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "2e980e5a-b82e-4e9b-8b30-e966f196fabf",
+  "prevId": "a462faa3-3079-4655-9579-f186932bbd49",
   "tables": {
     "channel": {
       "name": "channel",
@@ -381,16 +381,16 @@
           "autoincrement": false,
           "default": 0
         },
-        "bCanManageUsers": {
-          "name": "bCanManageUsers",
+        "bCanManageWorkspaceMembers": {
+          "name": "bCanManageWorkspaceMembers",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
           "default": 0
         },
-        "bCanManageWorkspaces": {
-          "name": "bCanManageWorkspaces",
+        "bCanManageWorkspaceSettings": {
+          "name": "bCanManageWorkspaceSettings",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
@@ -429,6 +429,8 @@
   "_meta": {
     "schemas": {},
     "tables": {},
-    "columns": {}
+    "columns": {
+      "\"workspaceMember\".\"bCanManageUsers\"": "\"workspaceMember\".\"bCanManageWorkspaceMembers\""
+    }
   }
 }

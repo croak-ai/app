@@ -1,0 +1,1 @@
+ALTER TABLE channel ADD `channelType` text(256) NOT NULL;

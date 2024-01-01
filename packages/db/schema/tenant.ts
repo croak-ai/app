@@ -24,6 +24,7 @@ export const channel = sqliteTable("channel", {
   name: text("name", { length: 256 }).notNull(),
   description: text("description", { length: 512 }).notNull(),
   workspaceId: integer("workspaceId").notNull(),
+  channelType: text("channelType", { length: 256 }).notNull(),
   bRequiresReadWriteAccess: integer("bRequiresWriteAccess").default(0),
   bIsPrivateChannel: integer("bIsPrivateChannel").default(0),
   privateChannelEncryptionId: text("privateEncryptionId", {
@@ -50,9 +51,12 @@ export const workspaceMember = sqliteTable("workspaceMember", {
   workspaceId: integer("workspaceId").notNull(),
   userId: text("userId").notNull(),
   bCanManageChannels: integer("bCanManageChannels").default(0),
-  bCanManageUsers: integer("bCanManageUsers").default(0),
-  bCanManageWorkspaceSettings: integer("bCanManageWorkspaces").default(0),
+  bCanManageWorkspaceMembers: integer("bCanManageWorkspaceMembers").default(0),
+  bCanManageWorkspaceSettings: integer("bCanManageWorkspaceSettings").default(
+    0,
+  ),
   createdAt: integer("createdAt").notNull(),
+  updatedAt: integer("updatedAt").notNull(),
   deletedAt: integer("deletedAt"),
 });
 

@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "ccdfdd97-56c0-49cb-9036-45a7c69cbda3",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "a462faa3-3079-4655-9579-f186932bbd49",
+  "prevId": "ccdfdd97-56c0-49cb-9036-45a7c69cbda3",
   "tables": {
     "channel": {
       "name": "channel",
@@ -389,8 +389,8 @@
           "autoincrement": false,
           "default": 0
         },
-        "bCanManageWorkspaces": {
-          "name": "bCanManageWorkspaces",
+        "bCanManageWorkspaceSettings": {
+          "name": "bCanManageWorkspaceSettings",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
@@ -429,6 +429,8 @@
   "_meta": {
     "schemas": {},
     "tables": {},
-    "columns": {}
+    "columns": {
+      "\"workspaceMember\".\"bCanManageWorkspaces\"": "\"workspaceMember\".\"bCanManageWorkspaceSettings\""
+    }
   }
 }

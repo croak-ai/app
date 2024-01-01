@@ -1,0 +1,1 @@
+ALTER TABLE `workspaceMember` RENAME COLUMN `bCanManageUsers` TO `bCanManageWorkspaceMembers`;

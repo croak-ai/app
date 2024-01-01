@@ -60,6 +60,7 @@ CREATE TABLE `workspaceMember` (
 	`bCanManageUsers` integer DEFAULT 0,
 	`bCanManageWorkspaces` integer DEFAULT 0,
 	`createdAt` integer NOT NULL,
+	`updatedAt` integer NOT NULL,
 	`deletedAt` integer
 );
 --> statement-breakpoint
