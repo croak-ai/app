@@ -15,9 +15,11 @@ import CreateChannelForm from "./create-channel-form";
 export const ChannelCreationSheet = ({
   channelSheetOpen,
   setChannelSheetOpen,
+  takenChannelNames,
 }: {
   channelSheetOpen: boolean;
   setChannelSheetOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  takenChannelNames?: string[];
 }) => {
   return (
     <Sheet
@@ -33,7 +35,7 @@ export const ChannelCreationSheet = ({
             Create Channel
           </SheetTitle>
         </SheetHeader>
-        <CreateChannelForm />
+        <CreateChannelForm takenChannelNames={takenChannelNames} />
         <SheetFooter>
           <SheetClose asChild></SheetClose>
         </SheetFooter>

@@ -10,6 +10,7 @@ import Link from "next/link";
 import { Button } from "@next/components/ui/Button";
 import { Hash, Mic2 } from "lucide-react";
 import { zChannelTypes } from "@packages/db/enum";
+import { ScrollArea } from "@packages/ui/components/ui/scroll-area";
 
 const ChannelIcon = ({ channelType }: { channelType: string }) => {
   switch (channelType) {
@@ -22,9 +23,11 @@ const ChannelIcon = ({ channelType }: { channelType: string }) => {
   }
 };
 
-export default function ChannelList() {
-  const [channelSheetOpen, setChannelSheetOpen] = useState(false);
-
+export default function ChannelList({
+  workspaceChannels,
+}: {
+  workspaceChannels: { id: string; name: string; channelType: string }[];
+}) {
   const params = useParams<{
     workspaceSlug: string;
     organizationSlug: string;
@@ -32,30 +35,14 @@ export default function ChannelList() {
   }>();
 
   if (!params?.workspaceSlug || !params?.organizationSlug) {
-    return <ChannelSkeleton />;
-  }
-
-  const workspaceChannels =
-    reactTRPC.getWorkspaceChannels.getWorkspaceChannels.useQuery({
-      zWorkspaceSlug: params.workspaceSlug,
-    });
-
-  if (workspaceChannels.isLoading) {
-    return <ChannelSkeleton />;
+    return <></>;
   }
 
   return (
-    <WorkspaceRightClickMenu
-      onChannelSheetOpen={() => setChannelSheetOpen(true)}
-    >
-      <ChannelCreationSheet
-        channelSheetOpen={channelSheetOpen}
-        setChannelSheetOpen={setChannelSheetOpen}
-      />
-
+    <ScrollArea className=" flex flex-col gap-2 p-4">
       <main className="flex flex-col gap-2 p-4">
         <h2 className="text-lg font-medium">Channels</h2>
-        {workspaceChannels.data?.map((channel) => (
+        {workspaceChannels.map((channel) => (
           <div key={channel.id.toString()}>
             <Link
               href={`/organization/${params.organizationSlug}/workspace/${params.workspaceSlug}/channel/${channel.id}/${channel.channelType}`}
@@ -75,6 +62,6 @@ export default function ChannelList() {
           </div>
         ))}
       </main>
-    </WorkspaceRightClickMenu>
+    </ScrollArea>
   );
 }

@@ -30,7 +30,11 @@ import { zChannelTypes } from "@packages/db/enum";
 import { redirect, useParams } from "next/navigation";
 import { Textarea } from "@packages/ui/components/ui/textarea";
 
-export default function CreateChannelForm() {
+export default function CreateChannelForm({
+  takenChannelNames,
+}: {
+  takenChannelNames?: string[];
+}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const params = useParams<{
@@ -46,9 +50,15 @@ export default function CreateChannelForm() {
   }
 
   const formSchema = z.object({
-    channelName: z.string().min(2).max(256, {
-      message: "Channel name must be at most 256 characters.",
-    }),
+    channelName: z
+      .string()
+      .min(2)
+      .max(256, {
+        message: "Channel name must be at most 256 characters.",
+      })
+      .refine((value) => !takenChannelNames?.includes(value), {
+        message: "Channel name is already taken.",
+      }),
 
     type: zChannelTypes,
 
