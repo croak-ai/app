@@ -8,6 +8,7 @@ import {
 } from "@packages/ui/components/ui/resizable";
 import React, { useRef, useEffect } from "react";
 import { cn } from "@acme/ui/lib/utils";
+import ChatBot from "./chat-bot";
 
 interface MailProps {
   defaultLayout: number[];
@@ -62,6 +63,7 @@ const ResizableWindows: React.FC<MailProps> = ({
         ref={aiPanelRef}
       >
         <span className="font-semibold">Two</span>
+        <ChatBot></ChatBot>
       </ResizablePanel>
     </ResizablePanelGroup>
   );
