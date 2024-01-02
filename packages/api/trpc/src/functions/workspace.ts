@@ -1,4 +1,4 @@
-import { createDbClient, eq } from "@packages/db";
+import { and, createDbClient, eq } from "@packages/db";
 import {
   dekEncryptionKey,
   workspace,
@@ -27,7 +27,13 @@ export const getWorkspacePermission = async ({
       .select()
       .from(workspace)
       .where(eq(workspace.slug, workspaceSlug))
-      .innerJoin(workspaceMember, eq(workspaceMember.userId, userId));
+      .innerJoin(
+        workspaceMember,
+        and(
+          eq(workspaceMember.userId, userId),
+          eq(workspaceMember.workspaceId, workspace.id),
+        ),
+      );
 
     if (foundWorkspace.length !== 1 || !foundWorkspace[0]) {
       return { hasPermission: false, foundWorkspace: null };

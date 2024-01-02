@@ -25,11 +25,19 @@ import { useForm } from "react-hook-form";
 import { ContinueButton } from "@acme/ui/components/bonus/continue-button";
 import Loading from "@acme/ui/components/bonus/loading";
 import { useState } from "react";
-import { redirect } from "next/navigation";
+import { reactTRPC } from "@next/utils/trpc/reactTRPCClient";
+import { zChannelTypes } from "@packages/db/enum";
+import { redirect, useParams } from "next/navigation";
 
 export default function CreateChannelForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const params = useParams<{
+    workspaceSlug: string;
+    organizationSlug: string;
+  }>();
+
+  const createChannel = reactTRPC.createChannel.createChannel.useMutation();
 
   if (error) {
     setLoading(false);
@@ -37,11 +45,15 @@ export default function CreateChannelForm() {
   }
 
   const formSchema = z.object({
-    channelSlug: z.string().min(2, {
-      message: "Channel name must be at least 2 characters.",
+    channelName: z.string().min(2).max(256, {
+      message: "Channel name must be at most 256 characters.",
     }),
 
-    type: z.enum(["text", "voice", "category"]),
+    type: zChannelTypes,
+
+    channelDescription: z.string().min(2).max(512, {
+      message: "Channel description must be at most 256 characters.",
+    }),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -51,7 +63,27 @@ export default function CreateChannelForm() {
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
+      if (!params?.workspaceSlug || !params?.organizationSlug) {
+        setError(new Error("No workspace slug provided."));
+        return;
+      }
+
       setLoading(true);
+
+      const newChannel = await createChannel.mutateAsync({
+        zName: data.channelName,
+        zChannelTypes: data.type,
+        zDescription: data.channelDescription,
+        zWorkspaceSlug: params.workspaceSlug, // replace with your actual variable
+      });
+
+      setLoading(false);
+
+      if (newChannel) {
+        redirect(
+          `/organization/${params.organizationSlug}/workspace/${params.workspaceSlug}/channel/${newChannel.insertedId}/${newChannel.channelType}`,
+        ); // replace with your actual variable
+      }
     } catch (e) {
       setError(e as Error);
     }
@@ -63,7 +95,7 @@ export default function CreateChannelForm() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <FormField
             control={form.control}
-            name="channelSlug"
+            name="channelName"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Channel Name</FormLabel>
@@ -72,6 +104,22 @@ export default function CreateChannelForm() {
                 </FormControl>
                 <FormDescription>
                   This is the name of your channel.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="channelDescription"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Channel Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="General Communications" {...field} />
+                </FormControl>
+                <FormDescription>
+                  This is the description of your channel.
                 </FormDescription>
                 <FormMessage />
               </FormItem>

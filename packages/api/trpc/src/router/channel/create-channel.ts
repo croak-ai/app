@@ -13,12 +13,14 @@ export const zCreateTextChannel = z.object({
   zChannelTypes,
 });
 
-export const createWorkspace = router({
-  createTextChannel: protectedProcedureWithOrgDB
+export const createChannel = router({
+  createChannel: protectedProcedureWithOrgDB
     .input(zCreateTextChannel)
     .mutation(async ({ ctx, input }) => {
       ////////////////////////////////////////////////////////
       // Check if user has permission to create a text channel
+
+      console.log(input.zWorkspaceSlug);
 
       const workspace = await getWorkspacePermission({
         workspaceSlug: input.zWorkspaceSlug,

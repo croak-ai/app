@@ -1,5 +1,11 @@
 import { sql } from "drizzle-orm";
-import { text, integer, sqliteTable, index } from "drizzle-orm/sqlite-core";
+import {
+  text,
+  integer,
+  sqliteTable,
+  index,
+  unique,
+} from "drizzle-orm/sqlite-core";
 
 export const workspace = sqliteTable(
   "workspace",
@@ -19,21 +25,27 @@ export const workspace = sqliteTable(
     };
   },
 );
-export const channel = sqliteTable("channel", {
-  id: integer("id").primaryKey(),
-  name: text("name", { length: 256 }).notNull(),
-  description: text("description", { length: 512 }).notNull(),
-  workspaceId: integer("workspaceId").notNull(),
-  channelType: text("channelType", { length: 256 }).notNull(),
-  bRequiresReadWriteAccess: integer("bRequiresWriteAccess").default(0),
-  bIsPrivateChannel: integer("bIsPrivateChannel").default(0),
-  privateChannelEncryptionId: text("privateEncryptionId", {
-    length: 256,
+export const channel = sqliteTable(
+  "channel",
+  {
+    id: integer("id").primaryKey(),
+    name: text("name", { length: 256 }).notNull(),
+    description: text("description", { length: 512 }).notNull(),
+    workspaceId: integer("workspaceId").notNull(),
+    channelType: text("channelType", { length: 256 }).notNull(),
+    bRequiresReadWriteAccess: integer("bRequiresWriteAccess").default(0),
+    bIsPrivateChannel: integer("bIsPrivateChannel").default(0),
+    privateChannelEncryptionId: text("privateEncryptionId", {
+      length: 256,
+    }),
+    createdAt: integer("createdAt").notNull(),
+    updatedAt: integer("updatedAt").notNull(),
+    deletedAt: integer("deletedAt"),
+  },
+  (t) => ({
+    unq: unique().on(t.workspaceId, t.name),
   }),
-  createdAt: integer("createdAt").notNull(),
-  updatedAt: integer("updatedAt").notNull(),
-  deletedAt: integer("deletedAt"),
-});
+);
 
 export const channelAccess = sqliteTable("channelAccess", {
   id: integer("id").primaryKey(),
