@@ -1,22 +1,19 @@
 import { channel } from "@packages/db/schema/tenant";
 import { protectedProcedureWithOrgDB, router } from "../../trpc";
 import { z } from "zod";
-import { zChannelTypes } from "@packages/db/enum";
+import { eq } from "drizzle-orm";
 
 import { TRPCError } from "@trpc/server";
 import { getWorkspacePermission } from "../../functions/workspace";
 
-export const zCreateTextChannel = z.object({
-  zName: z.string().min(2).max(256),
-  zDescription: z.string().min(2).max(512),
+export const zGetWorkspaceChannels = z.object({
   zWorkspaceSlug: z.string().min(2).max(256),
-  zChannelTypes,
 });
 
-export const createChannel = router({
-  createChannel: protectedProcedureWithOrgDB
-    .input(zCreateTextChannel)
-    .mutation(async ({ ctx, input }) => {
+export const getWorkspaceChannels = router({
+  getWorkspaceChannels: protectedProcedureWithOrgDB
+    .input(zGetWorkspaceChannels)
+    .query(async ({ ctx, input }) => {
       ////////////////////////////////////////////////////////
       // Check if user has permission to create a text channel
 
@@ -24,7 +21,6 @@ export const createChannel = router({
         workspaceSlug: input.zWorkspaceSlug,
         userId: ctx.auth.userId,
         db: ctx.db,
-        bCanManageChannels: true,
       });
 
       if (!workspace.foundWorkspace) {
@@ -49,30 +45,11 @@ export const createChannel = router({
 
       ////////////////////////////////////////////////////////
       // Create the channel
-      const newChannel = await ctx.db
-        .insert(channel)
-        .values({
-          name: input.zName,
-          channelType: input.zChannelTypes,
-          workspaceId: workspace.foundWorkspace.workspace.id,
-          description: input.zDescription,
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
-        })
-        .returning({
-          insertedId: channel.id,
-          name: channel.name,
-          description: channel.description,
-          channelType: channel.channelType,
-        });
+      const channels = await ctx.db
+        .select()
+        .from(channel)
+        .where(eq(channel.workspaceId, workspace.foundWorkspace.workspace.id));
 
-      if (newChannel.length !== 1 || !newChannel || !newChannel[0]) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to create new channel",
-        });
-      }
-
-      return newChannel[0];
+      return channels;
     }),
 });

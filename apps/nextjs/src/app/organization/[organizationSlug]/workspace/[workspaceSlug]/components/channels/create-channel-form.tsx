@@ -28,6 +28,7 @@ import { useState } from "react";
 import { reactTRPC } from "@next/utils/trpc/reactTRPCClient";
 import { zChannelTypes } from "@packages/db/enum";
 import { redirect, useParams } from "next/navigation";
+import { Textarea } from "@packages/ui/components/ui/textarea";
 
 export default function CreateChannelForm() {
   const [loading, setLoading] = useState(false);
@@ -114,9 +115,9 @@ export default function CreateChannelForm() {
             name="channelDescription"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Channel Name</FormLabel>
+                <FormLabel>Channel Description</FormLabel>
                 <FormControl>
-                  <Input placeholder="General Communications" {...field} />
+                  <Textarea placeholder="Engineering General Chat" {...field} />
                 </FormControl>
                 <FormDescription>
                   This is the description of your channel.

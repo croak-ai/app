@@ -7,6 +7,7 @@ import { workspaceSlugExists } from "./router/workspace/workspace-slug-exists";
 import { getWorkspaceMemberships } from "./router/workspace/get-workspace-memberships";
 import { getAllWorkspaces } from "./router/workspace/get-all-workspaces";
 import { createChannel } from "./router/channel/create-channel";
+import { getWorkspaceChannels } from "./router/channel/get-workspace-channels";
 
 export const appRouter = router({
   createNewTursoDB,
@@ -16,6 +17,7 @@ export const appRouter = router({
   getWorkspaceMemberships,
   getAllWorkspaces,
   createChannel,
+  getWorkspaceChannels,
 });
 
 // export type definition of API
