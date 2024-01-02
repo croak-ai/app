@@ -1,9 +1,8 @@
 import { createClient } from "@libsql/client";
 
-const url = "file:src/db/sync/sync.db";
-const syncUrl = "libsql://t-2zxiuje7ew7a907upsn1bftqtzr-walshington.turso.io";
-const authToken =
-  "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJnaWQiOiJkNGNhZjhhYi05M2I5LTExZWUtYTM0MS02YWNiMmFlZjI4M2QiLCJpYXQiOiIyMDIzLTEyLTE5VDIyOjI3OjQ0LjI1NjQ3ODgyM1oifQ.QslOcv6KCqz7jYrg_LHpydzbR0nFuKaLBoPNoO7KDHKetYNtdvO2zuDWs7OI7oI19Wd0ljvgGjuxvh8fhgnxAg";
+const url = process.env.TURSO_DB_REPLICA_PATH || "";
+const syncUrl = process.env.TURSO_DB_SYNC_URL || "";
+const authToken = process.env.TURSO_DB_TOKEN || "";
 
 const db = createClient({
   url,
