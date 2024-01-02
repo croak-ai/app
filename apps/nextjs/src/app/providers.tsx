@@ -2,6 +2,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { ClerkProvider } from "@clerk/nextjs";
+import { dark } from "@clerk/themes";
+import { TooltipProvider } from "@packages/ui/components/ui/tooltip";
 
 import {
   createReactTRPCClient,
@@ -16,12 +18,18 @@ export default function TRPC_Provider({
   const [queryClient] = useState(() => new QueryClient({}));
   const [trpcClient] = useState(() => createReactTRPCClient());
   return (
-    <ClerkProvider>
-      <reactTRPC.Provider client={trpcClient} queryClient={queryClient}>
-        <QueryClientProvider client={queryClient}>
-          {children}
-        </QueryClientProvider>
-      </reactTRPC.Provider>
-    </ClerkProvider>
+    <TooltipProvider>
+      <ClerkProvider
+        appearance={{
+          baseTheme: dark,
+        }}
+      >
+        <reactTRPC.Provider client={trpcClient} queryClient={queryClient}>
+          <QueryClientProvider client={queryClient}>
+            {children}
+          </QueryClientProvider>
+        </reactTRPC.Provider>
+      </ClerkProvider>
+    </TooltipProvider>
   );
 }

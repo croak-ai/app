@@ -2,11 +2,7 @@ import { Button } from "@packages/ui/components/ui/button";
 
 import { Suspense } from "react";
 async function WorkspacePage() {
-  return (
-    <>
-      <Button className="w-full" />
-    </>
-  );
+  return <></>;
 }
 
 export default async function Layout() {

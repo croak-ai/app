@@ -1,22 +1,34 @@
 "use client";
-
-import { useState, Suspense, useEffect } from "react";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@packages/ui/components/ui/sheet";
-
-import CourseSelection from "./workspace-selection";
 import { Icons } from "@acme/ui/components/bonus/icons";
 import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
 import { Button } from "@packages/ui/components/ui/button";
+import ResizableWindows from "./resizable-windows";
+import { useState, useEffect } from "react";
+import { Nav } from "./main-nav-button";
+import {
+  Settings,
+  Inbox,
+  Calendar,
+  TextQuote,
+  MessageCircle,
+  BellDot,
+  User,
+} from "lucide-react";
 
-export function OrgLayout({ children }: { children: React.ReactNode }) {
-  const [isSheetOpen, setSheetOpen] = useState(false);
+export function OrgLayout({
+  children,
+  defaultCollapsibleLayoutValues,
+  defaultCollapsibleIsAICollapsed,
+  organizationSlug,
+}: {
+  children: React.ReactNode;
+  defaultCollapsibleLayoutValues: number[];
+  defaultCollapsibleIsAICollapsed: boolean;
+  organizationSlug: string;
+}) {
+  const [isAICollapsed, setAICollapsed] = useState(
+    defaultCollapsibleIsAICollapsed,
+  );
   const [isMac, setIsMac] = useState(false);
 
   useEffect(() => {
@@ -27,7 +39,7 @@ export function OrgLayout({ children }: { children: React.ReactNode }) {
     const down = (e: KeyboardEvent) => {
       if (e.key === "j" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        setSheetOpen((open) => !open);
+        setAICollapsed((open) => !open);
       }
     };
 
@@ -35,84 +47,70 @@ export function OrgLayout({ children }: { children: React.ReactNode }) {
     return () => document.removeEventListener("keydown", down);
   }, []);
 
-  const AISheet = () => {
+  const AIButton = () => {
     return (
       <>
-        {isSheetOpen ? null : (
-          <Button variant="outline" onClick={() => setSheetOpen(true)}>
-            Ask Voyaging AI <Icons.magicWand className="mx-2 h-4 w-4" />
+        {isAICollapsed && (
+          <Button variant="outline" onClick={() => setAICollapsed(false)}>
+            Ask Croak AI <Icons.magicWand className="mx-2 h-4 w-4" />
             <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
               <span className="text-base">{isMac ? "⌘ J" : "Ctrl + J"}</span>
             </kbd>
           </Button>
         )}
-        <Sheet modal={false} open={isSheetOpen}>
-          <SheetContent className="w-[600px]" side="right">
-            <SheetHeader>
-              <SheetTitle>
-                <div className="flex items-center justify-between">
-                  Chat With AI
-                  <div>
-                    <div className="justify-self-end">
-                      <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-                        <span className="text-base">
-                          {isMac ? "⌘ J" : "Ctrl + J"}
-                        </span>
-                      </kbd>
-                      <Button
-                        variant="ghost"
-                        onClick={() => setSheetOpen(false)}
-                        className="ml-2"
-                      >
-                        X
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </SheetTitle>
-              <SheetDescription>Loreum Ipsum</SheetDescription>
-            </SheetHeader>
-            <div className="grid gap-4 py-4">adsasddasdsaasd</div>
-          </SheetContent>
-        </Sheet>
       </>
     );
   };
 
   return (
-    <>
-      <div className="grid w-full grid-cols-3 items-center py-3">
-        <span className="flex px-6">
-          <div className="mt-2">
-            <OrganizationSwitcher
-              afterSelectOrganizationUrl={`/organization/:slug`}
+    <div className="box-border flex h-screen flex-col overflow-hidden">
+      <div className="flex-grow overflow-hidden">
+        <div className="box-border grid w-full grid-cols-3 items-center py-3">
+          <span className="flex px-6">
+            <div className="mt-2">
+              <UserButton />
+            </div>
+            <Icons.slash
+              style={{ width: "50px", height: "50px" }}
+              className="bg-text"
+            />
+            <div className="mt-2">
+              <OrganizationSwitcher
+                afterSelectOrganizationUrl={`/organization/:slug`}
+                hidePersonal={true}
+              />
+            </div>
+          </span>
+          <div className="flex space-x-4 justify-self-center">
+            <Nav
+              title="Workspace"
+              href={`/organization/${organizationSlug}/workspace`}
+              icon={TextQuote}
+            />
+            <Nav
+              title="Inbox"
+              href={`/organization/${organizationSlug}/inbox`}
+              icon={Inbox}
+            />
+            <Nav
+              title="Notifications"
+              href={`/organization/${organizationSlug}/user`}
+              icon={BellDot}
             />
           </div>
-
-          <div>
-            <CourseSelection />
+          <div className="justify-self-end">
+            <AIButton />
           </div>
-        </span>
-        <div className="justify-self-center">
-          <Button className="w-72 ">
-            Notifications
-            <span className="ml-2">
-              <Icons.bell className="h-4 w-4" />
-            </span>
-          </Button>
-        </div>
-        <div className="mr-12 justify-self-end">
-          <AISheet />
         </div>
       </div>
-      <div
-        className={`main-content ${
-          isSheetOpen ? "mr-[384px]" : "mr-0"
-        } transition-margin duration-500`}
+      <ResizableWindows
+        defaultLayout={defaultCollapsibleLayoutValues}
+        isAICollapsed={isAICollapsed}
+        setAICollapsed={setAICollapsed}
       >
         {children}
-      </div>
-    </>
+      </ResizableWindows>
+    </div>
   );
 }
 
