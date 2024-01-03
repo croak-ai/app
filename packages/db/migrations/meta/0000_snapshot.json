@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "35fdb74b-598d-49b6-a26c-03adb49da36e",
-  "prevId": "aa009fdf-f4fa-4678-8014-d446b98e447b",
+  "id": "ccdfdd97-56c0-49cb-9036-45a7c69cbda3",
+  "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "channel": {
       "name": "channel",
@@ -85,8 +85,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "channelWriteAccess": {
-      "name": "channelWriteAccess",
+    "channelAccess": {
+      "name": "channelAccess",
       "columns": {
         "id": {
           "name": "id",
@@ -104,10 +104,26 @@
         },
         "userId": {
           "name": "userId",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        },
+        "bCanRead": {
+          "name": "bCanRead",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 0
+        },
+        "bCanWrite": {
+          "name": "bCanWrite",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 0
         },
         "createdAt": {
           "name": "createdAt",
@@ -356,6 +372,30 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        },
+        "bCanManageChannels": {
+          "name": "bCanManageChannels",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 0
+        },
+        "bCanManageUsers": {
+          "name": "bCanManageUsers",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 0
+        },
+        "bCanManageWorkspaces": {
+          "name": "bCanManageWorkspaces",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 0
         },
         "createdAt": {
           "name": "createdAt",

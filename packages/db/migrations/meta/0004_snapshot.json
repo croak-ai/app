@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "aa009fdf-f4fa-4678-8014-d446b98e447b",
-  "prevId": "33c61f00-f3d6-412d-9a49-1a58138814d9",
+  "id": "179fc694-b6c9-450e-81ba-ba3b76d25627",
+  "prevId": "ebb4b959-1880-4f8d-9fda-becfb165504a",
   "tables": {
     "channel": {
       "name": "channel",
@@ -31,6 +31,13 @@
         "workspaceId": {
           "name": "workspaceId",
           "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "channelType": {
+          "name": "channelType",
+          "type": "text(256)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -80,13 +87,22 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "channel_workspaceId_name_unique": {
+          "name": "channel_workspaceId_name_unique",
+          "columns": [
+            "workspaceId",
+            "name"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "channelWriteAccess": {
-      "name": "channelWriteAccess",
+    "channelAccess": {
+      "name": "channelAccess",
       "columns": {
         "id": {
           "name": "id",
@@ -104,10 +120,26 @@
         },
         "userId": {
           "name": "userId",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        },
+        "bCanRead": {
+          "name": "bCanRead",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 0
+        },
+        "bCanWrite": {
+          "name": "bCanWrite",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 0
         },
         "createdAt": {
           "name": "createdAt",
@@ -221,7 +253,7 @@
         },
         "userId": {
           "name": "userId",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -279,7 +311,7 @@
         },
         "description": {
           "name": "description",
-          "type": "text(256)",
+          "type": "text(512)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -320,6 +352,13 @@
             "slug"
           ],
           "isUnique": true
+        },
+        "slug_idx": {
+          "name": "slug_idx",
+          "columns": [
+            "slug"
+          ],
+          "isUnique": false
         }
       },
       "foreignKeys": {},
@@ -345,10 +384,34 @@
         },
         "userId": {
           "name": "userId",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        },
+        "bCanManageChannels": {
+          "name": "bCanManageChannels",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 0
+        },
+        "bCanManageWorkspaceMembers": {
+          "name": "bCanManageWorkspaceMembers",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 0
+        },
+        "bCanManageWorkspaceSettings": {
+          "name": "bCanManageWorkspaceSettings",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 0
         },
         "createdAt": {
           "name": "createdAt",

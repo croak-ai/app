@@ -1,51 +1,67 @@
-import {
-  AvatarImage,
-  AvatarFallback,
-  Avatar,
-} from "@acme/ui/components/ui/avatar";
-import Link from "next/link";
-import { Card } from "@acme/ui/components/ui/card";
+"use client";
+
+import ChannelList from "./channels/channel-list";
 import WorkspaceSelection from "./workspace-selection";
-import { Suspense } from "react";
+import { WorkspaceRightClickMenu } from "./workspace-right-click";
+import { useState } from "react";
+import { ChannelCreationSheet } from "./channels/channel-creation-sheet";
+import { reactTRPC } from "@next/utils/trpc/reactTRPCClient";
+import { useParams } from "next/navigation";
+import { ChannelSkeleton } from "./channels/channel-list-skeleton";
+import Link from "next/link";
+import { Button } from "@next/components/ui/Button";
+import { Hash, Mic2 } from "lucide-react";
+import { zChannelTypes } from "@packages/db/enum";
 
 export default function WorkspaceSidebar() {
+  const [channelSheetOpen, setChannelSheetOpen] = useState(false);
+
+  const params = useParams<{
+    workspaceSlug: string;
+  }>();
+
+  if (!params?.workspaceSlug) {
+    return <></>;
+  }
+
+  const workspaceChannels =
+    reactTRPC.getWorkspaceChannels.getWorkspaceChannels.useQuery({
+      zWorkspaceSlug: params.workspaceSlug,
+    });
+
+  const Channels = () => {
+    if (workspaceChannels.isLoading || !workspaceChannels.data) {
+      return <ChannelSkeleton />;
+    }
+
+    return (
+      <ChannelList
+        workspaceChannels={workspaceChannels.data.map((channel) => ({
+          id: String(channel.id),
+          name: channel.name,
+          channelType: channel.channelType,
+        }))}
+      />
+    );
+  };
+
   return (
-    <div className="flex h-full w-full flex-col ">
-      <header className="flex h-16 items-center border-b px-4">
-        <WorkspaceSelection />
-      </header>
-      <main className="flex flex-col gap-2 p-4">
-        <h2 className="text-lg font-medium">Channels</h2>
-        <Card className="p-2">
-          <Link className="flex items-center gap-2 text-sm" href="#">
-            <span>General</span>
-          </Link>
-        </Card>
-        <Card className="p-2">
-          <Link className="flex items-center gap-2 text-sm" href="#">
-            <span>Random</span>
-          </Link>
-        </Card>
-        <h2 className="mt-4 text-lg font-medium">Direct Messages</h2>
-        <Card className="p-2">
-          <Link className="flex items-center gap-2 text-sm" href="#">
-            <Avatar>
-              <AvatarImage alt="User 1" src="/placeholder-avatar.jpg" />
-              <AvatarFallback>U1</AvatarFallback>
-            </Avatar>
-            <span>User 1</span>
-          </Link>
-        </Card>
-        <Card className="p-2">
-          <Link className="flex items-center gap-2 text-sm" href="#">
-            <Avatar>
-              <AvatarImage alt="User 2" src="/placeholder-avatar.jpg" />
-              <AvatarFallback>U2</AvatarFallback>
-            </Avatar>
-            <span>User 2</span>
-          </Link>
-        </Card>
-      </main>
-    </div>
+    <WorkspaceRightClickMenu
+      onChannelSheetOpen={() => setChannelSheetOpen(true)}
+    >
+      <ChannelCreationSheet
+        channelSheetOpen={channelSheetOpen}
+        setChannelSheetOpen={setChannelSheetOpen}
+        takenChannelNames={workspaceChannels.data?.map(
+          (channel) => channel.name,
+        )}
+      />
+      <div className="flex h-full w-full flex-col ">
+        <header className="flex h-16 items-center border-b px-4">
+          <WorkspaceSelection />
+        </header>
+        <Channels />
+      </div>
+    </WorkspaceRightClickMenu>
   );
 }
