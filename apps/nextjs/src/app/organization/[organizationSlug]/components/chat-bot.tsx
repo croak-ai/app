@@ -4,18 +4,51 @@ import { Button } from "@next/components/ui/Button";
 import { Input } from "@next/components/ui/Input";
 import { useChat } from "ai/react";
 import SuperJSON from "superjson";
+import { useState } from "react";
 // import { appRouter } from "@packages/api";
 // console.log("router: ", typeof appRouter);
 
 export default function ChatBot() {
   //const botRes = trpc.bot.createAssistant.useQuery();
 
-  const { messages, input, handleInputChange, handleSubmit, isLoading } =
-    useChat({
-      api: `http://localhost:3001/api/trpc/bot.createAssistant?input=${encodeURIComponent(
-        SuperJSON.stringify(""),
-      )}`,
-    });
+  //const { messages, input, handleInputChange, handleSubmit, isLoading } =
+  // useChat({
+  //   api: `http://localhost:3001/api/trpc/bot.createAssistant?input=${encodeURIComponent(
+  //     SuperJSON.stringify(""),
+  //   )}`,
+  // });
+  const [input, setInput] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    // Your server endpoint URL
+    const endpoint = "http://localhost:3001/assistant";
+
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message: input }),
+      });
+
+      if (!response.ok) {
+        throw new Error("HTTP status code out of successful range");
+      }
+
+      // Handle the response if needed
+      const responseData = await response.json();
+      console.log("Server Response:", responseData);
+
+      // Clear the input field after submission
+      setInput("");
+    } catch (error) {
+      // Handle any errors from the request
+      console.error("Error:", error);
+    }
+  };
 
   return (
     <div className="flex h-full w-full flex-col items-center ">
@@ -53,47 +86,13 @@ export default function ChatBot() {
             </div>
           )}
         </div>
-        <form
-          className="flex items-center gap-2 space-x-2"
-          onSubmit={async (e) => {
-            e.preventDefault();
-            // if (!generateEmbedding) {
-            //   throw new Error("Unable to generate embeddings");
-            // }
-
-            // const output = await generateEmbedding(input, {
-            //   pooling: "mean",
-            //   normalize: true,
-            // });
-
-            // const embedding = JSON.stringify(Array.from(output.data));
-
-            // const {
-            //   data: { session },
-            // } = await supabase.auth.getSession();
-
-            // if (!session) {
-            //   return;
-            // }
-
-            handleSubmit(e, {
-              // options: {
-              //   headers: {
-              //     authorization: `Bearer ${session.access_token}`,
-              //   },
-              //   body: {
-              //     embedding,
-              //   },
-              // },
-            });
-          }}
-        >
+        <form className="flex items-center gap-2 space-x-2">
           <Input
             type="text"
             autoFocus
             placeholder="Send a message"
             value={input}
-            onChange={handleInputChange}
+            onChange={(e) => setInput(e.target.value)}
           />
           <Button type="submit">Send</Button>
         </form>

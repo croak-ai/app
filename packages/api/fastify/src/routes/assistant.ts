@@ -5,12 +5,22 @@ import { createOrRetrieveAssistant } from "../ai/helpers/createOrRetrieveAssista
 import { Run } from "openai/resources/beta/threads/runs/runs";
 import { query } from "../ai/functions/query";
 
+type AssistantBody = {
+  message: string;
+};
+
 export default async function assistant(fastify: FastifyInstance) {
   // GET /
-  fastify.get(
+  fastify.post(
     "/assistant",
-    async function (_request: FastifyRequest, reply: FastifyReply) {
+    async function (
+      request: FastifyRequest<{ Body: AssistantBody }>,
+      reply: FastifyReply,
+    ) {
       const assistant = await createOrRetrieveAssistant();
+
+      const { message } = request.body;
+      console.log("message: ", message);
 
       // Initialize a thread
       const thread = await openai.beta.threads.create();
@@ -18,7 +28,7 @@ export default async function assistant(fastify: FastifyInstance) {
       //Add message to thread
       await openai.beta.threads.messages.create(thread.id, {
         role: "user",
-        content: "Can you give me the workspaceId of Ben !(userId = 888)!?",
+        content: message,
       });
 
       //Run the assistant with the thread we just created
