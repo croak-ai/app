@@ -62,7 +62,6 @@ const ResizableWindows: React.FC<MailProps> = ({
         )}
         ref={aiPanelRef}
       >
-        <span className="font-semibold">Two</span>
         <ChatBot></ChatBot>
       </ResizablePanel>
     </ResizablePanelGroup>

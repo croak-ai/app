@@ -12,14 +12,14 @@ export default function ChatBot() {
 
   const { messages, input, handleInputChange, handleSubmit, isLoading } =
     useChat({
-      api: `http://localhost:3000/api/trpc/bot.createAssistant?input=${encodeURIComponent(
+      api: `http://localhost:3001/api/trpc/bot.createAssistant?input=${encodeURIComponent(
         SuperJSON.stringify(""),
       )}`,
     });
 
   return (
-    <div className="flex h-full w-full max-w-6xl flex-col items-center">
-      <div className="my-2 flex w-full grow flex-col gap-6 overflow-y-auto rounded-sm p-4 sm:my-10 sm:border sm:p-8">
+    <div className="flex h-full w-full flex-col items-center ">
+      <div className="my-2 flex w-full grow flex-col gap-6 overflow-y-auto rounded-sm p-4 sm:my-10 sm:p-8">
         <div className="flex grow flex-col justify-start gap-4 overflow-y-scroll rounded-lg border-slate-400 pr-2">
           {messages.map(({ id, role, content }) => (
             <div
