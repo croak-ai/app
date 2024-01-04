@@ -70,7 +70,7 @@ export default function WorkspaceSelection() {
   };
 
   const WorkspaceOptions = () => {
-    if (!workspaceMemberships.isFetched) {
+    if (workspaceMemberships.isLoading) {
       return <Loading />;
     }
 
@@ -136,7 +136,7 @@ export default function WorkspaceSelection() {
     }
 
     if (!workspaceMemberships.isFetched || !allWorkspaces.isFetched) {
-      return <Loading />;
+      return <></>;
     }
 
     if (workspaceMemberships.data?.length === allWorkspaces.data?.length) {
@@ -205,9 +205,8 @@ export default function WorkspaceSelection() {
               role="combobox"
               aria-expanded={open}
               aria-label="Select a Workspace"
-              className="w-full"
+              className="flex w-full items-center justify-between "
             >
-              <CurrentWorkspaceAvatar />
               <CurrentWorkspaceText />
               <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>

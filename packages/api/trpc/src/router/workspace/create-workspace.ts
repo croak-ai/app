@@ -90,6 +90,9 @@ export const createWorkspace = router({
       await ctx.db?.insert(workspaceMember).values({
         workspaceId: newlyCreatedWorkspace.insertedId,
         userId: ctx.auth.userId,
+        bCanManageChannels: 1,
+        bCanManageWorkspaceMembers: 1,
+        bCanManageWorkspaceSettings: 1,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       });

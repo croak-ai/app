@@ -16,7 +16,8 @@
     "@libsql/client": "0.4.0-pre.5",
     "@planetscale/database": "^1.10.0",
     "drizzle-orm": "^0.28.6",
-    "znv": "^0.4.0"
+    "znv": "^0.4.0",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "dotenv-cli": "^7.2.1",

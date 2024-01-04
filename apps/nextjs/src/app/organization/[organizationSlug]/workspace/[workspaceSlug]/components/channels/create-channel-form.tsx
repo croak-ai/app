@@ -25,11 +25,24 @@ import { useForm } from "react-hook-form";
 import { ContinueButton } from "@acme/ui/components/bonus/continue-button";
 import Loading from "@acme/ui/components/bonus/loading";
 import { useState } from "react";
-import { redirect } from "next/navigation";
+import { reactTRPC } from "@next/utils/trpc/reactTRPCClient";
+import { zChannelTypes } from "@packages/db/enum";
+import { redirect, useParams } from "next/navigation";
+import { Textarea } from "@packages/ui/components/ui/textarea";
 
-export default function CreateChannelForm() {
+export default function CreateChannelForm({
+  takenChannelNames,
+}: {
+  takenChannelNames?: string[];
+}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const params = useParams<{
+    workspaceSlug: string;
+    organizationSlug: string;
+  }>();
+
+  const createChannel = reactTRPC.createChannel.createChannel.useMutation();
 
   if (error) {
     setLoading(false);
@@ -37,12 +50,20 @@ export default function CreateChannelForm() {
   }
 
   const formSchema = z.object({
-    channelSlug: z.string().min(2, {
-      message: "Organization name must be at least 2 characters.",
-    }),
+    channelName: z
+      .string()
+      .min(2)
+      .max(256, {
+        message: "Channel name must be at most 256 characters.",
+      })
+      .refine((value) => !takenChannelNames?.includes(value), {
+        message: "Channel name is already taken.",
+      }),
 
-    type: z.string().min(2, {
-      message: "Email must be at least 2 characters.",
+    type: zChannelTypes,
+
+    channelDescription: z.string().min(2).max(512, {
+      message: "Channel description must be at most 256 characters.",
     }),
   });
 
@@ -53,12 +74,26 @@ export default function CreateChannelForm() {
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
+      if (!params?.workspaceSlug || !params?.organizationSlug) {
+        setError(new Error("No workspace slug provided."));
+        return;
+      }
+
       setLoading(true);
 
-      if (true) {
-        redirect(`/`);
-      } else {
-        setError(new Error("Something went wrong. Please try again."));
+      const newChannel = await createChannel.mutateAsync({
+        zName: data.channelName,
+        zChannelTypes: data.type,
+        zDescription: data.channelDescription,
+        zWorkspaceSlug: params.workspaceSlug, // replace with your actual variable
+      });
+
+      setLoading(false);
+
+      if (newChannel) {
+        redirect(
+          `/organization/${params.organizationSlug}/workspace/${params.workspaceSlug}/channel/${newChannel.insertedId}/${newChannel.channelType}`,
+        ); // replace with your actual variable
       }
     } catch (e) {
       setError(e as Error);
@@ -71,19 +106,31 @@ export default function CreateChannelForm() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <FormField
             control={form.control}
-            name="channelSlug"
+            name="channelName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Organization Name</FormLabel>
+                <FormLabel>Channel Name</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="University Of Central Florida"
-                    {...field}
-                  />
+                  <Input placeholder="General Chat" {...field} />
                 </FormControl>
                 <FormDescription>
-                  This is your full Organization name. For Example:{" "}
-                  <b>University of Central Florida</b>
+                  This is the name of your channel.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="channelDescription"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Channel Description</FormLabel>
+                <FormControl>
+                  <Textarea placeholder="Engineering General Chat" {...field} />
+                </FormControl>
+                <FormDescription>
+                  This is the description of your channel.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -105,13 +152,12 @@ export default function CreateChannelForm() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="m@example.com">Text</SelectItem>
-                    <SelectItem value="m@google.com">Canvas</SelectItem>
-                    <SelectItem value="m@support.com">Tasks</SelectItem>
+                    <SelectItem value="text">Text</SelectItem>
+                    <SelectItem value="voice">Voice</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormDescription>
-                  You can manage verified email addresses in your
+                  This is the type of your channel.
                 </FormDescription>
                 <FormMessage />
               </FormItem>

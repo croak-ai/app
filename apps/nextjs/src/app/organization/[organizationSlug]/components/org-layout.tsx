@@ -1,4 +1,6 @@
 "use client";
+
+import CourseSelection from "../workspace/[workspaceSlug]/components/workspace-selection";
 import { Icons } from "@acme/ui/components/bonus/icons";
 import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
 import { Button } from "@packages/ui/components/ui/button";
