@@ -1,14 +1,14 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 //import db from "../db/client";
 import openai from "../ai/client";
-import { createOrRetrieveAssistant } from "../ai/helpers/createOrRetrieveAssistant.ts";
+import { createOrRetrieveAssistant } from "../ai/helpers/createOrRetrieveAssistant";
 import { Run } from "openai/resources/beta/threads/runs/runs";
 import { query } from "../ai/functions/query";
 
-export default async function postTest(fastify: FastifyInstance) {
+export default async function assistant(fastify: FastifyInstance) {
   // GET /
   fastify.get(
-    "/test",
+    "/assistant",
     async function (_request: FastifyRequest, reply: FastifyReply) {
       const assistant = await createOrRetrieveAssistant();
 
