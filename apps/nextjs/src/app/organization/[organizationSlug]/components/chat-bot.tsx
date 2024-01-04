@@ -18,6 +18,7 @@ export default function ChatBot() {
   //   )}`,
   // });
   const [input, setInput] = useState("");
+  const [messages, setMessages] = useState<Array<string>>([]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -41,6 +42,9 @@ export default function ChatBot() {
       // Handle the response if needed
       const responseData = await response.json();
       console.log("Server Response:", responseData);
+
+      // Append the AI response to the messages array
+      setMessages((prevMessages) => [...prevMessages, responseData.message]);
 
       // Clear the input field after submission
       setInput("");

@@ -36,6 +36,16 @@ export default async function assistant(fastify: FastifyInstance) {
         assistant_id: assistant.id,
       });
 
+      /*
+      CRUCIAL
+      
+      Here we need to handle the case of the ai deciding not to use a
+      function to answer the question
+      
+      This run will return complete and we must act accordingly and send the response
+
+
+      */
       //Check run status periodically
       // (Wait until assistant chooses a function for us to use, then run it)
       let status: string | null = null;
@@ -45,7 +55,8 @@ export default async function assistant(fastify: FastifyInstance) {
           thread.id,
           run.id,
         );
-
+        console.log(status);
+        console.log("polling run1");
         status = runDetails.status;
         finalRunDetails = runDetails;
         // Introduce a 2-second delay before the next iteration
@@ -97,14 +108,17 @@ export default async function assistant(fastify: FastifyInstance) {
           thread.id,
           run.id,
         );
-
+        console.log("polling run2");
         status = runDetails.status;
         finalRunDetails = runDetails;
+
+        await new Promise((resolve) => setTimeout(resolve, 2000));
       }
 
       // List the assistants response messages
       const messages = await openai.beta.threads.messages.list(thread.id);
-      reply.send(messages.data[0]?.content[0]);
+      //reply.send(messages.data[0]?.content[0]);
+      reply.send(messages.data);
     },
   );
 }
