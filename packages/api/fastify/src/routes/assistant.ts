@@ -10,7 +10,6 @@ type AssistantBody = {
 };
 
 export default async function assistant(fastify: FastifyInstance) {
-  // GET /
   fastify.post(
     "/assistant",
     async function (
