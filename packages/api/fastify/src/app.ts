@@ -1,11 +1,11 @@
-import fastify from "fastify";
+import Fastify from "fastify";
 import router from "./router";
 
-const server = fastify({
+const fastify = Fastify({
   // Logger only for production
   logger: true,
 });
 
-server.register(router);
+fastify.register(router);
 
-export default server;
+export default fastify;
