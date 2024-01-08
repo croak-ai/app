@@ -7,6 +7,26 @@ import SuperJSON from "superjson";
 import { useState } from "react";
 // import { appRouter } from "@packages/api";
 // console.log("router: ", typeof appRouter);
+type Message = {
+  id: string;
+  object: string;
+  created_at: number;
+  thread_id: string;
+  role: string;
+  content: {
+    type: string;
+    text: {
+      value: string;
+      annotations: string[]; // You might want to replace 'any[]' with a more specific type if you have annotations structure
+    };
+  }[];
+  file_ids: string[];
+  assistant_id: string;
+  run_id: string;
+  metadata: Record<string, string>; // You might define a more specific type for the metadata if known
+};
+
+type messages = Message[];
 
 export default function ChatBot() {
   //const botRes = trpc.bot.createAssistant.useQuery();
@@ -18,14 +38,14 @@ export default function ChatBot() {
   //   )}`,
   // });
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<Array<string>>([]);
+  const [messages, setMessages] = useState<messages>([]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     // Your server endpoint URL
     const endpoint = "http://localhost:3001/assistant";
-
+    console.log("about to hit endpoint");
     try {
       const response = await fetch(endpoint, {
         method: "POST",
@@ -40,12 +60,16 @@ export default function ChatBot() {
       }
 
       // Handle the response if needed
-      const responseData = await response.json();
+      const responseData: messages = await response.json();
       console.log("Server Response:", responseData);
+      const latestMessage: Message | undefined = responseData[0];
+
+      if (!latestMessage) {
+        throw new Error("Latest message doesn't exist or is undefined");
+      }
 
       // Append the AI response to the messages array
-      setMessages((prevMessages) => [...prevMessages, responseData.message]);
-
+      setMessages((prevMessages) => [...prevMessages, latestMessage]);
       // Clear the input field after submission
       setInput("");
     } catch (error) {
@@ -66,7 +90,7 @@ export default function ChatBot() {
                 role === "user" ? "self-end bg-blue-600" : "self-start",
               )}
             >
-              {content}
+              {content[0]?.text.value}
             </div>
           ))}
           {/* {isLoading && (
@@ -90,7 +114,10 @@ export default function ChatBot() {
             </div>
           )}
         </div>
-        <form className="flex items-center gap-2 space-x-2">
+        <form
+          onSubmit={handleSubmit}
+          className="flex items-center gap-2 space-x-2"
+        >
           <Input
             type="text"
             autoFocus
