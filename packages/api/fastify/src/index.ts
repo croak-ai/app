@@ -1,10 +1,9 @@
-import server from "./app";
+import fastify from "./app";
 
-//const FASTIFY_PORT = Number(process.env.FASTIFY_PORT) || 3006;
+const port = Number(process.env.FASTIFY_PORT) || 3001;
 
-server.listen({ port: 3001 });
+await fastify.listen({ port });
 
-console.log(`🚀  Fastify server running on port http://localhost:3000`);
+console.log(`🚀  Fastify server running on port http://localhost:3001`);
 console.log(`Route index: /`);
-console.log(`Route user: /api/v1/user`);
 console.log("client created successfully");

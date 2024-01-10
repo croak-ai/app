@@ -1,1 +1,0 @@
-CREATE UNIQUE INDEX `channel_workspaceId_name_unique` ON `channel` (`workspaceId`,`name`);
