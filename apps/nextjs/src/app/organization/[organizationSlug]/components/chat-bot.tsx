@@ -5,9 +5,8 @@ import { Input } from "@next/components/ui/Input";
 import { useChat } from "ai/react";
 import SuperJSON from "superjson";
 import { useState } from "react";
-// import { appRouter } from "@packages/api";
-// console.log("router: ", typeof appRouter);
-type Message = {
+
+type AIMessage = {
   id: string;
   object: string;
   created_at: number;
@@ -17,16 +16,28 @@ type Message = {
     type: string;
     text: {
       value: string;
-      annotations: string[]; // You might want to replace 'any[]' with a more specific type if you have annotations structure
+      annotations: string[];
     };
   }[];
   file_ids: string[];
   assistant_id: string;
   run_id: string;
-  metadata: Record<string, string>; // You might define a more specific type for the metadata if known
+  metadata: Record<string, string>;
 };
 
-type messages = Message[];
+type UserMessage = {
+  id: string;
+  content: {
+    type: string;
+    text: {
+      value: string;
+      annotations: string[];
+    };
+  }[];
+  // other properties specific to user messages
+};
+
+type messages = AIMessage[];
 
 export default function ChatBot() {
   //const botRes = trpc.bot.createAssistant.useQuery();
@@ -40,7 +51,20 @@ export default function ChatBot() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<messages>([]);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  function handleUserMessage() {
+    // Store the user's message in the state
+    const userMessage: Message = {
+      id: "user",
+      role: "user",
+      content: [{ type: "text", text: { value: input, annotations: [] } }],
+      // Add any other necessary properties
+    };
+
+    // Update the state with the user's message
+    setMessages((prevMessages) => [...prevMessages, userMessage]);
+  }
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     // Your server endpoint URL
@@ -60,9 +84,9 @@ export default function ChatBot() {
       }
 
       // Handle the response if needed
-      const responseData: messages = await response.json();
+      const responseData = await response.json();
       console.log("Server Response:", responseData);
-      const latestMessage: Message | undefined = responseData[0];
+      const latestMessage = responseData[0];
 
       if (!latestMessage) {
         throw new Error("Latest message doesn't exist or is undefined");
@@ -76,7 +100,7 @@ export default function ChatBot() {
       // Handle any errors from the request
       console.error("Error:", error);
     }
-  };
+  }
 
   return (
     <div className="flex h-full w-full flex-col items-center ">

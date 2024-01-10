@@ -1,5 +1,10 @@
-import { sql } from "drizzle-orm";
-import { text, integer, sqliteTable, index } from "drizzle-orm/sqlite-core";
+import {
+  text,
+  integer,
+  sqliteTable,
+  index,
+  unique,
+} from "drizzle-orm/sqlite-core";
 
 export const workspace = sqliteTable(
   "workspace",
@@ -19,25 +24,34 @@ export const workspace = sqliteTable(
     };
   },
 );
-export const channel = sqliteTable("channel", {
-  id: integer("id").primaryKey(),
-  name: text("name", { length: 256 }).notNull(),
-  description: text("description", { length: 512 }).notNull(),
-  workspaceId: integer("workspaceId").notNull(),
-  bRequiresWriteAccess: integer("bRequiresWriteAccess").default(0),
-  bIsPrivateChannel: integer("bIsPrivateChannel").default(0),
-  privateChannelEncryptionId: text("privateEncryptionId", {
-    length: 256,
+export const channel = sqliteTable(
+  "channel",
+  {
+    id: integer("id").primaryKey(),
+    name: text("name", { length: 256 }).notNull(),
+    description: text("description", { length: 512 }).notNull(),
+    workspaceId: integer("workspaceId").notNull(),
+    channelType: text("channelType", { length: 256 }).notNull(),
+    bRequiresReadWriteAccess: integer("bRequiresWriteAccess").default(0),
+    bIsPrivateChannel: integer("bIsPrivateChannel").default(0),
+    privateChannelEncryptionId: text("privateEncryptionId", {
+      length: 256,
+    }),
+    createdAt: integer("createdAt").notNull(),
+    updatedAt: integer("updatedAt").notNull(),
+    deletedAt: integer("deletedAt"),
+  },
+  (t) => ({
+    unq: unique().on(t.workspaceId, t.name),
   }),
-  createdAt: integer("createdAt").notNull(),
-  updatedAt: integer("updatedAt").notNull(),
-  deletedAt: integer("deletedAt"),
-});
+);
 
-export const channelWriteAccess = sqliteTable("channelWriteAccess", {
+export const channelAccess = sqliteTable("channelAccess", {
   id: integer("id").primaryKey(),
   channelId: integer("channelId").notNull(),
-  userId: integer("userId").notNull(),
+  userId: text("userId").notNull(),
+  bCanRead: integer("bCanRead").default(0),
+  bCanWrite: integer("bCanWrite").default(0),
   createdAt: integer("createdAt").notNull(),
   updatedAt: integer("updatedAt").notNull(),
   deletedAt: integer("deletedAt"),
@@ -47,6 +61,11 @@ export const workspaceMember = sqliteTable("workspaceMember", {
   id: integer("id").primaryKey(),
   workspaceId: integer("workspaceId").notNull(),
   userId: text("userId").notNull(),
+  bCanManageChannels: integer("bCanManageChannels").default(0),
+  bCanManageWorkspaceMembers: integer("bCanManageWorkspaceMembers").default(0),
+  bCanManageWorkspaceSettings: integer("bCanManageWorkspaceSettings").default(
+    0,
+  ),
   createdAt: integer("createdAt").notNull(),
   updatedAt: integer("updatedAt").notNull(),
   deletedAt: integer("deletedAt"),
