@@ -9,9 +9,9 @@ const fastify = Fastify({
 const urls = ["http://localhost:3000"];
 
 await fastify.register(cors, {
-  origin: true,
+  origin: urls,
   //methods: ["GET", "PUT", "POST", "OPTIONS"],
-  // credentials: true,
+  credentials: true,
 });
 
 await fastify.register(router);
