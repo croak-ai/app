@@ -27,6 +27,7 @@ type AIMessage = {
 
 type UserMessage = {
   id: string;
+  role: string;
   content: {
     type: string;
     text: {
@@ -37,7 +38,9 @@ type UserMessage = {
   // other properties specific to user messages
 };
 
-type messages = AIMessage[];
+type Message = AIMessage | UserMessage;
+
+type Messages = Message[];
 
 export default function ChatBot() {
   //const botRes = trpc.bot.createAssistant.useQuery();
@@ -49,23 +52,28 @@ export default function ChatBot() {
   //   )}`,
   // });
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<messages>([]);
+  const [messages, setMessages] = useState<Messages>([]);
 
   function handleUserMessage() {
     // Store the user's message in the state
     const userMessage: Message = {
-      id: "user",
+      id: "1",
       role: "user",
       content: [{ type: "text", text: { value: input, annotations: [] } }],
-      // Add any other necessary properties
     };
 
+    setInput("");
     // Update the state with the user's message
     setMessages((prevMessages) => [...prevMessages, userMessage]);
+    return userMessage.content[0]?.text.value;
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
+    const userMessage = handleUserMessage();
+
+    //Grab latest message (Should always be user input)
 
     // Your server endpoint URL
     const endpoint = "http://localhost:3001/assistant";
@@ -76,7 +84,7 @@ export default function ChatBot() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message: input }),
+        body: JSON.stringify({ message: userMessage }),
       });
 
       if (!response.ok) {
@@ -95,7 +103,6 @@ export default function ChatBot() {
       // Append the AI response to the messages array
       setMessages((prevMessages) => [...prevMessages, latestMessage]);
       // Clear the input field after submission
-      setInput("");
     } catch (error) {
       // Handle any errors from the request
       console.error("Error:", error);
