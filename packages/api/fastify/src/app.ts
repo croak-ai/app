@@ -1,16 +1,15 @@
+/* Initalize Fastify and register CORS/router */
 import Fastify from "fastify";
 import router from "./router";
 import cors from "@fastify/cors";
 
-const fastify = Fastify({
-  // Logger only for production
-  //logger: true,
-});
-const urls = ["http://localhost:3000"];
+const fastify = Fastify();
+
+const nextDomain = process.env.NEXT_APP_DOMAIN || "http://localhost:3000";
+const urls = [nextDomain];
 
 await fastify.register(cors, {
   origin: urls,
-  //methods: ["GET", "PUT", "POST", "OPTIONS"],
   credentials: true,
 });
 
