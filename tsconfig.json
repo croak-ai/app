@@ -4,6 +4,7 @@
     "paths": {
       "@next/*": ["apps/nextjs/src/*"],
       "@expo/*": ["apps/expo/*"],
+      "@landing-page/*": ["apps/landing-site/*"],
       "@packages/*": ["packages/*"]
     },
     "target": "es2017",
