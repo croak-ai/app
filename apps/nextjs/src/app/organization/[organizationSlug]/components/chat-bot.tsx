@@ -117,10 +117,10 @@ export default function ChatBot() {
           })}
           {isLoading && (
             <>
-              <div className="m-2 flex space-x-1">
-                <div className="h-2 w-2 animate-bounce rounded-full bg-white [animation-delay:-0.3s]"></div>
-                <div className="h-2 w-2 animate-bounce rounded-full bg-white [animation-delay:-0.15s]"></div>
+              <div className="m-2 flex space-x-1 self-end">
                 <div className="h-2 w-2 animate-bounce rounded-full bg-white"></div>
+                <div className="h-2 w-2 animate-bounce rounded-full bg-white [animation-delay:-0.15s]"></div>
+                <div className="h-2 w-2 animate-bounce rounded-full bg-white [animation-delay:-0.3s]"></div>
               </div>
             </>
           )}
