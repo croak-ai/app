@@ -6,6 +6,7 @@ import { useChat } from "ai/react";
 import SuperJSON from "superjson";
 import { useState } from "react";
 
+//Add these types to another file
 type AIMessage = {
   id: string;
   object: string;
@@ -43,19 +44,11 @@ type Message = AIMessage | UserMessage;
 type Messages = Message[];
 
 export default function ChatBot() {
-  //const botRes = trpc.bot.createAssistant.useQuery();
-
-  //const { messages, input, handleInputChange, handleSubmit, isLoading } =
-  // useChat({
-  //   api: `http://localhost:3001/api/trpc/bot.createAssistant?input=${encodeURIComponent(
-  //     SuperJSON.stringify(""),
-  //   )}`,
-  // });
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Messages>([]);
 
+  /* Store the users message in the state and return its content */
   function handleUserMessage() {
-    // Store the user's message in the state
     const userMessage: Message = {
       id: "1",
       role: "user",
@@ -63,19 +56,16 @@ export default function ChatBot() {
     };
 
     setInput("");
-    // Update the state with the user's message
     setMessages((prevMessages) => [...prevMessages, userMessage]);
     return userMessage.content[0]?.text.value;
   }
 
+  /* Query Assistant with given user message, add Assistant response message to state */
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     const userMessage = handleUserMessage();
 
-    //Grab latest message (Should always be user input)
-
-    // Your server endpoint URL
     const endpoint = "http://localhost:3001/assistant";
     console.log("about to hit endpoint");
     try {
@@ -91,20 +81,16 @@ export default function ChatBot() {
         throw new Error("HTTP status code out of successful range");
       }
 
-      // Handle the response if needed
       const responseData = await response.json();
       console.log("Server Response:", responseData);
-      const latestMessage = responseData[0];
+      const latestMessage: Message = responseData[0];
 
       if (!latestMessage) {
         throw new Error("Latest message doesn't exist or is undefined");
       }
 
-      // Append the AI response to the messages array
       setMessages((prevMessages) => [...prevMessages, latestMessage]);
-      // Clear the input field after submission
     } catch (error) {
-      // Handle any errors from the request
       console.error("Error:", error);
     }
   }
