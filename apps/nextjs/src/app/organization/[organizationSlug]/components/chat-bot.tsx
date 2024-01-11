@@ -36,7 +36,6 @@ type UserMessage = {
       annotations: string[];
     };
   }[];
-  // other properties specific to user messages
 };
 
 type Message = AIMessage | UserMessage;
@@ -84,7 +83,6 @@ export default function ChatBot() {
       }
 
       const responseData = await response.json();
-      console.log("Server Response:", responseData);
       const latestMessage: Message = responseData[0];
 
       if (!latestMessage) {
@@ -92,6 +90,7 @@ export default function ChatBot() {
       }
       setMessages((prevMessages) => [...prevMessages, latestMessage]);
     } catch (error) {
+      //Error handling here in future
       console.error("Error:", error);
     } finally {
       setIsLoading(false);
