@@ -46,6 +46,7 @@ type Messages = Message[];
 export default function ChatBot() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Messages>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   /* Store the users message in the state and return its content */
   function handleUserMessage() {
@@ -57,6 +58,7 @@ export default function ChatBot() {
 
     setInput("");
     setMessages((prevMessages) => [...prevMessages, userMessage]);
+    setIsLoading(true);
     return userMessage.content[0]?.text.value;
   }
 
@@ -67,7 +69,7 @@ export default function ChatBot() {
     const userMessage = handleUserMessage();
 
     const endpoint = "http://localhost:3001/assistant";
-    console.log("about to hit endpoint");
+
     try {
       const response = await fetch(endpoint, {
         method: "POST",
@@ -88,10 +90,11 @@ export default function ChatBot() {
       if (!latestMessage) {
         throw new Error("Latest message doesn't exist or is undefined");
       }
-
       setMessages((prevMessages) => [...prevMessages, latestMessage]);
     } catch (error) {
       console.error("Error:", error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -99,20 +102,29 @@ export default function ChatBot() {
     <div className="flex h-full w-full flex-col items-center ">
       <div className="my-2 flex w-full grow flex-col gap-6 overflow-y-auto rounded-sm p-4 sm:my-10 sm:p-8">
         <div className="flex grow flex-col justify-start gap-4 overflow-y-scroll rounded-lg border-slate-400 pr-2">
-          {messages.map(({ id, role, content }) => (
-            <div
-              key={id}
-              className={cn(
-                "max-w-lg rounded-xl bg-gray-500 px-4 py-2 text-white",
-                role === "user" ? "self-end bg-blue-600" : "self-start",
-              )}
-            >
-              {content[0]?.text.value}
-            </div>
-          ))}
-          {/* {isLoading && (
-              <div className="dot-pulse m-6 self-start text-gray-500 before:text-gray-500 after:text-gray-500" />
-            )} */}
+          {messages.map(({ id, role, content }) => {
+            console.log(role);
+            return (
+              <div
+                key={id}
+                className={cn(
+                  "max-w-lg rounded-xl bg-gray-500 px-4 py-2 text-white",
+                  role === "user" ? "self-start bg-green-600" : "self-end",
+                )}
+              >
+                {content[0]?.text.value}
+              </div>
+            );
+          })}
+          {isLoading && (
+            <>
+              <div className="m-2 flex space-x-1">
+                <div className="h-2 w-2 animate-bounce rounded-full bg-white [animation-delay:-0.3s]"></div>
+                <div className="h-2 w-2 animate-bounce rounded-full bg-white [animation-delay:-0.15s]"></div>
+                <div className="h-2 w-2 animate-bounce rounded-full bg-white"></div>
+              </div>
+            </>
+          )}
           {messages.length === 0 && (
             <div className="flex grow items-center justify-center self-stretch">
               <svg
