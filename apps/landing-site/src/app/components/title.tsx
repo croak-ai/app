@@ -44,7 +44,7 @@ export function Title() {
       words: [{ text: "croak.ai" }],
       duration: 0.25,
       className:
-        "font-bold text-4xlrelative z-10 text-lg md:text-7xl bg-clip-text text-transparent bg-gradient-to-b from-green-200 to-green-600  text-center font-sans font-bold",
+        "font-bold text-4xlrelative z-10 text-6xl md:text-7xl bg-clip-text text-transparent bg-gradient-to-b from-green-200 to-green-600  text-center font-sans font-bold",
     },
   ];
   return (
