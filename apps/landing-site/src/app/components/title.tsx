@@ -4,44 +4,54 @@ import { TypewriterEffectSmooth } from "@acme/ui/components/aceternity/typewrite
 import { Input } from "@packages/ui/components/ui/input";
 import { Button } from "@packages/ui/components/ui/button";
 
-export function SparklesPreview() {
+export function Title() {
   const phrases = [
     {
       words: [
         { text: "No" },
         { text: "More" },
-        { text: "Redudant" },
-        { text: "Meetings", className: "text-primary" },
+        { text: "Redudant", className: "text-primary" },
+        { text: "Meetings" },
       ],
       duration: 1,
       showLines: true,
+      className: "font-bold text-2xl lg:text-6xl",
     },
     {
       words: [
         { text: "Always" },
         { text: "Know" },
         { text: "What's" },
-        { text: "Happening" },
+        { text: "Happening", className: "text-primary" },
         { text: "In" },
         { text: "All", className: "text-primary" },
-        { text: "Your" },
         { text: "Teams" },
       ],
       duration: 2,
+      className: "font-bold text-md md:text-xl lg:text-3xl xl:text-6xl",
     },
     {
-      words: [{ text: "croak.ai", className: "text-primary" }],
+      words: [
+        { text: "10x" },
+        { text: "Your" },
+        { text: "Business'" },
+        { text: "Productivity", className: "text-primary" },
+      ],
+      duration: 0.75,
+      className: "font-bold text-xl lg:text-6xl ",
+    },
+    {
+      words: [{ text: "croak.ai" }],
       duration: 0.25,
-      hideLine: true,
+      className:
+        "font-bold text-4xlrelative z-10 text-lg md:text-7xl bg-clip-text text-transparent bg-gradient-to-b from-green-200 to-green-600  text-center font-sans font-bold",
     },
   ];
   return (
     <div className="flex h-[40rem] w-full flex-col items-center justify-center overflow-hidden rounded-md bg-background">
-      <div className=" relative z-10  mx-auto w-full max-w-4xl  p-4 pt-20 md:pt-0">
-        <div className="flex items-center justify-center">
-          <h1>
-            <TypewriterEffectSmooth phrases={phrases} />{" "}
-          </h1>
+      <div className=" relative z-10  mx-auto w-full max-w-4xl  p-4 pt-16 md:pt-0">
+        <div className="flex h-[50px] items-end justify-center">
+          <TypewriterEffectSmooth phrases={phrases} />{" "}
         </div>
       </div>
       <div className="relative w-[40rem]">
@@ -58,7 +68,8 @@ export function SparklesPreview() {
       </div>
       <p className="mx-12 my-4 max-w-lg text-center text-base font-normal text-neutral-300">
         Using our <b>workspaces,</b> <b>text channels</b>, and <b>meetings</b>{" "}
-        we structure your communication data from the ground up to serve AI.
+        we structure your communication data from the ground up to securely
+        serve AI.
       </p>
       <form className="flex space-x-2">
         <Input

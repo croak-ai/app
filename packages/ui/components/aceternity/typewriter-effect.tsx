@@ -4,8 +4,6 @@ import { cn } from "../../lib/utils";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
-import { z } from "zod";
-
 type Word = {
   text: string;
   className?: string;
@@ -14,7 +12,7 @@ type Word = {
 type Phrase = {
   words: Word[];
   duration: number;
-  hideLine?: boolean;
+  className?: string;
 };
 
 type TypewriterEffectSmoothProps = {
@@ -26,10 +24,8 @@ type TypewriterEffectSmoothProps = {
 export const TypewriterEffectSmooth = ({
   phrases,
   className,
-  cursorClassName,
 }: TypewriterEffectSmoothProps) => {
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
-  const [hideLine, setHideLine] = useState(false);
 
   // split text inside of words into array of characters
   const phrasesArray = phrases.map((phrase) => {
@@ -75,12 +71,8 @@ export const TypewriterEffectSmooth = ({
     return () => clearInterval(interval);
   }, [currentPhraseIndex]);
 
-  useEffect(() => {
-    setHideLine(phrases[currentPhraseIndex]?.hideLine || false);
-  }, [currentPhraseIndex]);
-
   return (
-    <div className={cn("my-6 flex space-x-1", className)}>
+    <div className={cn("lex space-x-1", className)}>
       <motion.div
         key={currentPhraseIndex} // Add this line
         className="overflow-hidden "
@@ -97,7 +89,7 @@ export const TypewriterEffectSmooth = ({
         }}
       >
         <div
-          className="lg:text:3xl text-xs font-bold sm:text-base md:text-xl xl:text-5xl"
+          className={phrases[currentPhraseIndex]?.className}
           style={{
             whiteSpace: "nowrap",
           }}
@@ -105,26 +97,6 @@ export const TypewriterEffectSmooth = ({
           {renderWords()}
         </div>
       </motion.div>
-
-      {!phrases[currentPhraseIndex]?.hideLine && (
-        <motion.span
-          initial={{
-            opacity: 0,
-          }}
-          animate={{
-            opacity: 1,
-          }}
-          transition={{
-            duration: 0.8,
-            repeat: Infinity,
-            repeatType: "reverse",
-          }}
-          className={cn(
-            "block h-4 w-[4px]  rounded-sm bg-blue-500 sm:h-6 xl:h-12",
-            cursorClassName,
-          )}
-        ></motion.span>
-      )}
     </div>
   );
 };
