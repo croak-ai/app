@@ -3,8 +3,6 @@ import Link from "next/link";
 import { Title } from "./title";
 import dynamic from "next/dynamic";
 import { ThreeDCardDemo } from "./main-site-image-demo";
-import DetailedCroakInfo from "./detailed-info";
-import { Icons } from "@acme/ui/components/bonus/icons";
 import { LampDemo } from "./lamp-section";
 
 export default function Component() {
