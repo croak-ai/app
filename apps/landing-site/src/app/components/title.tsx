@@ -3,8 +3,9 @@ import React from "react";
 import { TypewriterEffectSmooth } from "@acme/ui/components/aceternity/typewriter-effect";
 import { Input } from "@packages/ui/components/ui/input";
 import { Button } from "@packages/ui/components/ui/button";
+import { cn } from "@packages/ui/lib/utils";
 
-export function Title() {
+export function Title({ className }: { className?: string }) {
   const phrases = [
     {
       words: [
@@ -48,8 +49,13 @@ export function Title() {
     },
   ];
   return (
-    <div className="flex h-[40rem] w-full flex-col items-center justify-center overflow-hidden rounded-md bg-background">
-      <div className=" relative z-10  mx-auto w-full max-w-4xl  p-4 pt-16 md:pt-0">
+    <div
+      className={cn(
+        "flex w-full flex-col items-center justify-center overflow-hidden rounded-md bg-background",
+        className,
+      )}
+    >
+      <div className=" \ relative  z-10 mx-auto w-full  max-w-4xl p-4">
         <div className="flex h-[50px] items-end justify-center">
           <TypewriterEffectSmooth phrases={phrases} />{" "}
         </div>
