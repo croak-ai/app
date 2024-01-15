@@ -212,6 +212,9 @@ importers:
       lottie-react:
         specifier: ^2.4.0
         version: 2.4.0(react-dom@18.2.0)(react@18.2.0)
+      lucide-react:
+        specifier: ^0.250.0
+        version: 0.250.0(react@18.2.0)
       next:
         specifier: ^14.0.3
         version: 14.0.4(react-dom@18.2.0)(react@18.2.0)
@@ -10201,6 +10204,14 @@ packages:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0
     dependencies:
       react: 17.0.2
+    dev: false
+
+  /lucide-react@0.250.0(react@18.2.0):
+    resolution: {integrity: sha512-AdboVcX2IMQs5NcyFu6vSbZWkn0Z07TjVvb9uPLI2IetNbygE0/6mPbHLwJwgD7AS/t0JJPwmP2vhVD1xA+P+w==}
+    peerDependencies:
+      react: ^16.5.1 || ^17.0.0 || ^18.0.0
+    dependencies:
+      react: 18.2.0
     dev: false
 
   /magic-string@0.30.5:
