@@ -6,6 +6,7 @@ import { useChat } from "ai/react";
 import SuperJSON from "superjson";
 import { useState } from "react";
 
+//Add these types to another file
 type AIMessage = {
   id: string;
   object: string;
@@ -35,7 +36,6 @@ type UserMessage = {
       annotations: string[];
     };
   }[];
-  // other properties specific to user messages
 };
 
 type Message = AIMessage | UserMessage;
@@ -43,19 +43,12 @@ type Message = AIMessage | UserMessage;
 type Messages = Message[];
 
 export default function ChatBot() {
-  //const botRes = trpc.bot.createAssistant.useQuery();
-
-  //const { messages, input, handleInputChange, handleSubmit, isLoading } =
-  // useChat({
-  //   api: `http://localhost:3001/api/trpc/bot.createAssistant?input=${encodeURIComponent(
-  //     SuperJSON.stringify(""),
-  //   )}`,
-  // });
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Messages>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
+  /* Store the users message in the state and return its content */
   function handleUserMessage() {
-    // Store the user's message in the state
     const userMessage: Message = {
       id: "1",
       role: "user",
@@ -63,21 +56,19 @@ export default function ChatBot() {
     };
 
     setInput("");
-    // Update the state with the user's message
     setMessages((prevMessages) => [...prevMessages, userMessage]);
+    setIsLoading(true);
     return userMessage.content[0]?.text.value;
   }
 
+  /* Query Assistant with given user message, add Assistant response message to state */
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     const userMessage = handleUserMessage();
 
-    //Grab latest message (Should always be user input)
-
-    // Your server endpoint URL
     const endpoint = "http://localhost:3001/assistant";
-    console.log("about to hit endpoint");
+
     try {
       const response = await fetch(endpoint, {
         method: "POST",
@@ -91,21 +82,18 @@ export default function ChatBot() {
         throw new Error("HTTP status code out of successful range");
       }
 
-      // Handle the response if needed
       const responseData = await response.json();
-      console.log("Server Response:", responseData);
-      const latestMessage = responseData[0];
+      const latestMessage: Message = responseData[0];
 
       if (!latestMessage) {
         throw new Error("Latest message doesn't exist or is undefined");
       }
-
-      // Append the AI response to the messages array
       setMessages((prevMessages) => [...prevMessages, latestMessage]);
-      // Clear the input field after submission
     } catch (error) {
-      // Handle any errors from the request
+      //Error handling here in future
       console.error("Error:", error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -113,20 +101,28 @@ export default function ChatBot() {
     <div className="flex h-full w-full flex-col items-center ">
       <div className="my-2 flex w-full grow flex-col gap-6 overflow-y-auto rounded-sm p-4 sm:my-10 sm:p-8">
         <div className="flex grow flex-col justify-start gap-4 overflow-y-scroll rounded-lg border-slate-400 pr-2">
-          {messages.map(({ id, role, content }) => (
-            <div
-              key={id}
-              className={cn(
-                "max-w-lg rounded-xl bg-gray-500 px-4 py-2 text-white",
-                role === "user" ? "self-end bg-blue-600" : "self-start",
-              )}
-            >
-              {content[0]?.text.value}
-            </div>
-          ))}
-          {/* {isLoading && (
-              <div className="dot-pulse m-6 self-start text-gray-500 before:text-gray-500 after:text-gray-500" />
-            )} */}
+          {messages.map(({ id, role, content }) => {
+            return (
+              <div
+                key={id}
+                className={cn(
+                  "max-w-lg  rounded-xl bg-gray-500 px-4 py-2 text-white [overflow-wrap:anywhere]",
+                  role === "user" ? "self-start bg-primary" : "self-end",
+                )}
+              >
+                {content[0]?.text.value}
+              </div>
+            );
+          })}
+          {isLoading && (
+            <>
+              <div className="m-2 flex space-x-1 self-end">
+                <div className="h-2 w-2 animate-bounce rounded-full bg-white"></div>
+                <div className="h-2 w-2 animate-bounce rounded-full bg-white [animation-delay:-0.15s]"></div>
+                <div className="h-2 w-2 animate-bounce rounded-full bg-white [animation-delay:-0.3s]"></div>
+              </div>
+            </>
+          )}
           {messages.length === 0 && (
             <div className="flex grow items-center justify-center self-stretch">
               <svg
@@ -156,7 +152,31 @@ export default function ChatBot() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
           />
-          <Button type="submit">Send</Button>
+          <Button type="submit">
+            {isLoading ? (
+              <div role="status">
+                <svg
+                  aria-hidden="true"
+                  className="inline h-6 w-6 animate-spin fill-black text-white dark:fill-white dark:text-black"
+                  viewBox="0 0 100 101"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                    fill="currentColor"
+                  />
+                  <path
+                    d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                    fill="currentFill"
+                  />
+                </svg>
+                <span className="sr-only">Loading...</span>
+              </div>
+            ) : (
+              <div className="text-md text-white">Send</div>
+            )}
+          </Button>
         </form>
       </div>
     </div>
