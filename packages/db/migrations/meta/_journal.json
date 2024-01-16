@@ -1,5 +1,13 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "entries": []
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1705375907424,
+      "tag": "0000_unusual_madame_hydra",
+      "breakpoints": true
+    }
+  ]
 }
