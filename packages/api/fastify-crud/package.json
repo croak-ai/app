@@ -5,6 +5,9 @@
   "types": "./index.ts",
   "license": "MIT",
   "scripts": {
+    "dev": "bun --watch src/index.ts",
+    "build": "bun build src/index.ts --outdir ./build --sourcemap=external --minify",
+    "start": "bun build/index.js",
     "clean": "rm -rf .turbo node_modules",
     "lint": "eslint . --ext .ts,.tsx",
     "type-check": "tsc --noEmit"
@@ -24,5 +27,8 @@
   "devDependencies": {
     "eslint": "^8.28.0",
     "typescript": "^4.9.3"
+  },
+  "engines": {
+    "bun": ">=1.0.22"
   }
 }

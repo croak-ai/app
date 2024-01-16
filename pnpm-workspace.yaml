@@ -2,8 +2,8 @@ packages:
   - apps/expo
   - apps/nextjs
   - apps/landing-site
-  - packages/api/trpc
-  - packages/api/fastify
+  - packages/api/fastify-crud
+  - packages/api/fastify-ai
   - packages/db
   - packages/shared-functions
   - packages/ui
