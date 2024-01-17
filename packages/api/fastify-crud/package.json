@@ -16,12 +16,11 @@
     "@acme/db": "*",
     "@acme/shared-functions": "*",
     "@clerk/clerk-js": "^4.67.0",
-    "@clerk/nextjs": "^4.28.1",
+    "@clerk/fastify": "^0.6.31",
     "@trpc/client": "^10.43.1",
     "@trpc/next": "^10.43.1",
     "@trpc/server": "^10.43.1",
     "fastify": "^4.24.3",
-    "next": "^14.0.3",
     "superjson": "^1.9.1",
     "zod": "^3.18.0"
   },
