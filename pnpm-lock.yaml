@@ -46,7 +46,7 @@ importers:
 
   apps/expo:
     dependencies:
-      '@acme/trpc':
+      '@acme/fastify-crud':
         specifier: '*'
         version: link:../../packages/api/fastify-crud
       '@acme/ui':
@@ -140,15 +140,15 @@ importers:
       '@acme/db':
         specifier: '*'
         version: link:../../packages/db
+      '@acme/fastify-crud':
+        specifier: '*'
+        version: link:../../packages/api/fastify-crud
       '@acme/lottie-animations':
         specifier: '*'
         version: link:../../packages/lottie-animations
       '@acme/shared-functions':
         specifier: '*'
         version: link:../../packages/shared-functions
-      '@acme/trpc':
-        specifier: '*'
-        version: link:../../packages/api/fastify-crud
       '@acme/ui':
         specifier: '*'
         version: link:../../packages/ui
@@ -270,15 +270,15 @@ importers:
       '@acme/db':
         specifier: '*'
         version: link:../../packages/db
+      '@acme/fastify-crud':
+        specifier: '*'
+        version: link:../../packages/api/fastify-crud
       '@acme/lottie-animations':
         specifier: '*'
         version: link:../../packages/lottie-animations
       '@acme/shared-functions':
         specifier: '*'
         version: link:../../packages/shared-functions
-      '@acme/trpc':
-        specifier: '*'
-        version: link:../../packages/api/fastify-crud
       '@acme/ui':
         specifier: '*'
         version: link:../../packages/ui
@@ -424,7 +424,7 @@ importers:
         version: link:../../shared-functions
       '@clerk/clerk-js':
         specifier: ^4.67.0
-        version: 4.68.1(react-dom@18.2.0)(react@18.2.0)
+        version: 4.68.1(@types/react@18.2.45)(react-dom@18.2.0)(react@18.2.0)
       '@clerk/fastify':
         specifier: ^0.6.31
         version: 0.6.31(fastify-plugin@4.5.1)(fastify@4.25.0)(react@18.2.0)
@@ -451,7 +451,7 @@ importers:
         specifier: ^8.28.0
         version: 8.55.0
       typescript:
-        specifier: ^4.9.3
+        specifier: ^4.9.5
         version: 4.9.5
 
   packages/db:
@@ -2143,32 +2143,6 @@ packages:
       - react-dom
     dev: false
 
-  /@clerk/clerk-js@4.68.1(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-WgWwF5NiYUkTisLYfDu6hRQK06PiAK6epy0JIP8WjqLKr8WD2VpAwSP0IKpHHeboNMhNa+CbEDCYjjarrWvk0Q==}
-    peerDependencies:
-      react: '>=18'
-    dependencies:
-      '@clerk/localizations': 1.26.13(react@18.2.0)
-      '@clerk/shared': 1.3.0(react@18.2.0)
-      '@clerk/types': 3.60.0
-      '@emotion/cache': 11.11.0
-      '@emotion/react': 11.11.1(react@18.2.0)
-      '@floating-ui/react': 0.25.4(react-dom@18.2.0)(react@18.2.0)
-      '@zxcvbn-ts/core': 3.0.4
-      '@zxcvbn-ts/language-common': 3.0.4
-      browser-tabs-lock: 1.2.15
-      copy-to-clipboard: 3.3.3
-      core-js: 3.26.1
-      dequal: 2.0.3
-      qrcode.react: 3.1.0(react@18.2.0)
-      qs: 6.11.0
-      react: 18.2.0
-      regenerator-runtime: 0.13.11
-    transitivePeerDependencies:
-      - '@types/react'
-      - react-dom
-    dev: false
-
   /@clerk/clerk-react@4.30.0(react@18.2.0):
     resolution: {integrity: sha512-MArib2io8DNNc1SEocujOZPPApGIekmxHiSKgJ/lO8uo0w5EPwKqLZWan7bfUBYaPUAqwDcsnfRB/YmFB3eS9g==}
     engines: {node: '>=14'}
@@ -2419,26 +2393,6 @@ packages:
       '@emotion/utils': 1.2.1
       '@emotion/weak-memoize': 0.3.1
       '@types/react': 18.2.45
-      hoist-non-react-statics: 3.3.2
-      react: 18.2.0
-    dev: false
-
-  /@emotion/react@11.11.1(react@18.2.0):
-    resolution: {integrity: sha512-5mlW1DquU5HaxjLkfkGN1GA/fvVGdyHURRiX/0FHl2cfIfRxSOfmxEH5YS43edp0OldZrZ+dkBKbngxcNCdZvA==}
-    peerDependencies:
-      '@types/react': '*'
-      react: '>=16.8.0'
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-    dependencies:
-      '@babel/runtime': 7.23.6
-      '@emotion/babel-plugin': 11.11.0
-      '@emotion/cache': 11.11.0
-      '@emotion/serialize': 1.1.2
-      '@emotion/use-insertion-effect-with-fallbacks': 1.0.1(react@18.2.0)
-      '@emotion/utils': 1.2.1
-      '@emotion/weak-memoize': 0.3.1
       hoist-non-react-statics: 3.3.2
       react: 18.2.0
     dev: false
@@ -5350,24 +5304,6 @@ packages:
       use-sync-external-store: 1.2.0(react@18.2.0)
     dev: false
 
-  /@tanstack/react-query@4.36.1(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-y7ySVHFyyQblPl3J3eQBWpXZkliroki3ARnBKsdJchlgt7yJLRDUcf4B8soufgiYt3pEQIkBWBx1N9/ZPIeUWw==}
-    peerDependencies:
-      react: ^16.8.0 || ^17.0.0 || ^18.0.0
-      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
-      react-native: '*'
-    peerDependenciesMeta:
-      react-dom:
-        optional: true
-      react-native:
-        optional: true
-    dependencies:
-      '@tanstack/query-core': 4.36.1
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      use-sync-external-store: 1.2.0(react@18.2.0)
-    dev: false
-
   /@trpc/client@10.44.1(@trpc/server@10.44.1):
     resolution: {integrity: sha512-vTWsykNcgz1LnwePVl2fKZnhvzP9N3GaaLYPkfGINo314ZOS0OBqe9x0ytB2LLUnRVTAAZ2WoONzARd8nHiqrA==}
     peerDependencies:
@@ -5387,7 +5323,7 @@ packages:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
     dependencies:
-      '@tanstack/react-query': 4.36.1(react-dom@18.2.0)(react@18.2.0)
+      '@tanstack/react-query': 4.36.1(react-dom@18.2.0)(react-native@0.70.5)(react@18.2.0)
       '@trpc/client': 10.44.1(@trpc/server@10.44.1)
       '@trpc/react-query': 10.44.1(@tanstack/react-query@4.36.1)(@trpc/client@10.44.1)(@trpc/server@10.44.1)(react-dom@18.2.0)(react@18.2.0)
       '@trpc/server': 10.44.1
@@ -5406,7 +5342,7 @@ packages:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
     dependencies:
-      '@tanstack/react-query': 4.36.1(react-dom@18.2.0)(react@18.2.0)
+      '@tanstack/react-query': 4.36.1(react-dom@18.2.0)(react-native@0.70.5)(react@18.2.0)
       '@trpc/client': 10.44.1(@trpc/server@10.44.1)
       '@trpc/server': 10.44.1
       react: 18.2.0

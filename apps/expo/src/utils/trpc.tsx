@@ -1,5 +1,4 @@
 import { createTRPCReact } from "@trpc/react-query";
-import type { AppRouter } from "@acme/trpc";
 /**
  * Extend this function when going to production by
  * setting the baseUrl to your production API URL.
@@ -12,7 +11,7 @@ import Constants from "expo-constants";
 import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
-import { transformer } from "@acme/trpc/transformer";
+import { transformer, type AppRouter } from "@acme/fastify-crud/src/trpc";
 import { useAuth } from "@clerk/clerk-expo";
 
 /**

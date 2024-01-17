@@ -1,4 +1,5 @@
-export { appRouter, type AppRouter } from "./config/router";
+/* Everything needed to create a TRPC client will be available here */
 
-export { createContext } from "./config/context";
-export type { Context } from "./config/context";
+export { appRouter, type AppRouter } from "./config/router";
+export { createContext, type Context } from "./config/context";
+export { transformer } from "./config/transformer";
