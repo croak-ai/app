@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 
-import assistant from "./routes/assistant";
+import webhook from "./routes/webhook";
 export default async function router(fastify: FastifyInstance) {
-  fastify.register(assistant, { prefix: "/" });
+  fastify.register(webhook, { prefix: "/" });
 }
