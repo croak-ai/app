@@ -1,7 +1,7 @@
 /* Initalize Fastify and register CORS/router */
 import Fastify from "fastify";
-import router from "./fastify/router";
 import cors from "@fastify/cors";
+import router from "./fastify/router";
 import {
   fastifyTRPCPlugin,
   FastifyTRPCPluginOptions,

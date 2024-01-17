@@ -1,10 +1,9 @@
 import { type inferAsyncReturnType } from "@trpc/server";
-import { getAuth } from "@clerk/nextjs/server";
+import { getAuth } from "@clerk/fastify";
 import type {
   SignedInAuthObject,
   SignedOutAuthObject,
 } from "@clerk/nextjs/api";
-import { type NextRequest } from "next/server";
 import { getTursoDbUrlFromClerkTenantId } from "@acme/shared-functions";
 import { createDbClient } from "@acme/db";
 import { CreateFastifyContextOptions } from "@trpc/server/adapters/fastify";
@@ -61,7 +60,7 @@ export const createContextInner = async ({ auth }: AuthContextProps) => {
  * This is the actual context you'll use in your router
  * @link https://trpc.io/docs/context
  **/
-export const createContext = async (opts: { req: NextRequest }) => {
+export const createContext = async (opts: CreateFastifyContextOptions) => {
   return await createContextInner({ auth: getAuth(opts.req) });
 };
 
