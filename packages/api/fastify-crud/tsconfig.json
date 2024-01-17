@@ -1,4 +1,4 @@
 {
   "extends": "../../../tsconfig.json",
-  "include": ["src", "src/trpc/index.ts", "transformer.ts"]
+  "include": ["src", "transformer.ts"]
 }

@@ -1,4 +1,4 @@
-import { protectedProcedure, router } from "../../trpc";
+import { protectedProcedure, router } from "../../config/trpc";
 import {
   getTursoDbUrlFromClerkTenantId,
   getTursoDbNameFromClerkTenantId,

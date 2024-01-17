@@ -1,4 +1,4 @@
-export { appRouter, type AppRouter } from "./router";
+export { appRouter, type AppRouter } from "./config/router";
 
-export { createContext } from "./context";
-export type { Context } from "./context";
+export { createContext } from "./config/context";
+export type { Context } from "./config/context";
