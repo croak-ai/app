@@ -1,7 +1,7 @@
 "use client";
-import { cn } from "@next/utils/tailwindMerge";
-import { Button } from "@next/components/ui/Button";
-import { Input } from "@next/components/ui/Input";
+import { cn } from "@acme/ui/lib/utils";
+import { Button } from "@acme/ui/components/ui/Button";
+import { Input } from "@acme/ui/components/ui/Input";
 import { useChat } from "ai/react";
 import SuperJSON from "superjson";
 import { useState } from "react";

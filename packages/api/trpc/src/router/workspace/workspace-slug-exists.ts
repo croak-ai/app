@@ -1,4 +1,4 @@
-import { dekEncryptionKey, workspace } from "@packages/db/schema/tenant";
+import { dekEncryptionKey, workspace } from "@acme/db/schema/tenant";
 import { protectedProcedureWithOrgDB, router } from "../../trpc";
 import { z } from "zod";
 type newWorkspaceType = typeof workspace.$inferInsert;

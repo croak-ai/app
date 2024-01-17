@@ -1,4 +1,4 @@
-import { getServerTRPCClient } from "@next/utils/trpc/serverTRPCClient";
+import { getServerTRPCClient } from "@/utils/trpc/serverTRPCClient";
 import { cookies } from "next/headers";
 
 import { Suspense } from "react";

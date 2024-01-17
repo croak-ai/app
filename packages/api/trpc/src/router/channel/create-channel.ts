@@ -1,7 +1,7 @@
-import { channel } from "@packages/db/schema/tenant";
+import { channel } from "@acme/db/schema/tenant";
 import { protectedProcedureWithOrgDB, router } from "../../trpc";
 import { z } from "zod";
-import { zChannelTypes } from "@packages/db/enum";
+import { zChannelTypes } from "@acme/db/enum";
 
 import { TRPCError } from "@trpc/server";
 import { getWorkspacePermission } from "../../functions/workspace";

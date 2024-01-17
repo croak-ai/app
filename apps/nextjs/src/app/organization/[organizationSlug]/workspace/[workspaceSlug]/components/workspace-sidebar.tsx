@@ -5,13 +5,13 @@ import WorkspaceSelection from "./workspace-selection";
 import { WorkspaceRightClickMenu } from "./workspace-right-click";
 import { useState } from "react";
 import { ChannelCreationSheet } from "./channels/channel-creation-sheet";
-import { reactTRPC } from "@next/utils/trpc/reactTRPCClient";
+import { reactTRPC } from "@/utils/trpc/reactTRPCClient";
 import { useParams } from "next/navigation";
 import { ChannelSkeleton } from "./channels/channel-list-skeleton";
 import Link from "next/link";
-import { Button } from "@next/components/ui/Button";
+import { Button } from "@acme/ui/components/ui/Button";
 import { Hash, Mic2 } from "lucide-react";
-import { zChannelTypes } from "@packages/db/enum";
+import { zChannelTypes } from "@acme/db/enum";
 
 export default function WorkspaceSidebar() {
   const [channelSheetOpen, setChannelSheetOpen] = useState(false);

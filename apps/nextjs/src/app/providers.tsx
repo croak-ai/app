@@ -3,12 +3,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
-import { TooltipProvider } from "@packages/ui/components/ui/tooltip";
+import { TooltipProvider } from "@acme/ui/components/ui/tooltip";
 
-import {
-  createReactTRPCClient,
-  reactTRPC,
-} from "../utils/trpc/reactTRPCClient";
+import { createReactTRPCClient, reactTRPC } from "@/utils/trpc/reactTRPCClient";
 
 export default function TRPC_Provider({
   children,

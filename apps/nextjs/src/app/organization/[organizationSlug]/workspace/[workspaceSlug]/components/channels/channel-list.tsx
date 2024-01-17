@@ -3,14 +3,14 @@
 import { WorkspaceRightClickMenu } from "../workspace-right-click";
 import { useState } from "react";
 import { ChannelCreationSheet } from "./channel-creation-sheet";
-import { reactTRPC } from "@next/utils/trpc/reactTRPCClient";
+import { reactTRPC } from "@/utils/trpc/reactTRPCClient";
 import { useParams } from "next/navigation";
 import { ChannelSkeleton } from "./channel-list-skeleton";
 import Link from "next/link";
-import { Button } from "@next/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import { Hash, Mic2 } from "lucide-react";
-import { zChannelTypes } from "@packages/db/enum";
-import { ScrollArea } from "@packages/ui/components/ui/scroll-area";
+import { zChannelTypes } from "@acme/db/enum";
+import { ScrollArea } from "@acme/ui/components/ui/scroll-area";
 
 const ChannelIcon = ({ channelType }: { channelType: string }) => {
   switch (channelType) {

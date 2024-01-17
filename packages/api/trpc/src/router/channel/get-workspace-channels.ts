@@ -1,4 +1,4 @@
-import { channel } from "@packages/db/schema/tenant";
+import { channel } from "@acme/db/schema/tenant";
 import { protectedProcedureWithOrgDB, router } from "../../trpc";
 import { z } from "zod";
 import { eq } from "drizzle-orm";

@@ -25,10 +25,10 @@ import { useForm } from "react-hook-form";
 import { ContinueButton } from "@acme/ui/components/bonus/continue-button";
 import Loading from "@acme/ui/components/bonus/loading";
 import { useState } from "react";
-import { reactTRPC } from "@next/utils/trpc/reactTRPCClient";
-import { zChannelTypes } from "@packages/db/enum";
+import { reactTRPC } from "@/utils/trpc/reactTRPCClient";
+import { zChannelTypes } from "@acme/db/enum";
 import { redirect, useParams } from "next/navigation";
-import { Textarea } from "@packages/ui/components/ui/textarea";
+import { Textarea } from "@acme/ui/components/ui/textarea";
 
 export default function CreateChannelForm({
   takenChannelNames,

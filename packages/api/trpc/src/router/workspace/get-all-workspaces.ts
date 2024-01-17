@@ -2,7 +2,7 @@ import {
   dekEncryptionKey,
   workspace,
   workspaceMember,
-} from "@packages/db/schema/tenant";
+} from "@acme/db/schema/tenant";
 import { protectedProcedureWithOrgDB, router } from "../../trpc";
 import { TRPCError } from "@trpc/server";
 

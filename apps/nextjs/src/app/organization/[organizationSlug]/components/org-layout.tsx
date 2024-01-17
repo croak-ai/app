@@ -3,7 +3,7 @@
 import CourseSelection from "../workspace/[workspaceSlug]/components/workspace-selection";
 import { Icons } from "@acme/ui/components/bonus/icons";
 import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
-import { Button } from "@packages/ui/components/ui/button";
+import { Button } from "@acme/ui/components/ui/button";
 import ResizableWindows from "./resizable-windows";
 import { useState, useEffect } from "react";
 import { Nav } from "./main-nav-button";

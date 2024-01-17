@@ -5,7 +5,7 @@ import {
   ResizablePanel,
   ResizableHandle,
   ImperativeResizablePanel,
-} from "@packages/ui/components/ui/resizable";
+} from "@acme/ui/components/ui/resizable";
 import React, { useRef, useEffect } from "react";
 import { cn } from "@acme/ui/lib/utils";
 import ChatBot from "./chat-bot";
