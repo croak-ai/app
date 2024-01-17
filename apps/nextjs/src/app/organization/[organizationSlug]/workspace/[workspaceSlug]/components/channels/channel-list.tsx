@@ -7,7 +7,7 @@ import { reactTRPC } from "@/utils/trpc/reactTRPCClient";
 import { useParams } from "next/navigation";
 import { ChannelSkeleton } from "./channel-list-skeleton";
 import Link from "next/link";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@acme/ui/components/ui/Button";
 import { Hash, Mic2 } from "lucide-react";
 import { zChannelTypes } from "@acme/db/enum";
 import { ScrollArea } from "@acme/ui/components/ui/scroll-area";

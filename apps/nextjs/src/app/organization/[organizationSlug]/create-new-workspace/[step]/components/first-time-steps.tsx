@@ -6,7 +6,7 @@ import { Skeleton } from "@acme/ui/components/ui/skeleton";
 import { SkeletonButtonText } from "@acme/ui/components/skeleton/skeleton-button";
 import CreateWorkSpaceForm from "./create-workspace-form";
 import Link from "next/link";
-import { ContinueButton } from "@packages/ui/components/bonus/continue-button";
+import { ContinueButton } from "@acme/ui/components/bonus/continue-button";
 
 export const StepSkeleton = () => {
   return (

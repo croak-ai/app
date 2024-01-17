@@ -330,6 +330,9 @@ importers:
       lottie-react:
         specifier: ^2.4.0
         version: 2.4.0(react-dom@18.2.0)(react@18.2.0)
+      lucide-react:
+        specifier: ^0.250.0
+        version: 0.250.0(react@18.2.0)
       next:
         specifier: ^14.0.3
         version: 14.0.4(react-dom@18.2.0)(react@18.2.0)
@@ -7302,7 +7305,6 @@ packages:
       loose-envify: 1.4.0
       object-assign: 4.1.1
     dev: false
-    bundledDependencies: false
 
   /create-require@1.1.1:
     resolution: {integrity: sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==}
