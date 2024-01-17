@@ -16,6 +16,7 @@ import {
   BellDot,
   User,
 } from "lucide-react";
+import { ThemeToggle } from "./theme-toggle";
 
 export function OrgLayout({
   children,
@@ -99,8 +100,9 @@ export function OrgLayout({
               href={`/organization/${organizationSlug}/user`}
               icon={BellDot}
             />
+            <ThemeToggle />
           </div>
-          <div className="justify-self-end">
+          <div className="mx-4 justify-self-end">
             <AIButton />
           </div>
         </div>
