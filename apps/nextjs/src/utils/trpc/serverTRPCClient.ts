@@ -1,7 +1,7 @@
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 import superjson from "superjson";
 
-import { type AppRouter } from "@packages/api/trpc";
+import { type AppRouter } from "@acme/fastify-crud/src/trpc";
 import { auth } from "@clerk/nextjs";
 
 export const getServerTRPCClient = () => {
@@ -16,7 +16,7 @@ export const getServerTRPCClient = () => {
             Authorization: authToken ?? undefined,
           };
         },
-        url: `http://localhost:3000/api/trpc`,
+        url: `${process.env.NEXT_PUBLIC_TRPC_BASE_URL}`,
       }),
     ],
     transformer: superjson,

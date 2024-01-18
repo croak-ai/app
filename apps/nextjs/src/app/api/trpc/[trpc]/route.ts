@@ -1,16 +1,18 @@
-import { appRouter } from "@packages/api/trpc";
-import { createContext } from "@packages/api/trpc";
-import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
-import { type NextRequest } from "next/server";
+import { appRouter, createContext } from "@acme/fastify-crud/src/trpc";
+import {
+  fetchRequestHandler,
+  FetchCreateContextFnOptions,
+} from "@trpc/server/adapters/fetch";
+import { type NextRequest, type NextResponse } from "next/server";
 
 export const maxDuration = 300;
 
 const handler = (req: NextRequest) =>
   fetchRequestHandler({
-    endpoint: "/api/trpc",
+    endpoint: "http://localhost:3002/trpc",
     req,
     router: appRouter,
-    createContext: () => createContext({ req }),
+    createContext,
     onError:
       process.env.NODE_ENV === "development"
         ? // env.NODE_ENV === "development"
