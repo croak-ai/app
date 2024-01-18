@@ -7,10 +7,6 @@ import type {
 import { getTursoDbUrlFromClerkTenantId } from "@acme/shared-functions";
 import { createDbClient } from "@acme/db";
 import { CreateFastifyContextOptions } from "@trpc/server/adapters/fastify";
-import {
-  fetchRequestHandler,
-  FetchCreateContextFnOptions,
-} from "@trpc/server/adapters/fetch";
 
 /**
  * Replace this with an object if you want to pass things to createContextInner

@@ -4,6 +4,7 @@ import {
   FetchCreateContextFnOptions,
 } from "@trpc/server/adapters/fetch";
 import { type NextRequest, type NextResponse } from "next/server";
+import { fastifyRequestHandler } from "@trpc/server/adapters/fastify";
 
 export const maxDuration = 300;
 
@@ -15,8 +16,7 @@ const handler = (req: NextRequest) =>
     createContext,
     onError:
       process.env.NODE_ENV === "development"
-        ? // env.NODE_ENV === "development"
-          ({ path, error }) => {
+        ? ({ path, error }) => {
             console.error(
               `❌ tRPC failed on ${path ?? "<no-path>"}: ${error.message}`,
             );

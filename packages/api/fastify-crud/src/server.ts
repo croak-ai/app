@@ -8,7 +8,9 @@ import {
 } from "@trpc/server/adapters/fastify";
 import { createContext, appRouter, type AppRouter } from "./trpc";
 
-const fastify = Fastify();
+const fastify = Fastify({
+  maxParamLength: 5000,
+});
 
 const nextDomain = process.env.NEXT_APP_DOMAIN || "http://localhost:3000";
 const urls = [nextDomain];
