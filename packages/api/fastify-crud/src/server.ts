@@ -2,6 +2,7 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import router from "./fastify/router";
+import { clerkPlugin } from "@clerk/fastify";
 import {
   fastifyTRPCPlugin,
   FastifyTRPCPluginOptions,
@@ -19,6 +20,8 @@ fastify.register(cors, {
   origin: urls,
   credentials: true,
 });
+
+fastify.register(clerkPlugin);
 
 fastify.register(router);
 

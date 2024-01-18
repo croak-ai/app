@@ -23,6 +23,8 @@ type AuthContextProps = {
 export const createContextInner = async ({ auth }: AuthContextProps) => {
   const orgId = auth?.orgId;
 
+  console.log("AUTH DATA", auth);
+
   if (!orgId) {
     throw new Error("No organization ID");
   }
@@ -61,7 +63,9 @@ export const createContextInner = async ({ auth }: AuthContextProps) => {
  * @link https://trpc.io/docs/context
  **/
 export const createContext = async (opts: CreateFastifyContextOptions) => {
+  //console.log("Helllooooo: ", typeof opts.req);
   return await createContextInner({ auth: getAuth(opts.req) });
+  //Get auth is broken here
 };
 
 export type Context = inferAsyncReturnType<typeof createContext>;
