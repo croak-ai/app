@@ -41,5 +41,5 @@ fastify.listen({ port }, function (err, address) {
     fastify.log.error(err);
     process.exit(1);
   }
-  console.log(`🚀  Fastify server running on ${address}`);
+  console.log(`🚀  Fastify CRUD server running on ${address}`);
 });

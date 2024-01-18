@@ -1,4 +1,4 @@
-import { protectedProcedure, router } from "../../trpc/trpc";
+import { protectedProcedure, router } from "../../config/trpc";
 import { sql } from "drizzle-orm";
 
 export const checkDBForOrg = router({

@@ -1,13 +1,13 @@
 {
   "name": "@acme/fastify-crud",
   "version": "0.1.0",
-  "main": "./index.ts",
-  "types": "./index.ts",
+  "main": "./src/server.ts",
+  "types": "./src/server.ts",
   "license": "MIT",
   "scripts": {
-    "dev": "bun --watch src/index.ts",
-    "build": "bun build src/index.ts --outdir ./build --sourcemap=external --minify",
-    "start": "bun build/index.js",
+    "dev": "bun --watch src/server.ts",
+    "build": "bun build src/server.ts --outdir ./build --sourcemap=external --minify",
+    "start": "bun build/server.js",
     "clean": "rm -rf .turbo node_modules",
     "lint": "eslint . --ext .ts,.tsx",
     "type-check": "tsc --noEmit"

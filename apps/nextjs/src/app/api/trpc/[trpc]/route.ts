@@ -8,8 +8,8 @@ import { fastifyRequestHandler } from "@trpc/server/adapters/fastify";
 
 export const maxDuration = 300;
 
-const handler = (req: NextRequest) =>
-  fetchRequestHandler({
+const handler = (req: Request) =>
+  fastifyRequestHandler({
     endpoint: "http://localhost:3002/trpc",
     req,
     router: appRouter,
