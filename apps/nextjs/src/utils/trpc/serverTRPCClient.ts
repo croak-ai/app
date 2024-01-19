@@ -1,6 +1,5 @@
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 import superjson from "superjson";
-
 import { type AppRouter } from "@acme/fastify-crud/src/trpc";
 import { auth } from "@clerk/nextjs";
 

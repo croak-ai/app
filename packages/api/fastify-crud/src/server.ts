@@ -16,12 +16,13 @@ const fastify = Fastify({
 const nextDomain = process.env.NEXT_APP_DOMAIN || "http://localhost:3000";
 const urls = [nextDomain];
 
+fastify.register(clerkPlugin);
+
 fastify.register(cors, {
   origin: urls,
   credentials: true,
+  //allowedHeaders: ["Authorization"],
 });
-
-fastify.register(clerkPlugin);
 
 fastify.register(router);
 
