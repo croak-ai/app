@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "bun --watch src/server.ts",
-    "build": "bun build src/server.ts --outdir ./build --sourcemap=external --minify",
+    "build": "bun build src/server.ts --outdir ./build --sourcemap=external --minify --target node",
     "start": "bun build/server.js",
     "clean": "rm -rf .turbo node_modules",
     "lint": "eslint . --ext .ts,.tsx",
