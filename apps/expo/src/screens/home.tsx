@@ -5,7 +5,7 @@ import { useAuth } from "@clerk/clerk-expo";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FlashList } from "@shopify/flash-list";
 import type { inferProcedureOutput } from "@trpc/server";
-import type { AppRouter } from "@acme/trpc";
+import type { AppRouter } from "@acme/fastify-crud/src/trpc";
 
 import { trpc } from "../utils/trpc";
 

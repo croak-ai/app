@@ -3,7 +3,7 @@ import {
   workspace,
   workspaceMember,
 } from "@packages/db/schema/tenant";
-import { protectedProcedureWithOrgDB, router } from "../../trpc";
+import { protectedProcedureWithOrgDB, router } from "../../config/trpc";
 import { TRPCError } from "@trpc/server";
 
 export const getAllWorkspaces = router({
