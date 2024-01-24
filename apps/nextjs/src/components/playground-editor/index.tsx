@@ -15,7 +15,6 @@ import {
 import { Slice } from "@milkdown/prose/model";
 import { Milkdown as Editor } from "@milkdown/react";
 import { callCommand } from "@milkdown/utils";
-import clsx from "clsx";
 import type { FC, RefObject } from "react";
 import { useImperativeHandle } from "react";
 import { usePlayground } from "./usePlayground";
@@ -76,85 +75,94 @@ export const PlaygroundMilkdown: FC<MilkdownProps> = ({
 
   return (
     <div className="relative h-full pt-10">
-      <div className="absolute top-0 h-10 w-full border-b">
-        <div className="prose mx-auto flex">
+      <div className="absolute top-0 h-14 w-full border-b ">
+        <div className="prose flex h-full items-center  space-x-1">
           {/* Undo Button */}
           <Button
             onClick={() => call(undoCommand.key)}
             variant={"outline"}
             size={"icon"}
+            className="h-6 w-6"
           >
-            <Undo />
+            <Undo className="h-4 w-4" />
           </Button>
           {/* Redo Button */}
           <Button
             onClick={() => call(redoCommand.key)}
             variant={"outline"}
             size={"icon"}
+            className="h-6 w-6"
           >
-            <Redo />
+            <Redo className="h-4 w-4" />
           </Button>
           {/* Bold Format Button */}
           <Button
             onClick={() => call(toggleStrongCommand.key)}
             variant={"outline"}
             size={"icon"}
+            className="h-6 w-6"
           >
-            <Bold />
+            <Bold className="h-4 w-4" />
           </Button>
           {/* Italic Format Button */}
           <Button
             onClick={() => call(toggleEmphasisCommand.key)}
             variant={"outline"}
             size={"icon"}
+            className="h-6 w-6"
           >
-            <Italic />
+            <Italic className="h-4 w-4" />
           </Button>
           {/* Strikethrough Format Button */}
           <Button
             onClick={() => call(toggleStrikethroughCommand.key)}
             variant={"outline"}
             size={"icon"}
+            className="h-6 w-6"
           >
-            <Strikethrough />
+            <Strikethrough className="h-4 w-4" />
           </Button>
           {/* Table Insert Button */}
           <Button
             onClick={() => call(insertTableCommand.key)}
             variant={"outline"}
             size={"icon"}
+            className="h-6 w-6"
           >
-            <Table />
+            <Table className="h-4 w-4" />
           </Button>
           {/* Bulleted List Format Button */}
           <Button
             onClick={() => call(wrapInBulletListCommand.key)}
             variant={"outline"}
             size={"icon"}
+            className="h-6 w-6"
           >
-            <List />
+            <List className="h-4 w-4" />
           </Button>
           {/* Numbered List Format Button */}
           <Button
             onClick={() => call(wrapInOrderedListCommand.key)}
             variant={"outline"}
             size={"icon"}
+            className="h-6 w-6"
           >
-            <ListOrdered />
+            <ListOrdered className="h-4 w-4" />
           </Button>
           {/* Quote Format Button */}
           <Button
             onClick={() => call(wrapInBlockquoteCommand.key)}
             variant={"outline"}
             size={"icon"}
+            className="h-6 w-6"
           >
-            <Quote />
+            <Quote className="h-4 w-4" />
           </Button>
         </div>
 
         <div />
       </div>
-      <div className="h-full overflow-auto overscroll-none">
+      <div className="mt-4 h-full overflow-auto overscroll-none">
         <Editor />
       </div>
     </div>
