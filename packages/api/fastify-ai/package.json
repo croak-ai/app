@@ -1,13 +1,12 @@
 {
   "name": "@acme/fastify-ai",
   "version": "0.1.0",
-  "main": "./index.ts",
-  "types": "./index.d.ts",
+  "main": "./src/server.ts",
   "license": "MIT",
   "scripts": {
-    "dev": "bun --watch src/index.ts",
-    "build": "bun build src/index.ts --outdir ./build --sourcemap=external --minify --target node",
-    "start": "bun build/index.js",
+    "dev": "bun --watch ./src/server.ts",
+    "build": "bun build ./src/server.ts --outdir ./build --sourcemap=external --minify --target node",
+    "start": "bun ./build/server.js",
     "clean": "rm -rf .turbo node_modules",
     "lint": "eslint . --ext .ts,.tsx",
     "type-check": "tsc --noEmit"
@@ -24,7 +23,6 @@
   },
   "devDependencies": {
     "eslint": "^8.28.0",
-    "fastify-tsconfig": "^2.0.0",
     "typescript": "^5.3.3"
   },
   "engines": {
