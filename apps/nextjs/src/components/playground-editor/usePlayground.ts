@@ -169,9 +169,6 @@ export const usePlayground = (
         .config((ctx) => {
           ctx.update(editorViewOptionsCtx, (prev) => ({
             ...prev,
-            attributes: {
-              class: "mx-auto px-2 py-4 box-border",
-            },
           }));
           ctx.set(rootCtx, root);
           ctx.set(defaultValueCtx, defaultValue);

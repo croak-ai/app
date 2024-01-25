@@ -16,7 +16,7 @@ import { Slice } from "@milkdown/prose/model";
 import { Milkdown as Editor } from "@milkdown/react";
 import { callCommand } from "@milkdown/utils";
 import type { FC, RefObject } from "react";
-import { useImperativeHandle } from "react";
+import { useImperativeHandle, useState } from "react";
 import { usePlayground } from "./usePlayground";
 import { Button } from "@acme/ui/components/ui/button";
 import {
@@ -29,10 +29,11 @@ import {
   List,
   ListOrdered,
   Quote,
+  Send,
 } from "lucide-react";
 
 interface MilkdownProps {
-  content: string;
+  defaultContent: string;
   onChange: (markdown: string) => void;
   milkdownRef: RefObject<MilkdownRef>;
 }
@@ -42,15 +43,17 @@ export interface MilkdownRef {
 }
 
 export const PlaygroundMilkdown: FC<MilkdownProps> = ({
-  content,
+  defaultContent,
   onChange,
   milkdownRef,
 }) => {
-  const { loading, get } = usePlayground(content, onChange);
+  const { loading, get } = usePlayground(defaultContent, onChange);
+  const [displayNoText, setDisplayNoText] = useState(defaultContent === "");
 
   useImperativeHandle(milkdownRef, () => ({
     update: (markdown: string) => {
       if (loading) return;
+      setDisplayNoText(false);
       const editor = get();
       editor?.action((ctx) => {
         const view = ctx.get(editorViewCtx);
@@ -74,13 +77,13 @@ export const PlaygroundMilkdown: FC<MilkdownProps> = ({
   }
 
   return (
-    <div className="relative h-full pt-10">
-      <div className="absolute top-0 h-14 w-full border-b ">
-        <div className="prose flex h-full items-center  space-x-1">
+    <div className="relative h-full rounded-lg border bg-background  shadow-sm">
+      <div className="flex items-center justify-between border-b  p-2">
+        <div className="flex space-x-1 ">
           {/* Undo Button */}
           <Button
             onClick={() => call(undoCommand.key)}
-            variant={"outline"}
+            variant={"ghost"}
             size={"icon"}
             className="h-6 w-6"
           >
@@ -89,7 +92,7 @@ export const PlaygroundMilkdown: FC<MilkdownProps> = ({
           {/* Redo Button */}
           <Button
             onClick={() => call(redoCommand.key)}
-            variant={"outline"}
+            variant={"ghost"}
             size={"icon"}
             className="h-6 w-6"
           >
@@ -98,7 +101,7 @@ export const PlaygroundMilkdown: FC<MilkdownProps> = ({
           {/* Bold Format Button */}
           <Button
             onClick={() => call(toggleStrongCommand.key)}
-            variant={"outline"}
+            variant={"ghost"}
             size={"icon"}
             className="h-6 w-6"
           >
@@ -107,7 +110,7 @@ export const PlaygroundMilkdown: FC<MilkdownProps> = ({
           {/* Italic Format Button */}
           <Button
             onClick={() => call(toggleEmphasisCommand.key)}
-            variant={"outline"}
+            variant={"ghost"}
             size={"icon"}
             className="h-6 w-6"
           >
@@ -116,7 +119,7 @@ export const PlaygroundMilkdown: FC<MilkdownProps> = ({
           {/* Strikethrough Format Button */}
           <Button
             onClick={() => call(toggleStrikethroughCommand.key)}
-            variant={"outline"}
+            variant={"ghost"}
             size={"icon"}
             className="h-6 w-6"
           >
@@ -125,7 +128,7 @@ export const PlaygroundMilkdown: FC<MilkdownProps> = ({
           {/* Table Insert Button */}
           <Button
             onClick={() => call(insertTableCommand.key)}
-            variant={"outline"}
+            variant={"ghost"}
             size={"icon"}
             className="h-6 w-6"
           >
@@ -134,7 +137,7 @@ export const PlaygroundMilkdown: FC<MilkdownProps> = ({
           {/* Bulleted List Format Button */}
           <Button
             onClick={() => call(wrapInBulletListCommand.key)}
-            variant={"outline"}
+            variant={"ghost"}
             size={"icon"}
             className="h-6 w-6"
           >
@@ -143,7 +146,7 @@ export const PlaygroundMilkdown: FC<MilkdownProps> = ({
           {/* Numbered List Format Button */}
           <Button
             onClick={() => call(wrapInOrderedListCommand.key)}
-            variant={"outline"}
+            variant={"ghost"}
             size={"icon"}
             className="h-6 w-6"
           >
@@ -152,18 +155,34 @@ export const PlaygroundMilkdown: FC<MilkdownProps> = ({
           {/* Quote Format Button */}
           <Button
             onClick={() => call(wrapInBlockquoteCommand.key)}
-            variant={"outline"}
+            variant={"ghost"}
             size={"icon"}
             className="h-6 w-6"
           >
             <Quote className="h-4 w-4" />
           </Button>
         </div>
-
-        <div />
+        {/* Send Button */}
+        <Button
+          onClick={() => {
+            /* TODO: Implement send functionality */
+          }}
+          variant={"default"}
+          size={"icon"}
+          className="h-6 w-6"
+        >
+          <Send className="h-4 w-4" />
+        </Button>
       </div>
-      <div className="mt-4 h-full overflow-auto overscroll-none">
-        <Editor />
+      {displayNoText && (
+        <div className="absolute left-4 top-14 z-0 opacity-60">
+          <span>Message in #General</span>
+        </div>
+      )}
+      <div className=" m-1 bg-secondary p-2">
+        <div className="relative z-10">
+          <Editor />
+        </div>
       </div>
     </div>
   );

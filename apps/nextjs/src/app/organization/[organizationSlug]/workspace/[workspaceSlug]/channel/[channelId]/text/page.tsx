@@ -55,15 +55,15 @@ export default function Playground() {
 
   return (
     <>
-      <div className="m-0 mt-16 grid border-b md:ml-20 md:mt-0 md:grid-cols-2">
-        <div className="h-[calc(50vh-2rem)] overflow-auto overscroll-none md:h-screen">
+      <div className="m-0 mt-16  border-b">
+        <div className="max-h-[calc(50vh-2rem)] overflow-auto overscroll-none ">
           <PlaygroundMilkdown
             milkdownRef={milkdownRef}
-            content={content}
+            defaultContent={content}
             onChange={onMilkdownChange}
           />
         </div>
-        <div className="h-[calc(50vh-2rem)] overflow-auto overscroll-none border-l  md:h-screen">
+        <div className="max-h-[calc(50vh-2rem)] ">
           <ControlPanel
             codemirrorRef={codemirrorRef}
             content={content}
