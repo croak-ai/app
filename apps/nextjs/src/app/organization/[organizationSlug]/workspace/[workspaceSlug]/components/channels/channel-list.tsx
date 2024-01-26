@@ -48,7 +48,7 @@ export default function ChannelList({
               href={`/organization/${params.organizationSlug}/workspace/${params.workspaceSlug}/channel/${channel.slug}/${channel.channelType}`}
             >
               <Button
-                className="w-full p-2"
+                className="flex h-8 w-full justify-start p-1"
                 variant={
                   params.channelSlug === channel.slug ? "secondary" : "ghost"
                 }
