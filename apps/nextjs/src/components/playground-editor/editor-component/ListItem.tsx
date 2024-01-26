@@ -1,5 +1,6 @@
 import { useNodeViewContext } from "@prosemirror-adapter/react";
 import type { FC } from "react";
+import { Dot } from "lucide-react";
 
 export const ListItem: FC = () => {
   const { contentRef, node, setAttrs, selected } = useNodeViewContext();
@@ -22,9 +23,9 @@ export const ListItem: FC = () => {
             checked={checked}
           />
         ) : isBullet ? (
-          <span className="bg-nord8 dark:bg-nord9 h-2 w-2 rounded-full" />
+          <Dot className="h-4 w-4" />
         ) : (
-          <span className="text-nord8">{attrs?.label}</span>
+          <span>{attrs?.label}</span>
         )}
       </span>
       <div className="min-w-0" ref={contentRef} />
