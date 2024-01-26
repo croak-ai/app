@@ -1,11 +1,6 @@
 "use client";
 
-import { WorkspaceRightClickMenu } from "../workspace-right-click";
-import { useState } from "react";
-import { ChannelCreationSheet } from "./channel-creation-sheet";
-import { reactTRPC } from "@/utils/trpc/reactTRPCClient";
 import { useParams } from "next/navigation";
-import { ChannelSkeleton } from "./channel-list-skeleton";
 import Link from "next/link";
 import { Button } from "@acme/ui/components/ui/button";
 import { Hash, Mic2 } from "lucide-react";

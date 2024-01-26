@@ -8,7 +8,6 @@ import {
   SheetTitle,
   SheetClose,
   SheetFooter,
-  SheetTrigger,
 } from "@acme/ui/components/ui/sheet";
 import CreateChannelForm from "./create-channel-form";
 

@@ -8,7 +8,6 @@ import { Button } from "@acme/ui/components/ui/button";
 
 import {
   Command,
-  CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
