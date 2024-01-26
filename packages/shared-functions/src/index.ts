@@ -22,6 +22,14 @@ const getTursoDbUrlFromClerkTenantIdInput = z.object({
   tursoOrgId: z.string(),
 });
 
+// This function is used to generate the database URL for a given tenant and organization.
+// It uses the tenantId from clerk to get the database name using the function getTursoDbNameFromClerkTenantId.
+// Finally, it constructs the database URL by appending the turso organization slug to the database name and adding the domain "turso.io".
+// Example:
+// tenantId: "org_1234567890"
+// tursoOrgId: "acme"
+// returns: "t-1234567890-acme.turso.io"
+
 export const getTursoDbUrlFromClerkTenantId = (
   input: z.infer<typeof getTursoDbUrlFromClerkTenantIdInput>,
 ) => {
