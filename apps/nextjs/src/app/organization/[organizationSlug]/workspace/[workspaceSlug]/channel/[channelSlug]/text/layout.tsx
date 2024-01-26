@@ -17,12 +17,6 @@ const Provider = compose(
   ShareProvider,
   InspectorProvider,
 );
-// import "@milkdown/theme-nord/style.css";
-// import "@/styles/docsearch.css";
-// import "@/styles/prosemirror.css";
-// import "@/styles/prose.css";
-// import "@/styles/playground.css";
-// import "@/styles/toast.css";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   return (

@@ -29,7 +29,7 @@ export const channel = sqliteTable(
   "channel",
   {
     id: integer("id").primaryKey(),
-    name: text("name", { length: 256 }).notNull(),
+    slug: text("slug", { length: 256 }).notNull(),
     description: text("description", { length: 512 }).notNull(),
     workspaceId: integer("workspaceId").notNull(),
     channelType: text("channelType", { length: 256 }).notNull(),
@@ -43,7 +43,7 @@ export const channel = sqliteTable(
     deletedAt: integer("deletedAt"),
   },
   (t) => ({
-    unq: unique().on(t.workspaceId, t.name),
+    unq: unique().on(t.workspaceId, t.slug),
   }),
 );
 

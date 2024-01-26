@@ -33,8 +33,7 @@ export default function WorkspaceSidebar() {
     return (
       <ChannelList
         workspaceChannels={workspaceChannels.data.map((channel) => ({
-          id: String(channel.id),
-          name: channel.name,
+          slug: channel.slug,
           channelType: channel.channelType,
         }))}
       />
@@ -49,7 +48,7 @@ export default function WorkspaceSidebar() {
         channelSheetOpen={channelSheetOpen}
         setChannelSheetOpen={setChannelSheetOpen}
         takenChannelNames={workspaceChannels.data?.map(
-          (channel) => channel.name,
+          (channel) => channel.slug,
         )}
       />
       <div className="flex h-full w-full flex-col ">
