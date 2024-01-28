@@ -14,13 +14,11 @@ import {
 } from "@milkdown/preset-gfm";
 import { Slice } from "@milkdown/prose/model";
 import { Milkdown as Editor } from "@milkdown/react";
-import { callCommand } from "@milkdown/utils";
+import { callCommand, getMarkdown } from "@milkdown/utils";
 import type { FC, RefObject } from "react";
 import { useImperativeHandle, useState } from "react";
 import { usePlayground } from "./usePlayground";
-
 import { Shortcuts } from "./shortcuts";
-
 import {
   Undo,
   Redo,
@@ -39,6 +37,7 @@ interface MilkdownProps {
   defaultContent: string;
   onChange: (markdown: string) => void;
   milkdownRef: RefObject<MilkdownRef>;
+  onSendPressed?: (content: string) => void;
 }
 
 export interface MilkdownRef {
@@ -49,9 +48,24 @@ export const PlaygroundMilkdown: FC<MilkdownProps> = ({
   defaultContent,
   onChange,
   milkdownRef,
+  onSendPressed,
 }) => {
   const { loading, get } = usePlayground(defaultContent, onChange);
   const [displayNoText, setDisplayNoText] = useState(defaultContent === "");
+
+  const getCurrentMarkdown = (): string => {
+    const editor = get();
+    if (!editor) return "";
+    const content = editor.action(getMarkdown());
+
+    return content;
+  };
+
+  const onSend = () => {
+    if (onSendPressed) {
+      onSendPressed(getCurrentMarkdown());
+    }
+  };
 
   useImperativeHandle(milkdownRef, () => ({
     update: (markdown: string) => {
@@ -118,7 +132,7 @@ export const PlaygroundMilkdown: FC<MilkdownProps> = ({
         {/* Send Button */}
         <Button
           onClick={() => {
-            /* TODO: Implement send functionality */
+            onSend();
           }}
           variant={"default"}
           size={"icon"}

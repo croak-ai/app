@@ -82,6 +82,12 @@ export default function Playground() {
           milkdownRef={milkdownRef}
           defaultContent={content}
           onChange={onMilkdownChange}
+          onSendPressed={(content) => {
+            console.log(content);
+            const { current } = milkdownRef;
+            if (!current) return;
+            current.update("");
+          }}
         />
         {isInDevMode() && (
           <div className="flex items-center justify-end">

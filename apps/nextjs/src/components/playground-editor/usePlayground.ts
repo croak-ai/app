@@ -25,6 +25,7 @@ import { upload } from "@milkdown/plugin-upload";
 import {
   codeBlockSchema,
   commonmark,
+  hardbreakKeymap,
   listItemSchema,
 } from "@milkdown/preset-commonmark";
 import {
@@ -67,6 +68,7 @@ import { encode } from "@/utils/share";
 import { useSetShare } from "./ShareProvider";
 import { useFeatureToggle } from "./FeatureToggleProvider";
 import { useSetProseState } from "./ProseStateProvider";
+import { $useKeymap } from "@milkdown/utils";
 
 export const usePlayground = (
   defaultValue: string,
@@ -162,6 +164,15 @@ export const usePlayground = (
   const slash = useSlash();
   const emojiMenu = useEmojiMenu();
 
+  const enterKeyMap = $useKeymap("enterKeyMap", {
+    Enter: {
+      shortcuts: "Enter",
+      command: () => {
+        return () => true;
+      },
+    },
+  });
+
   const editorInfo = useEditor(
     (root) => {
       return Editor.make()
@@ -190,6 +201,9 @@ export const usePlayground = (
               component: ImageTooltip,
             }),
           });
+          ctx.set(hardbreakKeymap.key, {
+            InsertHardbreak: ["Mod-Enter", "Shift-Enter"],
+          });
           slash.config(ctx);
           emojiMenu.config(ctx);
         })
@@ -207,6 +221,7 @@ export const usePlayground = (
         .use(trailing)
         .use(imageTooltip)
         .use(slash.plugins)
+        .use(enterKeyMap) // This plugin makes it so that the Enter key does nothing
         .use(
           $view(listItemSchema.node, () =>
             nodeViewFactory({ component: ListItem }),
