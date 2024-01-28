@@ -186,6 +186,9 @@ export const usePlayground = (
         .config((ctx) => {
           ctx.update(editorViewOptionsCtx, (prev) => ({
             ...prev,
+            attributes: {
+              class: "w-full",
+            },
           }));
           ctx.set(rootCtx, root);
           ctx.set(defaultValueCtx, defaultValue);
