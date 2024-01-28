@@ -73,6 +73,7 @@ import { $useKeymap } from "@milkdown/utils";
 export const usePlayground = (
   defaultValue: string,
   onChange: (markdown: string) => void,
+  onEnter?: () => void,
 ) => {
   const pluginViewFactory = usePluginViewFactory();
   const nodeViewFactory = useNodeViewFactory();
@@ -168,7 +169,12 @@ export const usePlayground = (
     Enter: {
       shortcuts: "Enter",
       command: () => {
-        return () => true;
+        return () => {
+          if (onEnter) {
+            onEnter();
+          }
+          return true;
+        };
       },
     },
   });

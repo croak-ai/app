@@ -16,7 +16,7 @@ import { Slice } from "@milkdown/prose/model";
 import { Milkdown as Editor } from "@milkdown/react";
 import { callCommand, getMarkdown } from "@milkdown/utils";
 import type { FC, RefObject } from "react";
-import { useImperativeHandle, useState } from "react";
+import { useEffect, useImperativeHandle, useRef } from "react";
 import { usePlayground } from "./usePlayground";
 import { Shortcuts } from "./shortcuts";
 import {
@@ -50,8 +50,14 @@ export const PlaygroundMilkdown: FC<MilkdownProps> = ({
   milkdownRef,
   onSendPressed,
 }) => {
-  const { loading, get } = usePlayground(defaultContent, onChange);
-  const [displayNoText, setDisplayNoText] = useState(defaultContent === "");
+  /* Since we have a circular dependency we need to use a ref to store the onSendPressed function */
+  const onSendRef = useRef<(() => void) | undefined>(undefined);
+
+  const { loading, get } = usePlayground(
+    defaultContent,
+    onChange,
+    () => onSendRef.current && onSendRef.current(),
+  );
 
   const getCurrentMarkdown = (): string => {
     const editor = get();
@@ -61,16 +67,17 @@ export const PlaygroundMilkdown: FC<MilkdownProps> = ({
     return content;
   };
 
-  const onSend = () => {
-    if (onSendPressed) {
-      onSendPressed(getCurrentMarkdown());
-    }
-  };
+  useEffect(() => {
+    onSendRef.current = () => {
+      if (onSendPressed) {
+        onSendPressed(getCurrentMarkdown());
+      }
+    };
+  }, [onSendPressed, get]);
 
   useImperativeHandle(milkdownRef, () => ({
     update: (markdown: string) => {
       if (loading) return;
-      setDisplayNoText(false);
       const editor = get();
       editor?.action((ctx) => {
         const view = ctx.get(editorViewCtx);
@@ -132,7 +139,9 @@ export const PlaygroundMilkdown: FC<MilkdownProps> = ({
         {/* Send Button */}
         <Button
           onClick={() => {
-            onSend();
+            if (onSendRef.current) {
+              onSendRef.current();
+            }
           }}
           variant={"default"}
           size={"icon"}
@@ -141,11 +150,6 @@ export const PlaygroundMilkdown: FC<MilkdownProps> = ({
           <Send className="h-4 w-4" />
         </Button>
       </div>
-      {displayNoText && (
-        <div className="absolute left-4 top-14 z-0 opacity-60">
-          <span>Message in #General</span>
-        </div>
-      )}
       <div className="relative z-10 m-1 max-h-[calc(50vh-2rem)] overflow-y-auto rounded bg-secondary p-2">
         <Editor />
       </div>
