@@ -1,13 +1,13 @@
 import { channel } from "@packages/db/schema/tenant";
 import { protectedProcedureWithOrgDB, router } from "../../config/trpc";
 import { z } from "zod";
-import { zChannelTypes } from "@packages/db/enum";
+import { zChannelTypes } from "@acme/db/enum";
 
 import { TRPCError } from "@trpc/server";
 import { getWorkspacePermission } from "../../functions/workspace";
 
-export const zCreateTextChannel = z.object({
-  zName: z.string().min(2).max(256),
+export const zCreateChannel = z.object({
+  zSlug: z.string().min(2).max(256),
   zDescription: z.string().min(2).max(512),
   zWorkspaceSlug: z.string().min(2).max(256),
   zChannelTypes,
@@ -15,7 +15,7 @@ export const zCreateTextChannel = z.object({
 
 export const createChannel = router({
   createChannel: protectedProcedureWithOrgDB
-    .input(zCreateTextChannel)
+    .input(zCreateChannel)
     .mutation(async ({ ctx, input }) => {
       ////////////////////////////////////////////////////////
       // Check if user has permission to create a text channel
@@ -52,7 +52,7 @@ export const createChannel = router({
       const newChannel = await ctx.db
         .insert(channel)
         .values({
-          name: input.zName,
+          slug: input.zSlug,
           channelType: input.zChannelTypes,
           workspaceId: workspace.foundWorkspace.workspace.id,
           description: input.zDescription,
@@ -61,7 +61,7 @@ export const createChannel = router({
         })
         .returning({
           insertedId: channel.id,
-          name: channel.name,
+          slug: channel.slug,
           description: channel.description,
           channelType: channel.channelType,
         });

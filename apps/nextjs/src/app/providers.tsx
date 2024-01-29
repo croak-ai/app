@@ -6,10 +6,11 @@ import { dark } from "@clerk/themes";
 import { TooltipProvider } from "@packages/ui/components/ui/tooltip";
 import { useAuth } from "@clerk/nextjs";
 
-import {
-  createReactTRPCClient,
-  reactTRPC,
-} from "../utils/trpc/reactTRPCClient";
+import { TooltipProvider } from "@acme/ui/components/ui/tooltip";
+
+import { createReactTRPCClient, reactTRPC } from "@/utils/trpc/reactTRPCClient";
+import ClerkProviderWrapper from "./providers/clerk";
+import ThemeProvider from "./providers/theme";
 
 export default function TRPC_Provider({
   children,
@@ -20,18 +21,16 @@ export default function TRPC_Provider({
   const [trpcClient] = useState(() => createReactTRPCClient());
 
   return (
-    <TooltipProvider>
-      <ClerkProvider
-        appearance={{
-          baseTheme: dark,
-        }}
-      >
-        <reactTRPC.Provider client={trpcClient} queryClient={queryClient}>
-          <QueryClientProvider client={queryClient}>
-            {children}
-          </QueryClientProvider>
-        </reactTRPC.Provider>
-      </ClerkProvider>
-    </TooltipProvider>
+    <ThemeProvider>
+      <TooltipProvider>
+        <ClerkProviderWrapper>
+          <reactTRPC.Provider client={trpcClient} queryClient={queryClient}>
+            <QueryClientProvider client={queryClient}>
+              {children}
+            </QueryClientProvider>
+          </reactTRPC.Provider>
+        </ClerkProviderWrapper>
+      </TooltipProvider>
+    </ThemeProvider>
   );
 }

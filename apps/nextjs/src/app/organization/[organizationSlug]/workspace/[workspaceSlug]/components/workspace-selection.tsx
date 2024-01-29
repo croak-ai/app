@@ -8,7 +8,6 @@ import { Button } from "@acme/ui/components/ui/button";
 
 import {
   Command,
-  CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
@@ -21,10 +20,10 @@ import {
   PopoverTrigger,
 } from "@acme/ui/components/ui/popover";
 import { useParams } from "next/navigation";
-import { reactTRPC } from "@next/utils/trpc/reactTRPCClient";
+import { reactTRPC } from "@/utils/trpc/reactTRPCClient";
 import { CheckIcon, PlusCircledIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
-import Loading from "@packages/ui/components/bonus/loading";
+import Loading from "@acme/ui/components/bonus/loading";
 import { Protect } from "@clerk/nextjs";
 
 export default function WorkspaceSelection() {

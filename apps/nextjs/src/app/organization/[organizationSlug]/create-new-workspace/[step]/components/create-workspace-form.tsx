@@ -22,16 +22,16 @@ import { useForm } from "react-hook-form";
 import Loading from "@acme/ui/components/bonus/loading";
 import { useState } from "react";
 import { useEffect } from "react";
-import { ScrollArea } from "@packages/ui/components/ui/scroll-area";
+import { ScrollArea } from "@acme/ui/components/ui/scroll-area";
 
-import ForwardButton from "@packages/ui/components/steps/forward-button";
-import { Separator } from "@packages/ui/components/ui/separator";
+import ForwardButton from "@acme/ui/components/steps/forward-button";
+import { Separator } from "@acme/ui/components/ui/separator";
 
 import Lottie from "lottie-react";
 
 import { successCheck } from "@acme/lottie-animations";
-import { reactTRPC } from "@next/utils/trpc/reactTRPCClient";
-import { Icons } from "@packages/ui/components/bonus/icons";
+import { reactTRPC } from "@/utils/trpc/reactTRPCClient";
+import { Icons } from "@acme/ui/components/bonus/icons";
 
 export default function CreateWorkSpaceForm({
   currentStep,

@@ -5,13 +5,9 @@ import WorkspaceSelection from "./workspace-selection";
 import { WorkspaceRightClickMenu } from "./workspace-right-click";
 import { useState } from "react";
 import { ChannelCreationSheet } from "./channels/channel-creation-sheet";
-import { reactTRPC } from "@next/utils/trpc/reactTRPCClient";
+import { reactTRPC } from "@/utils/trpc/reactTRPCClient";
 import { useParams } from "next/navigation";
 import { ChannelSkeleton } from "./channels/channel-list-skeleton";
-import Link from "next/link";
-import { Button } from "@next/components/ui/Button";
-import { Hash, Mic2 } from "lucide-react";
-import { zChannelTypes } from "@packages/db/enum";
 
 export default function WorkspaceSidebar() {
   const [channelSheetOpen, setChannelSheetOpen] = useState(false);
@@ -37,8 +33,7 @@ export default function WorkspaceSidebar() {
     return (
       <ChannelList
         workspaceChannels={workspaceChannels.data.map((channel) => ({
-          id: String(channel.id),
-          name: channel.name,
+          slug: channel.slug,
           channelType: channel.channelType,
         }))}
       />
@@ -53,7 +48,7 @@ export default function WorkspaceSidebar() {
         channelSheetOpen={channelSheetOpen}
         setChannelSheetOpen={setChannelSheetOpen}
         takenChannelNames={workspaceChannels.data?.map(
-          (channel) => channel.name,
+          (channel) => channel.slug,
         )}
       />
       <div className="flex h-full w-full flex-col ">

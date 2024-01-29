@@ -1,8 +1,8 @@
 "use client";
 import React from "react";
 import { TypewriterEffectSmooth } from "@acme/ui/components/aceternity/typewriter-effect";
-import { Input } from "@packages/ui/components/ui/input";
-import { Button } from "@packages/ui/components/ui/button";
+import { Input } from "@acme/ui/components/ui/input";
+import { Button } from "@acme/ui/components/ui/button";
 import { cn } from "@packages/ui/lib/utils";
 
 export function Title({ className }: { className?: string }) {

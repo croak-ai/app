@@ -1,7 +1,7 @@
-import { ContinueButton } from "@packages/ui/components/bonus/continue-button";
+import { ContinueButton } from "@acme/ui/components/bonus/continue-button";
 import Link from "next/link";
 import { Protect } from "@clerk/nextjs";
-import { getServerTRPCClient } from "@next/utils/trpc/serverTRPCClient";
+import { getServerTRPCClient } from "@/utils/trpc/serverTRPCClient";
 import { redirect } from "next/navigation";
 
 const WelcomePage = ({ organizationSlug }: { organizationSlug: string }) => {

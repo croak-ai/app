@@ -1,5 +1,27 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "entries": []
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1705375907424,
+      "tag": "0000_unusual_madame_hydra",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1706252743662,
+      "tag": "0001_spicy_micromax",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1706489333715,
+      "tag": "0002_amazing_dracula",
+      "breakpoints": true
+    }
+  ]
 }

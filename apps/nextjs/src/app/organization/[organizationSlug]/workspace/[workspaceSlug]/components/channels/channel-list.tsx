@@ -1,16 +1,11 @@
 "use client";
 
-import { WorkspaceRightClickMenu } from "../workspace-right-click";
-import { useState } from "react";
-import { ChannelCreationSheet } from "./channel-creation-sheet";
-import { reactTRPC } from "@next/utils/trpc/reactTRPCClient";
 import { useParams } from "next/navigation";
-import { ChannelSkeleton } from "./channel-list-skeleton";
 import Link from "next/link";
-import { Button } from "@next/components/ui/Button";
+import { Button } from "@acme/ui/components/ui/button";
 import { Hash, Mic2 } from "lucide-react";
-import { zChannelTypes } from "@packages/db/enum";
-import { ScrollArea } from "@packages/ui/components/ui/scroll-area";
+import { zChannelTypes } from "@acme/db/enum";
+import { ScrollArea } from "@acme/ui/components/ui/scroll-area";
 
 const ChannelIcon = ({ channelType }: { channelType: string }) => {
   switch (channelType) {
@@ -26,12 +21,12 @@ const ChannelIcon = ({ channelType }: { channelType: string }) => {
 export default function ChannelList({
   workspaceChannels,
 }: {
-  workspaceChannels: { id: string; name: string; channelType: string }[];
+  workspaceChannels: { slug: string; channelType: string }[];
 }) {
   const params = useParams<{
     workspaceSlug: string;
     organizationSlug: string;
-    channelId: string;
+    channelSlug: string;
   }>();
 
   if (!params?.workspaceSlug || !params?.organizationSlug) {
@@ -43,20 +38,18 @@ export default function ChannelList({
       <main className="flex flex-col gap-2 p-4">
         <h2 className="text-lg font-medium">Channels</h2>
         {workspaceChannels.map((channel) => (
-          <div key={channel.id.toString()}>
+          <div key={channel.slug}>
             <Link
-              href={`/organization/${params.organizationSlug}/workspace/${params.workspaceSlug}/channel/${channel.id}/${channel.channelType}`}
+              href={`/organization/${params.organizationSlug}/workspace/${params.workspaceSlug}/channel/${channel.slug}/${channel.channelType}`}
             >
               <Button
-                className="w-full p-2"
+                className="flex h-8 w-full justify-start p-1"
                 variant={
-                  params.channelId === channel.id.toString()
-                    ? "secondary"
-                    : "ghost"
+                  params.channelSlug === channel.slug ? "secondary" : "ghost"
                 }
               >
                 <ChannelIcon channelType={channel.channelType} />
-                {channel.name}
+                {channel.slug}
               </Button>
             </Link>
           </div>

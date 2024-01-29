@@ -25,10 +25,10 @@ import { useForm } from "react-hook-form";
 import { ContinueButton } from "@acme/ui/components/bonus/continue-button";
 import Loading from "@acme/ui/components/bonus/loading";
 import { useState } from "react";
-import { reactTRPC } from "@next/utils/trpc/reactTRPCClient";
-import { zChannelTypes } from "@packages/db/enum";
+import { reactTRPC } from "@/utils/trpc/reactTRPCClient";
+import { zChannelTypes } from "@acme/db/enum";
 import { redirect, useParams } from "next/navigation";
-import { Textarea } from "@packages/ui/components/ui/textarea";
+import { Textarea } from "@acme/ui/components/ui/textarea";
 
 export default function CreateChannelForm({
   takenChannelNames,
@@ -50,11 +50,15 @@ export default function CreateChannelForm({
   }
 
   const formSchema = z.object({
-    channelName: z
+    channelSlug: z
       .string()
       .min(2)
       .max(256, {
         message: "Channel name must be at most 256 characters.",
+      })
+      .refine((value) => /^[a-z0-9-]+$/.test(value), {
+        message:
+          "Channel name can only contain lowercase letters, numbers, and dashes.",
       })
       .refine((value) => !takenChannelNames?.includes(value), {
         message: "Channel name is already taken.",
@@ -82,7 +86,7 @@ export default function CreateChannelForm({
       setLoading(true);
 
       const newChannel = await createChannel.mutateAsync({
-        zName: data.channelName,
+        zSlug: data.channelSlug,
         zChannelTypes: data.type,
         zDescription: data.channelDescription,
         zWorkspaceSlug: params.workspaceSlug, // replace with your actual variable
@@ -92,7 +96,7 @@ export default function CreateChannelForm({
 
       if (newChannel) {
         redirect(
-          `/organization/${params.organizationSlug}/workspace/${params.workspaceSlug}/channel/${newChannel.insertedId}/${newChannel.channelType}`,
+          `/organization/${params.organizationSlug}/workspace/${params.workspaceSlug}/channel/${newChannel.slug}/${newChannel.channelType}`,
         ); // replace with your actual variable
       }
     } catch (e) {
@@ -106,12 +110,19 @@ export default function CreateChannelForm({
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <FormField
             control={form.control}
-            name="channelName"
+            name="channelSlug"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Channel Name</FormLabel>
+                <FormLabel>Channel Slug</FormLabel>
                 <FormControl>
-                  <Input placeholder="General Chat" {...field} />
+                  <Input
+                    placeholder="General Chat"
+                    {...field}
+                    onChange={(e) => {
+                      e.target.value = e.target.value.replace(/\s/g, "-");
+                      field.onChange(e);
+                    }}
+                  />
                 </FormControl>
                 <FormDescription>
                   This is the name of your channel.
