@@ -1,5 +1,5 @@
 import { channel, message } from "@acme/db/schema/tenant";
-import { protectedProcedureWithOrgDB, router } from "../../trpc";
+import { protectedProcedureWithOrgDB, router } from "../../config/trpc";
 import { z } from "zod";
 import { eq, and } from "drizzle-orm";
 
