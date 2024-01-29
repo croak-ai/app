@@ -69,6 +69,7 @@ import { useSetShare } from "./ShareProvider";
 import { useFeatureToggle } from "./FeatureToggleProvider";
 import { useSetProseState } from "./ProseStateProvider";
 import { $useKeymap } from "@milkdown/utils";
+import { editorViewCtx } from "@milkdown/core";
 
 export const usePlayground = (
   defaultValue: string,
@@ -321,6 +322,35 @@ export const usePlayground = (
       router.replace(url.toString());
     });
   }, [get, router, setShare]);
+
+  // Focus the editor when the user presses a key
+  useEffect(() => {
+    const focusEditor = (event: KeyboardEvent) => {
+      // Check if the key press is not from an input, textarea, or select
+      if (
+        document.activeElement &&
+        !["INPUT", "TEXTAREA", "SELECT"].includes(
+          document.activeElement.tagName,
+        )
+      ) {
+        const editor = get();
+        if (!editor) return;
+
+        const editorView = editor.ctx.get(editorViewCtx);
+        if (document.activeElement !== editorView.dom) {
+          editorView.dom.focus();
+        }
+      }
+    };
+
+    // Add event listener to the document
+    document.addEventListener("keydown", focusEditor);
+
+    // Clean up the event listener when the component unmounts
+    return () => {
+      document.removeEventListener("keydown", focusEditor);
+    };
+  }, [get]);
 
   return editorInfo;
 };

@@ -3,9 +3,11 @@
 import { CodemirrorRef } from "@/components/codemirror";
 import type { MilkdownRef } from "@/components/playground-editor";
 import dynamic from "next/dynamic";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Skeleton } from "@acme/ui/components/ui/skeleton";
 import { Switch } from "@acme/ui/components/ui/switch";
+import { reactTRPC } from "@/utils/trpc/reactTRPCClient";
+import { useParams } from "next/navigation";
 
 const PlaygroundLoading = () => {
   return (
@@ -46,6 +48,10 @@ export default function Playground() {
   const [content, setContent] = useState("");
   const [devModeEnabled, setDevModeEnabled] = useState(false);
 
+  const params = useParams();
+
+  const createMessage = reactTRPC.createMessage.createMessage.useMutation();
+
   const lockCodemirror = useRef(false);
   const milkdownRef = useRef<MilkdownRef>(null);
   const codemirrorRef = useRef<CodemirrorRef>(null);
@@ -66,6 +72,30 @@ export default function Playground() {
     current.update(value);
   }, []);
 
+  const sendMessage = useCallback(
+    async (message: string) => {
+      if (message.trim() === "") return;
+      if (
+        !params.workspaceSlug ||
+        typeof params.workspaceSlug !== "string" ||
+        params.workspaceSlug.trim() === ""
+      )
+        return;
+      if (
+        !params.channelSlug ||
+        typeof params.channelSlug !== "string" ||
+        params.channelSlug.trim() === ""
+      )
+        return;
+
+      await createMessage.mutate({
+        workspaceSlug: params.workspaceSlug,
+        channelSlug: params.channelSlug,
+        messageContent: message,
+      });
+    },
+    [params.workspaceSlug, params.channelSlug],
+  );
   return (
     <div className="relative h-screen">
       <div className="absolute bottom-24 w-full p-4">
@@ -83,10 +113,7 @@ export default function Playground() {
           defaultContent={content}
           onChange={onMilkdownChange}
           onSendPressed={(content) => {
-            console.log(content);
-            const { current } = milkdownRef;
-            if (!current) return;
-            current.update("");
+            sendMessage(content);
           }}
         />
         {isInDevMode() && (
