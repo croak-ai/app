@@ -1,5 +1,5 @@
 {
-  "name": "@croak/hono",
+  "name": "@croak/hono-crud",
   "version": "0.0.0",
   "license": "MIT",
   "type": "module",

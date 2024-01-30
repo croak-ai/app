@@ -4,7 +4,7 @@ import { createTRPCReact } from "@trpc/react-query";
 import { httpBatchLink } from "@trpc/client";
 import superjson from "superjson";
 
-import { type AppRouter } from "@acme/fastify-crud/src/trpc";
+import { type AppRouter } from "@acme/hono-crud/src/trpc";
 
 export const reactTRPC = createTRPCReact<AppRouter>({});
 

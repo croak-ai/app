@@ -12,7 +12,7 @@
     "lint": "eslint . --ext ts,tsx"
   },
   "dependencies": {
-    "@acme/fastify-crud": "*",
+    "@croak/hono-crud": "*",
     "@acme/ui": "*",
     "@clerk/clerk-expo": "^0.17.7",
     "@shopify/flash-list": "^1.4.0",
