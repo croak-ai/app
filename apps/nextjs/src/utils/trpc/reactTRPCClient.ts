@@ -15,12 +15,13 @@ export const createReactTRPCClient = () => {
         async headers() {
           //Fetch the active session token to use in TRPC client requests
           const res = await fetch("/api/token");
+          console.log("res", res);
           const { sessionToken } = await res.json();
           return {
             Authorization: sessionToken ?? undefined,
           };
         },
-        url: `${process.env.NEXT_PUBLIC_TRPC_BASE_URL}`,
+        url: `http://localhost:8080/trpc`,
       }),
     ],
     transformer: superjson,

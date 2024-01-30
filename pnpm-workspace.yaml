@@ -4,6 +4,7 @@ packages:
   - apps/landing-site
   - packages/api/fastify-crud
   - packages/api/fastify-ai
+  - packages/api/hono-crud
   - packages/db
   - packages/shared-functions
   - packages/ui

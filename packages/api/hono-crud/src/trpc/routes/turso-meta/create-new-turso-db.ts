@@ -8,10 +8,10 @@ import {
 export const createNewTursoDB = router({
   createNewTursoDB: protectedProcedure.mutation(async ({ ctx }) => {
     try {
-      const group = process.env.TRPC_TURSO_DEFAULT_GROUP;
-      const orgSlug = process.env.TRPC_TURSO_ORG_SLUG;
-      const tursoURL = process.env.TRPC_TURSO_API_BASE_URL;
-      const tursoToken = process.env.TRPC_TURSO_AUTH_TOKEN;
+      const group = ctx.env.TRPC_TURSO_DEFAULT_GROUP;
+      const orgSlug = ctx.env.TRPC_TURSO_ORG_SLUG;
+      const tursoURL = "https://api.turso.tech";
+      const tursoToken = ctx.env.TRPC_TURSO_AUTH_TOKEN;
 
       if (!orgSlug || !tursoURL || !tursoToken || !group) {
         throw new Error(
