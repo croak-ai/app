@@ -5,6 +5,7 @@ import { zChannelTypes } from "@acme/db/enum";
 
 import { TRPCError } from "@trpc/server";
 import { getWorkspacePermission } from "../../functions/workspace";
+import { userHasRole } from "../../../functions/clerk";
 
 export const zCreateChannel = z.object({
   zSlug: z.string().min(2).max(256),
@@ -35,8 +36,9 @@ export const createChannel = router({
       }
 
       if (!workspace.hasPermission) {
-        const hasRole = await ctx.auth.has({
-          permission: "org:workspace:all_access",
+        const hasRole = await userHasRole({
+          auth: ctx.auth,
+          role: "org:workspace:all_access",
         });
 
         if (!hasRole) {

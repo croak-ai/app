@@ -5,11 +5,13 @@ import {
 } from "@packages/db/schema/tenant";
 import { protectedProcedureWithOrgDB, router } from "../../config/trpc";
 import { TRPCError } from "@trpc/server";
+import { userHasRole } from "../../../functions/clerk";
 
 export const getAllWorkspaces = router({
   getAllWorkspaces: protectedProcedureWithOrgDB.query(async ({ ctx }) => {
-    const hasRole = await ctx.auth.has({
-      permission: "org:workspace:all_access",
+    const hasRole = await userHasRole({
+      auth: ctx.auth,
+      role: "org:workspace:all_access",
     });
 
     if (!hasRole) {

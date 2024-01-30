@@ -1,14 +1,7 @@
 import { z } from "zod";
 
-const getTursoDbNameFromClerkTenantIdInput = z.object({
-  tenantId: z.string(),
-});
-
-export const getTursoDbNameFromClerkTenantId = (
-  input: z.infer<typeof getTursoDbNameFromClerkTenantIdInput>,
-) => {
-  const { tenantId } = getTursoDbNameFromClerkTenantIdInput.parse(input);
-  let dbName = tenantId;
+export const getTursoDbNameFromClerkOrgId = (input: string) => {
+  let dbName = input;
   if (dbName.startsWith("org_")) {
     dbName = dbName.replace("org_", "t-").toLowerCase();
   } else {
@@ -18,8 +11,8 @@ export const getTursoDbNameFromClerkTenantId = (
 };
 
 const getTursoDbUrlFromClerkTenantIdInput = z.object({
-  tenantId: z.string(),
-  tursoOrgId: z.string(),
+  orgId: z.string(),
+  tursoOrgSlug: z.string(),
 });
 
 // This function is used to generate the database URL for a given tenant and organization.
@@ -30,13 +23,13 @@ const getTursoDbUrlFromClerkTenantIdInput = z.object({
 // tursoOrgId: "acme"
 // returns: "t-1234567890-acme.turso.io"
 
-export const getTursoDbUrlFromClerkTenantId = (
+export const getTursoDbUrlFromClerkOrgId = (
   input: z.infer<typeof getTursoDbUrlFromClerkTenantIdInput>,
 ) => {
-  const { tenantId, tursoOrgId } =
+  const { orgId, tursoOrgSlug } =
     getTursoDbUrlFromClerkTenantIdInput.parse(input);
-  let dbName = getTursoDbNameFromClerkTenantId({ tenantId });
-  return `${dbName}-${tursoOrgId}.turso.io`;
+  let dbName = getTursoDbNameFromClerkOrgId(orgId);
+  return `libsql://${dbName}-${tursoOrgSlug}.turso.io`;
 };
 
 export const getEmptyDatabaseName = (group: { groupName: string }) => {

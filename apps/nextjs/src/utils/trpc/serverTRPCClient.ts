@@ -15,7 +15,7 @@ export const getServerTRPCClient = () => {
             Authorization: authToken ?? undefined,
           };
         },
-        url: `${process.env.NEXT_PUBLIC_TRPC_BASE_URL}`,
+        url: `http://localhost:8080/trpc`,
       }),
     ],
     transformer: superjson,

@@ -1,17 +1,17 @@
 import { protectedProcedure, router } from "../../config/trpc";
 import {
-  getTursoDbUrlFromClerkTenantId,
-  getTursoDbNameFromClerkTenantId,
+  getTursoDbUrlFromClerkOrgId,
+  getTursoDbNameFromClerkOrgId,
   getEmptyDatabaseName,
 } from "@acme/shared-functions";
 
 export const createNewTursoDB = router({
   createNewTursoDB: protectedProcedure.mutation(async ({ ctx }) => {
     try {
-      const group = process.env.TRPC_TURSO_DEFAULT_GROUP;
-      const orgSlug = process.env.TRPC_TURSO_ORG_SLUG;
-      const tursoURL = process.env.TRPC_TURSO_API_BASE_URL;
-      const tursoToken = process.env.TRPC_TURSO_AUTH_TOKEN;
+      const group = ctx.env.TRPC_TURSO_DEFAULT_GROUP;
+      const orgSlug = ctx.env.TRPC_TURSO_ORG_SLUG;
+      const tursoURL = "https://api.turso.tech";
+      const tursoToken = ctx.env.TRPC_TURSO_AUTH_TOKEN;
 
       if (!orgSlug || !tursoURL || !tursoToken || !group) {
         throw new Error(
@@ -38,9 +38,9 @@ export const createNewTursoDB = router({
         throw new Error("No organization ID");
       }
 
-      const targetTursoDbUrl = getTursoDbUrlFromClerkTenantId({
-        tenantId: orgId,
-        tursoOrgId: orgSlug,
+      const targetTursoDbUrl = getTursoDbUrlFromClerkOrgId({
+        orgId: orgId,
+        tursoOrgSlug: orgSlug,
       });
 
       // Make sure the database doesn't already exist
@@ -52,9 +52,7 @@ export const createNewTursoDB = router({
         }
       }
 
-      const newDatabaseName = getTursoDbNameFromClerkTenantId({
-        tenantId: orgId,
-      });
+      const newDatabaseName = getTursoDbNameFromClerkOrgId(orgId);
 
       const emptyDatabaseName = getEmptyDatabaseName({ groupName: group });
 
