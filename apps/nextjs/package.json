@@ -15,7 +15,7 @@
     "@acme/db": "*",
     "@acme/lottie-animations": "*",
     "@acme/shared-functions": "*",
-    "@acme/fastify-crud": "*",
+    "@croak/hono-crud": "*",
     "@acme/ui": "*",
     "@clerk/clerk-js": "^4.68.1",
     "@clerk/nextjs": "^4.29.1",

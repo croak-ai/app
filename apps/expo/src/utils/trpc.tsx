@@ -11,7 +11,7 @@ import Constants from "expo-constants";
 import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
-import { transformer, type AppRouter } from "@acme/fastify-crud/src/trpc";
+import { transformer, type AppRouter } from "@croak/hono-crud/src/trpc";
 import { useAuth } from "@clerk/clerk-expo";
 
 /**

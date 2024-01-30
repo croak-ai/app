@@ -10,7 +10,7 @@ const config = {
   reactStrictMode: true,
   swcMinify: true,
   transpilePackages: [
-    "@acme/fastify-crud",
+    "@croak/hono-crud",
     "@acme/db",
     "@acme/ui",
     "@acme/shared-functions",
