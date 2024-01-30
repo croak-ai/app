@@ -5,6 +5,7 @@ import { eq, and } from "drizzle-orm";
 
 import { TRPCError } from "@trpc/server";
 import { getWorkspacePermission } from "../../functions/workspace";
+import { userHasRole } from "../../../functions/clerk";
 
 export const zCreateMessage = z.object({
   channelSlug: z.string().min(2).max(256),
@@ -33,8 +34,9 @@ export const createMessage = router({
       }
 
       if (!workspace.hasPermission) {
-        const hasRole = await ctx.auth.has({
-          permission: "org:workspace:all_access",
+        const hasRole = await userHasRole({
+          auth: ctx.auth,
+          role: "org:workspace:all_access",
         });
 
         if (!hasRole) {

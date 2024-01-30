@@ -8,8 +8,8 @@ import { protectedProcedureWithOrgDB, router } from "../../config/trpc";
 import { z } from "zod";
 type newWorkspaceType = typeof workspace.$inferInsert;
 type newDEKEncryptionKeyType = typeof dekEncryptionKey.$inferInsert;
-import crypto from "crypto";
 import { TRPCError } from "@trpc/server";
+import { userHasRole } from "../../../functions/clerk";
 
 export const zCreateWorkspace = z.object({
   zName: z.string().min(2).max(256),
@@ -21,8 +21,9 @@ export const createWorkspace = router({
   createWorkspace: protectedProcedureWithOrgDB
     .input(zCreateWorkspace)
     .mutation(async ({ ctx, input }) => {
-      const hasRole = await ctx.auth.has({
-        permission: "org:workspace:create",
+      const hasRole = await userHasRole({
+        auth: ctx.auth,
+        role: "org:workspace:create",
       });
 
       if (!hasRole) {
