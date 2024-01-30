@@ -2,10 +2,9 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 
 import type { HonoConfig } from "./config";
-import { clerk } from "./middlewares/clerk";
-import { trpc } from "./middlewares/trpc";
-// import { resume } from "./routes/resume";
-// import { webhook } from "./routes/webhook";
+import { clerk } from "./hono-middleware/clerk";
+import { trpc } from "./hono-middleware/trpc";
+import { webhook } from "./hono-routes/webhook";
 
 const app = new Hono<HonoConfig>()
   .get("/", (c) => {
@@ -28,8 +27,7 @@ const app = new Hono<HonoConfig>()
     }),
   )
   .use("*", clerk)
-  .use("/trpc/*", trpc);
-// .route("/resume", resume)
-// .route("/webhook", webhook);
+  .use("/trpc/*", trpc)
+  .route("/webhook", webhook);
 
 export { app };

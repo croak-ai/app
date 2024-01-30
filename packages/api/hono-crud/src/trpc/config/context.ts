@@ -3,11 +3,11 @@ import type {
   SignedInAuthObject,
   SignedOutAuthObject,
 } from "@clerk/nextjs/api";
-import { getTursoDbUrlFromClerkTenantId } from "@acme/shared-functions";
-import { createDbClient } from "@acme/db";
+
 import { getAuth } from "@hono/clerk-auth";
 import { HonoContext } from "../../config";
 import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
+import { createDb } from "../../functions/db";
 
 export function createTRPCContextFromHonoContext(c: HonoContext) {
   return (opts: FetchCreateContextFnOptions) => {
@@ -34,23 +34,7 @@ export function createTRPCContextFromHonoContext(c: HonoContext) {
       };
     }
 
-    const TRPC_TURSO_DB_TOKEN = c.env.TRPC_TURSO_DB_TOKEN;
-    const TRPC_TURSO_ORG_SLUG = c.env.TRPC_TURSO_ORG_SLUG;
-
-    if (!TRPC_TURSO_DB_TOKEN || !TRPC_TURSO_ORG_SLUG) {
-      throw new Error(
-        "No TRPC_TURSO_DB_TOKEN or TRPC_TURSO_ORG_SLUG, make sure you configured your .env file correctly",
-      );
-    }
-
-    const db = createDbClient(
-      `libsql://` +
-        getTursoDbUrlFromClerkTenantId({
-          tenantId: orgId,
-          tursoOrgId: TRPC_TURSO_ORG_SLUG,
-        }),
-      TRPC_TURSO_DB_TOKEN,
-    );
+    const db = createDb({ c, orgId });
 
     return {
       ...opts,

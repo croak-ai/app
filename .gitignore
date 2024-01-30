@@ -43,6 +43,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
+# wrangler
+.wrangler
+.dev.vars
+
 # turbo
 .turbo
 

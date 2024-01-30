@@ -1,7 +1,7 @@
 import { protectedProcedure, router } from "../../config/trpc";
 import {
-  getTursoDbUrlFromClerkTenantId,
-  getTursoDbNameFromClerkTenantId,
+  getTursoDbUrlFromClerkOrgId,
+  getTursoDbNameFromClerkOrgId,
   getEmptyDatabaseName,
 } from "@acme/shared-functions";
 
@@ -38,9 +38,9 @@ export const createNewTursoDB = router({
         throw new Error("No organization ID");
       }
 
-      const targetTursoDbUrl = getTursoDbUrlFromClerkTenantId({
-        tenantId: orgId,
-        tursoOrgId: orgSlug,
+      const targetTursoDbUrl = getTursoDbUrlFromClerkOrgId({
+        orgId: orgId,
+        tursoOrgSlug: orgSlug,
       });
 
       // Make sure the database doesn't already exist
@@ -52,9 +52,7 @@ export const createNewTursoDB = router({
         }
       }
 
-      const newDatabaseName = getTursoDbNameFromClerkTenantId({
-        tenantId: orgId,
-      });
+      const newDatabaseName = getTursoDbNameFromClerkOrgId(orgId);
 
       const emptyDatabaseName = getEmptyDatabaseName({ groupName: group });
 
