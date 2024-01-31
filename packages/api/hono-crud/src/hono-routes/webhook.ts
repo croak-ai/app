@@ -15,55 +15,53 @@ Insert data received into org DB
 export const webhook = new Hono<HonoConfig>().post("/", async (c) => {
   try {
     const event = await verifyWebhook(c);
-    console.log();
+    const userData = event.data.public_user_data;
+    const userId = parseInt(userData.user_id);
 
     console.log("WEBHOOK VERIFIED");
 
-    // const jsonBody = await c.req.json();
-    // const { data } = jsonBody;
-
-    // console.log()
-
     //Grab orgId (String for testing purposes)
-    // const orgId = "org_2beC7yJZqgXIXisWvhNJFbWie4Q"; //data.organization.id;
-    // const db = createDb({ c, orgId });
-    // //const test = await db.select().from(message);
+    const orgId = "org_2beC7yJZqgXIXisWvhNJFbWie4Q"; //data.organization.id;
+    const db = createDb({ c, orgId });
 
-    // switch (event.type) {
-    //   case "organizationMembership.created":
-    //     await db.insert(user).values({
-    //       user_id: event.data.id,
-    //       firstName: event.data.first_name,
-    //       lastName: event.data.last_name,
-    //       email: getPrimaryEmail(
-    //         event.data.email_addresses,
-    //         event.data.primary_email_address_id,
-    //       ),
-    //     });
-    //     return c.text(`User with id ${event.data.id} created`, 200);
-    //   case "user.updated":
-    //     await db
-    //       .update(users)
-    //       .set({
-    //         firstName: event.data.first_name,
-    //         lastName: event.data.last_name,
-    //         email: getPrimaryEmail(
-    //           event.data.email_addresses,
-    //           event.data.primary_email_address_id,
-    //         ),
-    //       })
-    //       .where(eq(users.id, event.data.id));
-    //     return c.text(`User with id ${event.data.id} deleted`, 200);
-    //   case "user.deleted":
-    //     if (!event.data.deleted) return c.text("User not deleted", 400);
-    //     if (!event.data.id) return c.text("Missing user id", 400);
-    //     await db.delete(users).where(eq(users.id, event.data.id));
-    //     return c.text(`User with id ${event.data.id} deleted`, 200);
-    //   default:
-    //     return c.text("Invalid event type", 400);
-    // }
+    switch (event.type) {
+      case "organizationMembership.created":
+        await db.insert(user).values({
+          userId,
+          role: event.data.role,
+          firstName: userData.first_name,
+          lastName: userData.last_name,
+          email: userData.identifier,
+          imageUrl: userData.image_url,
+          profileImageUrl: userData.profile_image_url,
+          createdAt: event.data.created_at,
+          updatedAt: event.data.updated_at,
+          deletedAt: null,
+        });
+        return c.text(`User with id ${event.data.id} created`, 200);
+      case "organizationMembership.updated":
+        await db
+          .update(users)
+          .set({
+            firstName: event.data.first_name,
+            lastName: event.data.last_name,
+            email: getPrimaryEmail(
+              event.data.email_addresses,
+              event.data.primary_email_address_id,
+            ),
+          })
+          .where(eq(users.id, event.data.id));
+        return c.text(`User with id ${event.data.id} deleted`, 200);
+      case "organizationMembership.deleted":
+        if (!event.data.deleted) return c.text("User not deleted", 400);
+        if (!event.data.id) return c.text("Missing user id", 400);
+        await db.delete(users).where(eq(users.id, event.data.id));
+        return c.text(`User with id ${event.data.id} deleted`, 200);
+      default:
+        return c.text("Invalid event type", 400);
+    }
 
-    //return c.text("working");
+    return c.text("working");
   } catch (err) {
     throw new HTTPException(500, {
       message: "Error in Clerk webhook",
@@ -71,18 +69,18 @@ export const webhook = new Hono<HonoConfig>().post("/", async (c) => {
   }
 });
 
-function getPrimaryEmail(emails: EmailAddressJSON[], primaryEmailId: string) {
-  const primaryEmail = emails.find(
-    (e) => e.id === primaryEmailId,
-  )?.email_address;
+// function getPrimaryEmail(emails: EmailAddressJSON[], primaryEmailId: string) {
+//   const primaryEmail = emails.find(
+//     (e) => e.id === primaryEmailId,
+//   )?.email_address;
 
-  // This in theory should never happen since users need to provide an email address to sign up
-  if (!primaryEmail) {
-    throw new Error("No primary email found");
-  }
+//   // This in theory should never happen since users need to provide an email address to sign up
+//   if (!primaryEmail) {
+//     throw new Error("No primary email found");
+//   }
 
-  return primaryEmail;
-}
+//   return primaryEmail;
+// }
 
 type OrganizationMembershipEvent = {
   data: {

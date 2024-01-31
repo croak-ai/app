@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "e3e9550a-4dea-43fe-832e-592ab58f289b",
+  "id": "561577ee-808c-4140-ae1f-5e22e9f219b6",
   "prevId": "d50e6a4b-b80a-4349-90c0-2211a134c7f1",
   "tables": {
     "channel": {
@@ -346,8 +346,8 @@
     "user": {
       "name": "user",
       "columns": {
-        "user_id": {
-          "name": "user_id",
+        "userId": {
+          "name": "userId",
           "type": "integer",
           "primaryKey": true,
           "notNull": true,
@@ -360,15 +360,15 @@
           "notNull": true,
           "autoincrement": false
         },
-        "first_name": {
-          "name": "first_name",
+        "firstName": {
+          "name": "firstName",
           "type": "text(256)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "last_name": {
-          "name": "last_name",
+        "lastName": {
+          "name": "lastName",
           "type": "text(256)",
           "primaryKey": false,
           "notNull": true,
@@ -381,15 +381,15 @@
           "notNull": true,
           "autoincrement": false
         },
-        "image_url": {
-          "name": "image_url",
+        "imageUrl": {
+          "name": "imageUrl",
           "type": "text(512)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "profile_image_url": {
-          "name": "profile_image_url",
+        "profileImageUrl": {
+          "name": "profileImageUrl",
           "type": "text(512)",
           "primaryKey": false,
           "notNull": false,
