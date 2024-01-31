@@ -44,7 +44,7 @@ export async function verifyWebhook(
   }
 }
 
-type OrganizationMembershipEvent = {
+export type OrganizationMembershipEvent = {
   data: {
     created_at: number;
     id: string;
