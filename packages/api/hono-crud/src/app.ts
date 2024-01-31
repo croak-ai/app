@@ -39,7 +39,7 @@ app.onError((err, c) => {
     return err.getResponse();
   }
   //Default to 500 if uncaught
-  return c.text("Internal Server error", 500);
+  return c.text(`Internal Server error ${err}`, 500);
 });
 
 export { app };

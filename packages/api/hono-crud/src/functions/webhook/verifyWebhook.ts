@@ -15,8 +15,8 @@ export async function verifyWebhook(
         message: "Please add WEBHOOK_SECRET from Clerk Dashboard to .dev.vars",
       });
     }
-
-    const textBody = await c.req.text();
+    //Clone the req object so we can still read json in main webhook route
+    const textBody = await c.req.raw.clone().text();
     const svix_id = c.req.header("svix-id");
     const svix_timestamp = c.req.header("svix-timestamp");
     const svix_signature = c.req.header("svix-signature");

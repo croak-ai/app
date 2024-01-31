@@ -1,10 +1,10 @@
-import type { EmailAddressJSON, WebhookEvent } from "@clerk/backend";
+import type { EmailAddressJSON } from "@clerk/backend";
 import { Hono } from "hono";
-import { Webhook } from "svix";
 import type { HonoConfig } from "../config";
 import { createDb } from "../functions/db";
-import { HTTPException } from "hono/http-exception";
 import { verifyWebhook } from "../functions/webhook/verifyWebhook";
+import { HTTPException } from "hono/http-exception";
+import { Context } from "../trpc";
 
 /*
 Verify integrity of webhook using svix
@@ -12,19 +12,29 @@ Connect to org database using orgId in request
 Insert data received into org DB
 */
 export const webhook = new Hono<HonoConfig>().post("/", async (c) => {
-  const event = await verifyWebhook(c);
+  try {
+    const event = await verifyWebhook(c);
 
-  console.log("WEBHOOK VERIFIED");
-  const jsonBody = await c.req.json();
-  const { data } = jsonBody;
+    console.log("WEBHOOK VERIFIED");
+    console.log("ello");
+    //console.log(c.req.raw);
+    const jsonBody = await c.req.json();
+    console.log("JSON", jsonBody);
+    //const { data } = jsonBody;
 
-  console.log(event.type);
-  console.log(data);
+    //console.log(event.type);
+    //console.log(data);
 
-  //Grab orgId
-  const orgId = data.organization.id;
-  //const orgId = data.
-  const db = createDb({ c, orgId });
+    //Grab orgId
+    //const orgId = data.organization.id;
+    //const orgId = data.
+    //const db = createDb({ c, orgId });
+    return c.text("working");
+  } catch (err) {
+    throw new HTTPException(500, {
+      message: "Error in Clerk webhook",
+    });
+  }
 
   // switch (event.type) {
   //   case "user.created":
