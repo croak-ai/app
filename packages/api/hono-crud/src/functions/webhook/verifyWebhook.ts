@@ -1,0 +1,46 @@
+import { Context } from "hono";
+import { HonoConfig } from "../../config";
+import { WebhookEvent } from "@clerk/backend";
+import { HTTPException } from "hono/http-exception";
+import { Webhook } from "svix";
+
+export async function verifyWebhook(
+  c: Context<HonoConfig>,
+): Promise<WebhookEvent> {
+  try {
+    const WEBHOOK_SECRET = c.env.CLERK_WEBHOOK_SECRET_KEY;
+
+    if (!WEBHOOK_SECRET) {
+      throw new HTTPException(401, {
+        message: "Please add WEBHOOK_SECRET from Clerk Dashboard to .dev.vars",
+      });
+    }
+
+    const textBody = await c.req.text();
+    const svix_id = c.req.header("svix-id");
+    const svix_timestamp = c.req.header("svix-timestamp");
+    const svix_signature = c.req.header("svix-signature");
+
+    if (!svix_id || !svix_timestamp || !svix_signature) {
+      throw new HTTPException(401, {
+        message: "Request does not have the correct svix headers",
+      });
+    }
+
+    const webhook = new Webhook(WEBHOOK_SECRET);
+    return webhook.verify(textBody, {
+      "svix-id": svix_id,
+      "svix-timestamp": svix_timestamp,
+      "svix-signature": svix_signature,
+    }) as WebhookEvent;
+    /* Catch known errors first else catch and throw unknown error */
+  } catch (error) {
+    if (error instanceof HTTPException) {
+      throw error;
+    } else {
+      throw new HTTPException(500, {
+        message: `Unable to verify integrity of Clerk webhook \n ${error}`,
+      });
+    }
+  }
+}

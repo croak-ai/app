@@ -33,9 +33,9 @@ const app = new Hono<HonoConfig>()
 
 /* Error handling */
 app.onError((err, c) => {
+  //Catch defined errors
   if (err instanceof HTTPException) {
-    //Display custom error message
-    console.error("Error: ", err.message);
+    console.error(err.stack);
     return err.getResponse();
   }
   //Default to 500 if uncaught
