@@ -47,6 +47,8 @@ export const webhook = new Hono<HonoConfig>().post("/", async (c) => {
         await db.insert(user).values(userPayload);
         return c.text(`User with id ${userPayload.userId} created`, 200);
       /* Update user */
+      /*This isnt hit at the moment. I need to account for another webhook
+      that checks for user account changes*/
       case "organizationMembership.updated":
         await db
           .update(user)
