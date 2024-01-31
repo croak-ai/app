@@ -1,4 +1,3 @@
-import { sql } from "drizzle-orm";
 import {
   text,
   integer,
@@ -6,6 +5,18 @@ import {
   index,
   unique,
 } from "drizzle-orm/sqlite-core";
+
+export const user = sqliteTable("user", {
+  userId: text("userId", { length: 256 }).primaryKey(),
+  role: text("role", { length: 256 }).notNull(),
+  firstName: text("firstName", { length: 256 }),
+  lastName: text("lastName", { length: 256 }),
+  email: text("email", { length: 256 }).notNull().unique(),
+  imageUrl: text("imageUrl", { length: 512 }),
+  profileImageUrl: text("profileImageUrl", { length: 512 }),
+  createdAt: integer("createdAt").notNull(),
+  updatedAt: integer("updatedAt").notNull(),
+});
 
 export const workspace = sqliteTable(
   "workspace",

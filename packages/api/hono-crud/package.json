@@ -11,7 +11,8 @@
     "lint": "eslint .",
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf .turbo .wrangler node_modules"
+    "clean": "rm -rf .turbo .wrangler node_modules",
+    "localtunnel": "npx lt --port 8080"
   },
   "dependencies": {
     "@acme/db": "*",
@@ -23,16 +24,17 @@
     "cors": "^2.8.5",
     "hono": "^3.11.7",
     "superjson": "1.9.1",
-    "svix": "^1.15.0",
+    "svix": "^1.16.0",
     "typescript": "^5.3.3",
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "eslint": "^8.56.0",
-    "prettier": "^3.1.1",
-    "typescript": "^5.3.3",
     "@cloudflare/workers-types": "^4.20231121.0",
+    "eslint": "^8.56.0",
+    "localtunnel": "^2.0.2",
+    "prettier": "^3.1.1",
     "tsup": "^8.0.1",
+    "typescript": "^5.3.3",
     "wrangler": "^3.22.1"
   }
 }
