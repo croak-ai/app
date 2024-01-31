@@ -17,7 +17,6 @@ export const user = sqliteTable("user", {
   profileImageUrl: text("profileImageUrl", { length: 512 }),
   createdAt: integer("createdAt").notNull(),
   updatedAt: integer("updatedAt").notNull(),
-  deletedAt: integer("deletedAt"),
 });
 
 export const workspace = sqliteTable(
