@@ -6,6 +6,7 @@ import { createDb } from "../functions/db";
 
 export const webhook = new Hono<HonoConfig>().post("/", async (c) => {
   // Change the orgId to use the orgId of the desired database.
+  console.log("RADARADA");
   const db = createDb({ c, orgId: "EXAMPLLLLEEEE" });
 
   const payload = await c.req.text();
