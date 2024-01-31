@@ -6,7 +6,7 @@ import { Webhook } from "svix";
 
 export async function verifyWebhook(
   c: Context<HonoConfig>,
-): Promise<WebhookEvent> {
+): Promise<OrganizationMembershipEvent> {
   try {
     const WEBHOOK_SECRET = c.env.CLERK_WEBHOOK_SECRET_KEY;
 
@@ -16,7 +16,7 @@ export async function verifyWebhook(
       });
     }
     //Clone the req object so we can still read json in main webhook route
-    const textBody = await c.req.raw.clone().text();
+    const textBody = await c.req.raw.text();
     const svix_id = c.req.header("svix-id");
     const svix_timestamp = c.req.header("svix-timestamp");
     const svix_signature = c.req.header("svix-signature");
@@ -32,7 +32,7 @@ export async function verifyWebhook(
       "svix-id": svix_id,
       "svix-timestamp": svix_timestamp,
       "svix-signature": svix_signature,
-    }) as WebhookEvent;
+    }) as OrganizationMembershipEvent;
     /* Catch known errors first else catch and throw unknown error */
   } catch (error) {
     if (error instanceof HTTPException) {
@@ -44,3 +44,35 @@ export async function verifyWebhook(
     }
   }
 }
+
+type OrganizationMembershipEvent = {
+  data: {
+    created_at: number;
+    id: string;
+    object: string;
+    organization: {
+      created_at: number;
+      created_by: string;
+      id: string;
+      image_url: string;
+      logo_url: string;
+      name: string;
+      object: string;
+      public_metadata: Record<string, unknown>;
+      slug: string;
+      updated_at: number;
+    };
+    public_user_data: {
+      first_name: string;
+      identifier: string;
+      image_url: string;
+      last_name: string;
+      profile_image_url: string;
+      user_id: string;
+    };
+    role: string;
+    updated_at: number;
+  };
+  object: string;
+  type: string;
+};
