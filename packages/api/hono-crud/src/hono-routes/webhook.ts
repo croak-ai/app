@@ -6,6 +6,7 @@ import { verifyWebhook } from "../functions/webhook/verifyWebhook";
 import { HTTPException } from "hono/http-exception";
 import { Context } from "../trpc";
 import { user } from "@packages/db/schema/tenant";
+import { eq } from "@packages/db";
 
 /*
 Verify integrity of webhook using svix
@@ -38,25 +39,27 @@ export const webhook = new Hono<HonoConfig>().post("/", async (c) => {
           updatedAt: event.data.updated_at,
           deletedAt: null,
         });
-        return c.text(`User with id ${event.data.id} created`, 200);
+        return c.text(`User with id ${userId} created`, 200);
       case "organizationMembership.updated":
         await db
-          .update(users)
+          .update(user)
           .set({
-            firstName: event.data.first_name,
-            lastName: event.data.last_name,
-            email: getPrimaryEmail(
-              event.data.email_addresses,
-              event.data.primary_email_address_id,
-            ),
+            userId,
+            role: event.data.role,
+            firstName: userData.first_name,
+            lastName: userData.last_name,
+            email: userData.identifier,
+            imageUrl: userData.image_url,
+            profileImageUrl: userData.profile_image_url,
+            createdAt: event.data.created_at,
+            updatedAt: event.data.updated_at,
+            deletedAt: null,
           })
-          .where(eq(users.id, event.data.id));
-        return c.text(`User with id ${event.data.id} deleted`, 200);
+          .where(eq(user.userId, userId));
+        return c.text(`User with id ${event.data.id} updated`, 200);
       case "organizationMembership.deleted":
-        if (!event.data.deleted) return c.text("User not deleted", 400);
-        if (!event.data.id) return c.text("Missing user id", 400);
-        await db.delete(users).where(eq(users.id, event.data.id));
-        return c.text(`User with id ${event.data.id} deleted`, 200);
+        await db.delete(user).where(eq(user.userId, userId));
+        return c.text(`User with id ${userData.user_id} deleted`, 200);
       default:
         return c.text("Invalid event type", 400);
     }
@@ -81,35 +84,3 @@ export const webhook = new Hono<HonoConfig>().post("/", async (c) => {
 
 //   return primaryEmail;
 // }
-
-type OrganizationMembershipEvent = {
-  data: {
-    created_at: number;
-    id: string;
-    object: string;
-    organization: {
-      created_at: number;
-      created_by: string;
-      id: string;
-      image_url: string;
-      logo_url: string;
-      name: string;
-      object: string;
-      public_metadata: Record<string, unknown>;
-      slug: string;
-      updated_at: number;
-    };
-    public_user_data: {
-      first_name: string;
-      identifier: string;
-      image_url: string;
-      last_name: string;
-      profile_image_url: string;
-      user_id: string;
-    };
-    role: string;
-    updated_at: number;
-  };
-  object: string;
-  type: string;
-};
