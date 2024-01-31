@@ -1,6 +1,10 @@
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 import superjson from "superjson";
+<<<<<<< Updated upstream
 import { type AppRouter } from "@acme/hono-crud/src/trpc";
+=======
+import { type AppRouter } from "@croak/hono-crud/src/trpc";
+>>>>>>> Stashed changes
 import { auth } from "@clerk/nextjs";
 
 export const getServerTRPCClient = () => {
