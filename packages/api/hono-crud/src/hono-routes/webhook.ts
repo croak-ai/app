@@ -3,11 +3,18 @@ import { Hono } from "hono";
 import { Webhook } from "svix";
 import type { HonoConfig } from "../config";
 import { createDb } from "../functions/db";
+/*
+Verify integrity of webhook using svix
+Connect to org database using orgId in request
+Insert data received into org DB
+*/
 
 export const webhook = new Hono<HonoConfig>().post("/", async (c) => {
-  // Change the orgId to use the orgId of the desired database.
-  console.log("RADARADA");
-  const db = createDb({ c, orgId: "EXAMPLLLLEEEE" });
+  const { data } = await c.req.json();
+  //Grab orgId
+  const orgId = data.organization.id;
+  //const orgId = data.
+  const db = createDb({ c, orgId });
 
   const payload = await c.req.text();
   const id = c.req.header("svix-id");
