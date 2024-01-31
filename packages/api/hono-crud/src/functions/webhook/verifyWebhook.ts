@@ -1,6 +1,5 @@
 import { Context } from "hono";
 import { HonoConfig } from "../../config";
-import { WebhookEvent } from "@clerk/backend";
 import { HTTPException } from "hono/http-exception";
 import { Webhook } from "svix";
 

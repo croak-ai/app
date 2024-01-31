@@ -7,8 +7,7 @@ CREATE TABLE `user` (
 	`imageUrl` text(512),
 	`profileImageUrl` text(512),
 	`createdAt` integer NOT NULL,
-	`updatedAt` integer NOT NULL,
-	`deletedAt` integer
+	`updatedAt` integer NOT NULL
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `user_email_unique` ON `user` (`email`);
