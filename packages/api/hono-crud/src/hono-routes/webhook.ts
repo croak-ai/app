@@ -5,6 +5,7 @@ import { createDb } from "../functions/db";
 import { verifyWebhook } from "../functions/webhook/verifyWebhook";
 import { HTTPException } from "hono/http-exception";
 import { Context } from "../trpc";
+import { message } from "@packages/db/schema/tenant";
 
 /*
 Verify integrity of webhook using svix
@@ -16,19 +17,28 @@ export const webhook = new Hono<HonoConfig>().post("/", async (c) => {
     const event = await verifyWebhook(c);
 
     console.log("WEBHOOK VERIFIED");
-    console.log("ello");
-    //console.log(c.req.raw);
+
     const jsonBody = await c.req.json();
-    console.log("JSON", jsonBody);
-    //const { data } = jsonBody;
+    const { data } = jsonBody;
 
-    //console.log(event.type);
-    //console.log(data);
+    //Grab orgId (String for testing purposes)
+    const orgId = "org_2beC7yJZqgXIXisWvhNJFbWie4Q"; //data.organization.id;
+    const db = createDb({ c, orgId });
+    //const test = await db.select().from(message);
 
-    //Grab orgId
-    //const orgId = data.organization.id;
-    //const orgId = data.
-    //const db = createDb({ c, orgId });
+    // switch (event.type) {
+    // case "organizationMembership.created":
+    //   await db.insert(users).values({
+    //     id: event.data.id,
+    //     firstName: event.data.first_name,
+    //     lastName: event.data.last_name,
+    //     email: getPrimaryEmail(
+    //       event.data.email_addresses,
+    //       event.data.primary_email_address_id,
+    //     ),
+    //   });
+    //   return c.text(`User with id ${event.data.id} created`, 200);
+
     return c.text("working");
   } catch (err) {
     throw new HTTPException(500, {

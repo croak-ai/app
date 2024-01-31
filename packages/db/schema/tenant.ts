@@ -7,6 +7,19 @@ import {
   unique,
 } from "drizzle-orm/sqlite-core";
 
+export const user = sqliteTable("user", {
+  user_id: integer("user_id").primaryKey(),
+  role: text("role", { length: 256 }).notNull(),
+  first_name: text("first_name", { length: 256 }).notNull(),
+  last_name: text("last_name", { length: 256 }).notNull(),
+  email: text("email", { length: 256 }).notNull().unique(),
+  image_url: text("image_url", { length: 512 }),
+  profile_image_url: text("profile_image_url", { length: 512 }),
+  createdAt: integer("createdAt").notNull(),
+  updatedAt: integer("updatedAt").notNull(),
+  deletedAt: integer("deletedAt"),
+});
+
 export const workspace = sqliteTable(
   "workspace",
   {
