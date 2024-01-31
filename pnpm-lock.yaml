@@ -561,7 +561,7 @@ importers:
         specifier: 1.9.1
         version: 1.9.1
       svix:
-        specifier: ^1.15.0
+        specifier: ^1.16.0
         version: 1.16.0
       typescript:
         specifier: ^5.3.3

@@ -10,13 +10,15 @@ Insert data received into org DB
 */
 
 export const webhook = new Hono<HonoConfig>().post("/", async (c) => {
-  const { data } = await c.req.json();
-  //Grab orgId
-  const orgId = data.organization.id;
-  //const orgId = data.
-  const db = createDb({ c, orgId });
+  const WEBHOOK_SECRET = c.env.CLERK_WEBHOOK_SECRET_KEY;
 
-  const payload = await c.req.text();
+  if (!WEBHOOK_SECRET) {
+    throw new Error(
+      "Please add WEBHOOK_SECRET from Clerk Dashboard to .env or .env.local",
+    );
+  }
+
+  const textBody = await c.req.text();
   const id = c.req.header("svix-id");
   const timestamp = c.req.header("svix-timestamp");
   const signature = c.req.header("svix-signature");
@@ -26,11 +28,20 @@ export const webhook = new Hono<HonoConfig>().post("/", async (c) => {
   }
 
   const webhook = new Webhook(c.env.CLERK_WEBHOOK_SECRET_KEY);
-  const event = webhook.verify(payload, {
+  const event = webhook.verify(textBody, {
     "svix-id": id,
     "svix-timestamp": timestamp,
     "svix-signature": signature,
   }) as WebhookEvent;
+
+  const jsonBody = await c.req.json();
+  const { type } = jsonBody;
+  const { data } = jsonBody;
+
+  //Grab orgId
+  const orgId = data.organization.id;
+  //const orgId = data.
+  const db = createDb({ c, orgId });
 
   // switch (event.type) {
   //   case "user.created":
