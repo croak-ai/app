@@ -32,12 +32,17 @@ export const webhook = new Hono<HonoConfig>().post("/", async (c) => {
   }
 
   const webhook = new Webhook(WEBHOOK_SECRET);
-  const event = webhook.verify(textBody, {
-    "svix-id": svix_id,
-    "svix-timestamp": svix_timestamp,
-    "svix-signature": svix_signature,
-  }) as WebhookEvent;
-
+  try {
+    const event = webhook.verify(textBody, {
+      "svix-id": svix_id,
+      "svix-timestamp": svix_timestamp,
+      "svix-signature": svix_signature,
+    }) as WebhookEvent;
+  } catch {
+    throw new HTTPException(401, {
+      message: "Unable to verify integrity of Clerk webhook",
+    });
+  }
   const jsonBody = await c.req.json();
   const { type } = jsonBody;
   const { data } = jsonBody;
