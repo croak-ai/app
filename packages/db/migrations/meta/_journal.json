@@ -50,6 +50,20 @@
       "when": 1706732829058,
       "tag": "0006_light_stryfe",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1706735731079,
+      "tag": "0007_modern_emma_frost",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1706735765919,
+      "tag": "0008_furry_gertrude_yorkes",
+      "breakpoints": true
     }
   ]
 }

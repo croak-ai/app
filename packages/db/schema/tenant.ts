@@ -9,8 +9,8 @@ import {
 export const user = sqliteTable("user", {
   userId: text("userId", { length: 256 }).primaryKey(),
   role: text("role", { length: 256 }).notNull(),
-  firstName: text("firstName", { length: 256 }).notNull(),
-  lastName: text("lastName", { length: 256 }).notNull(),
+  firstName: text("firstName", { length: 256 }),
+  lastName: text("lastName", { length: 256 }),
   email: text("email", { length: 256 }).notNull().unique(),
   imageUrl: text("imageUrl", { length: 512 }),
   profileImageUrl: text("profileImageUrl", { length: 512 }),
