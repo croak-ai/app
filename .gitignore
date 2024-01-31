@@ -45,8 +45,7 @@ yarn-error.log*
 
 # wrangler
 .wrangler
-.dev.vars
-
+packages/api/hono-crud/.dev.vars
 # turbo
 .turbo
 
