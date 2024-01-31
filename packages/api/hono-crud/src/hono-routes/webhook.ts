@@ -4,12 +4,12 @@ import { Webhook } from "svix";
 import type { HonoConfig } from "../config";
 import { createDb } from "../functions/db";
 import { HTTPException } from "hono/http-exception";
+
 /*
 Verify integrity of webhook using svix
 Connect to org database using orgId in request
 Insert data received into org DB
 */
-
 export const webhook = new Hono<HonoConfig>().post("/", async (c) => {
   const WEBHOOK_SECRET = c.env.CLERK_WEBHOOK_SECRET_KEY;
 
@@ -19,21 +19,23 @@ export const webhook = new Hono<HonoConfig>().post("/", async (c) => {
     });
   }
 
-  //Grab headers
+  /* Extract req body as text, extract req headers */
   const textBody = await c.req.text();
   const svix_id = c.req.header("svix-id");
   const svix_timestamp = c.req.header("svix-timestamp");
   const svix_signature = c.req.header("svix-signature");
 
-  if (!id || !timestamp || !signature) {
-    return c.text("Missing svix headers", 400);
+  if (!svix_id || !svix_timestamp || !svix_signature) {
+    throw new HTTPException(401, {
+      message: "Request does not have the correct svix headers",
+    });
   }
 
-  const webhook = new Webhook(c.env.CLERK_WEBHOOK_SECRET_KEY);
+  const webhook = new Webhook(WEBHOOK_SECRET);
   const event = webhook.verify(textBody, {
-    "svix-id": id,
-    "svix-timestamp": timestamp,
-    "svix-signature": signature,
+    "svix-id": svix_id,
+    "svix-timestamp": svix_timestamp,
+    "svix-signature": svix_signature,
   }) as WebhookEvent;
 
   const jsonBody = await c.req.json();
