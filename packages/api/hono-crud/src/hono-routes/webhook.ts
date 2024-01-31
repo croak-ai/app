@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { Webhook } from "svix";
 import type { HonoConfig } from "../config";
 import { createDb } from "../functions/db";
+import { HTTPException } from "hono/http-exception";
 /*
 Verify integrity of webhook using svix
 Connect to org database using orgId in request
@@ -13,15 +14,16 @@ export const webhook = new Hono<HonoConfig>().post("/", async (c) => {
   const WEBHOOK_SECRET = c.env.CLERK_WEBHOOK_SECRET_KEY;
 
   if (!WEBHOOK_SECRET) {
-    throw new Error(
-      "Please add WEBHOOK_SECRET from Clerk Dashboard to .env or .env.local",
-    );
+    throw new HTTPException(401, {
+      message: "Please add WEBHOOK_SECRET from Clerk Dashboard to .dev.vars",
+    });
   }
 
+  //Grab headers
   const textBody = await c.req.text();
-  const id = c.req.header("svix-id");
-  const timestamp = c.req.header("svix-timestamp");
-  const signature = c.req.header("svix-signature");
+  const svix_id = c.req.header("svix-id");
+  const svix_timestamp = c.req.header("svix-timestamp");
+  const svix_signature = c.req.header("svix-signature");
 
   if (!id || !timestamp || !signature) {
     return c.text("Missing svix headers", 400);
