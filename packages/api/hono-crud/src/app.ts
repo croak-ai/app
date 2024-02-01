@@ -4,8 +4,8 @@ import { cors } from "hono/cors";
 import type { HonoConfig } from "./config";
 import { clerk } from "./hono-middleware/clerk";
 import { trpc } from "./hono-middleware/trpc";
-import { webhook } from "./hono-routes/webhook";
 import { HTTPException } from "hono/http-exception";
+import { clerkWebhook } from "./hono-routes/webhook/clerkWebhook";
 
 const app = new Hono<HonoConfig>()
   .get("/", (c) => {
@@ -29,7 +29,7 @@ const app = new Hono<HonoConfig>()
   )
   .use("*", clerk)
   .use("/trpc/*", trpc)
-  .route("/webhook", webhook);
+  .route("/webhook", clerkWebhook);
 
 /* Error handling */
 app.onError((err, c) => {
