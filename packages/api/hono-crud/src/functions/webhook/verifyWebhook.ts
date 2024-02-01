@@ -2,10 +2,11 @@ import { Context } from "hono";
 import { HonoConfig } from "../../config";
 import { HTTPException } from "hono/http-exception";
 import { Webhook } from "svix";
+import { WebhookEvent } from "@clerk/backend";
 
 export async function verifyWebhook(
   c: Context<HonoConfig>,
-): Promise<OrganizationMembershipEvent> {
+): Promise<WebhookEvent> {
   try {
     const WEBHOOK_SECRET = c.env.CLERK_WEBHOOK_SECRET_KEY;
 
@@ -31,7 +32,7 @@ export async function verifyWebhook(
       "svix-id": svix_id,
       "svix-timestamp": svix_timestamp,
       "svix-signature": svix_signature,
-    }) as OrganizationMembershipEvent;
+    }) as WebhookEvent;
     /* Catch known errors first else catch and throw unknown error */
   } catch (error) {
     if (error instanceof HTTPException) {

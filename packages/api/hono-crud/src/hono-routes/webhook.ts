@@ -1,5 +1,8 @@
-import type { EmailAddressJSON } from "@clerk/backend";
-import { Context, Hono } from "hono";
+import {
+  OrganizationMembershipWebhookEvent,
+  type EmailAddressJSON,
+} from "@clerk/backend";
+import { Hono } from "hono";
 import type { HonoConfig } from "../config";
 import { createDb } from "../functions/db";
 import { verifyWebhook } from "../functions/webhook/verifyWebhook";
@@ -14,7 +17,10 @@ Based on webhook event either create, update, or delete user
 */
 export const webhook = new Hono<HonoConfig>().post("/", async (c) => {
   try {
-    const event = await verifyWebhook(c);
+    const event = (await verifyWebhook(
+      c,
+    )) as OrganizationMembershipWebhookEvent;
+
     const userData = event.data.public_user_data;
 
     const userPayload = {
@@ -47,8 +53,7 @@ export const webhook = new Hono<HonoConfig>().post("/", async (c) => {
         await db.insert(user).values(userPayload);
         return c.text(`User with id ${userPayload.userId} created`, 200);
       /* Update user */
-      /*This isnt hit at the moment. I need to account for another webhook
-      that checks for user account changes*/
+      /*This is only hit when a users organizaiton role changes*/
       case "organizationMembership.updated":
         await db
           .update(user)
