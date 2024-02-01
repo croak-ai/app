@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "@acme/ui/styles/globals.css";
 import { Suspense } from "react";
 import FloatingNavDemo from "./components/nav";
+import { ThemeProvider } from "./theme";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,9 +20,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Suspense fallback={<>Loading Suspense From Layout...</>}>
-          <FloatingNavDemo>{children}</FloatingNavDemo>
-        </Suspense>
+        <ThemeProvider>
+          <Suspense fallback={<>Loading Suspense From Layout...</>}>
+            <FloatingNavDemo>{children}</FloatingNavDemo>
+          </Suspense>
+        </ThemeProvider>
       </body>
     </html>
   );
