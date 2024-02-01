@@ -1,20 +1,30 @@
-import type { EmailAddressJSON } from "@clerk/backend";
-import { Context, Hono } from "hono";
-import type { HonoConfig } from "../config";
-import { createDb } from "../functions/db";
-import { verifyWebhook } from "../functions/webhook/verifyWebhook";
+/* ROUTE PREFIX: /webhook */
+
+import {
+  OrganizationMembershipWebhookEvent,
+  type EmailAddressJSON,
+} from "@clerk/backend";
+import { Hono } from "hono";
+import type { HonoConfig } from "../../config";
+import { createDb } from "../../functions/db";
+import { verifyWebhook } from "../../functions/webhook/verifyWebhook";
 import { HTTPException } from "hono/http-exception";
 import { user } from "@packages/db/schema/tenant";
 import { eq } from "@packages/db";
 
 /*
-Verify integrity of webhook using svix
-Connect to org database using orgId in request
-Based on webhook event either create, update, or delete user
+This route handles organization membership webhook events from Clerk.
+If an organization member is added, updated, or removed this code will
+reflect the change in the organizations database
 */
-export const webhook = new Hono<HonoConfig>().post("/", async (c) => {
+export const clerkWebhook = new Hono<HonoConfig>();
+
+clerkWebhook.post("/organizationMembership", async (c) => {
   try {
-    const event = await verifyWebhook(c);
+    const event = (await verifyWebhook(
+      c,
+    )) as OrganizationMembershipWebhookEvent;
+
     const userData = event.data.public_user_data;
 
     const userPayload = {
@@ -29,8 +39,8 @@ export const webhook = new Hono<HonoConfig>().post("/", async (c) => {
       updatedAt: event.data.updated_at,
     };
 
-    //Grab orgId
-    const orgId = event.data.organization.id; //"org_2beC7yJZqgXIXisWvhNJFbWie4Q";
+    /* Grab orgId */
+    const orgId = event.data.organization.id;
     const db = createDb({ c, orgId });
 
     switch (event.type) {
@@ -47,8 +57,7 @@ export const webhook = new Hono<HonoConfig>().post("/", async (c) => {
         await db.insert(user).values(userPayload);
         return c.text(`User with id ${userPayload.userId} created`, 200);
       /* Update user */
-      /*This isnt hit at the moment. I need to account for another webhook
-      that checks for user account changes*/
+      /*This is only hit when a users organizaiton role changes*/
       case "organizationMembership.updated":
         await db
           .update(user)
@@ -74,6 +83,14 @@ export const webhook = new Hono<HonoConfig>().post("/", async (c) => {
     }
   }
 });
+
+/* 
+We will eventually need to sync updated user data with each orgs database.
+Not a priority for now but sometihng to think about.
+The only updates that are currently supported are role updates for 
+users in a specific organization.
+*/
+clerkWebhook.post("/user", async (c) => {});
 
 // function getPrimaryEmail(emails: EmailAddressJSON[], primaryEmailId: string) {
 //   const primaryEmail = emails.find(
