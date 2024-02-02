@@ -8,7 +8,8 @@
     "clean": "rm -rf .turbo node_modules",
     "with-env": "dotenv -e ../../.env --",
     "push": "drizzle-kit push:sqlite",
-    "migrate": "pnpm ts-node migrate.ts",
+    "migrate": "pnpm ts-node ./scripts/migrate.ts",
+    "wipe": "pnpm ts-node ./scripts/wipe.ts",
     "generate": "drizzle-kit generate:sqlite"
   },
   "dependencies": {

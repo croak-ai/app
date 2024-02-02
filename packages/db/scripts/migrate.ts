@@ -5,9 +5,8 @@ import { createClient } from "@libsql/client";
 import {
   MIGRATIONS_TURSO_ORG_DB_GROUPS,
   MIGRATIONS_TURSO_ORG_SLUG,
-  MIGRATIONS_TURSO_API_BASE_URL,
   MIGRATIONS_TURSO_AUTH_TOKEN,
-} from "./env";
+} from "../env";
 import { getEmptyDatabaseName } from "@acme/shared-functions";
 
 async function migrateDatabase(db: {
@@ -32,7 +31,6 @@ async function main() {
     if (
       !MIGRATIONS_TURSO_ORG_DB_GROUPS ||
       !MIGRATIONS_TURSO_ORG_SLUG ||
-      !MIGRATIONS_TURSO_API_BASE_URL ||
       !MIGRATIONS_TURSO_AUTH_TOKEN
     ) {
       throw new Error(
@@ -41,7 +39,7 @@ async function main() {
     }
 
     const response = await fetch(
-      `${MIGRATIONS_TURSO_API_BASE_URL}/v1/organizations/${MIGRATIONS_TURSO_ORG_SLUG}/databases`,
+      `https://api.turso.tech/v1/organizations/${MIGRATIONS_TURSO_ORG_SLUG}/databases`,
       {
         method: "GET",
         headers: {
@@ -91,7 +89,7 @@ async function main() {
 
       if (!groupHasEmptyDatabase) {
         await fetch(
-          `${MIGRATIONS_TURSO_API_BASE_URL}/v1/organizations/${MIGRATIONS_TURSO_ORG_SLUG}/databases`,
+          `https://api.turso.tech/v1/organizations/${MIGRATIONS_TURSO_ORG_SLUG}/databases`,
           {
             method: "POST",
             headers: {
