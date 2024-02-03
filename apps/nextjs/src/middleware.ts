@@ -7,15 +7,32 @@ export default authMiddleware({
     if (!auth.userId && !auth.isPublicRoute) {
       return redirectToSignIn({ returnBackUrl: req.url });
     }
-    // redirect them to organization selection page
-    // if (
-    //   auth.userId &&
-    //   !auth.orgId &&
-    //   req.nextUrl.pathname !== "/org-selection"
-    // ) {
-    //   const orgSelection = new URL("/org-selection", req.url);
-    //   return NextResponse.redirect(orgSelection);
-    // }
+
+    // Allow tRPC requests to bypass the onboarding redirect
+    if (req.nextUrl.pathname.startsWith("/trpc/")) {
+      return NextResponse.next();
+    }
+
+    const publicMetadata: any = auth.sessionClaims?.org_public_metadata;
+
+    const redirectUrl = `/organization/${auth.orgSlug}/onboarding`;
+
+    if (req.nextUrl.pathname.includes(redirectUrl)) {
+      return NextResponse.next();
+    }
+
+    if (auth.isApiRoute) {
+      return NextResponse.next();
+    }
+
+    if (
+      !publicMetadata?.main_database_group_name ||
+      !publicMetadata?.main_database_name
+    ) {
+      const url = req.nextUrl.clone();
+      url.pathname = `/organization/${auth.orgSlug}/onboarding`;
+      return NextResponse.rewrite(url);
+    }
   },
 });
 // Stop Middleware running on static files
