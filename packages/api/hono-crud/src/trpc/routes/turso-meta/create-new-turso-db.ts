@@ -10,17 +10,16 @@ export const createNewTursoDB = router({
     try {
       const group = ctx.env.TRPC_TURSO_DEFAULT_GROUP;
       const orgSlug = ctx.env.TRPC_TURSO_ORG_SLUG;
-      const tursoURL = "https://api.turso.tech";
       const tursoToken = ctx.env.TRPC_TURSO_AUTH_TOKEN;
 
-      if (!orgSlug || !tursoURL || !tursoToken || !group) {
+      if (!orgSlug || !tursoToken || !group) {
         throw new Error(
           "No TRPC_TURSO_API_BASE_URL or TRPC_TURSO_ORG_SLUG, or TRPC_TURSO_TOKEN, TRPC_TURSO_DEFAULT_GROUP. Make sure you configured your .env file correctly.",
         );
       }
 
       const response = await fetch(
-        `${tursoURL}/v1/organizations/${orgSlug}/databases`,
+        `https://api.turso.tech/v1/organizations/${orgSlug}/databases`,
         {
           method: "GET",
           headers: {
@@ -57,7 +56,7 @@ export const createNewTursoDB = router({
       const emptyDatabaseName = getEmptyDatabaseName({ groupName: group });
 
       const newDatabaseResponse = await fetch(
-        `${tursoURL}/v1/organizations/${orgSlug}/databases`,
+        `https://api.turso.tech/v1/organizations/${orgSlug}/databases`,
         {
           method: "POST",
           headers: {

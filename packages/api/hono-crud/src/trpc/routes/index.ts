@@ -9,6 +9,7 @@ import { getAllWorkspaces } from "./workspace/get-all-workspaces";
 import { createChannel } from "./channel/create-channel";
 import { getWorkspaceChannels } from "./channel/get-workspace-channels";
 import { createMessage } from "./message/create-message";
+import { getAvailableGroups } from "./turso-meta/get-available-groups";
 
 export const appRouter = router({
   createNewTursoDB,
@@ -20,6 +21,7 @@ export const appRouter = router({
   createChannel,
   getWorkspaceChannels,
   createMessage,
+  getAvailableGroups,
 });
 
 // export type definition of API
