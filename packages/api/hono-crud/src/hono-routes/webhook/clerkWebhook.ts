@@ -90,32 +90,38 @@ We will eventually need to sync updated user data with each orgs database.
 Not a priority for now but sometihng to think about.
 The only updates that are currently supported are role updates for 
 users in a specific organization.
+
+1. Grab updated user info (Figure out how primary email addresses work in Clerk)
+2. Grab all organizations the user is part of.
+3. Loop through each organization database and update user info
 */
 clerkWebhook.post("/user", async (c) => {
   try {
     const event = (await verifyWebhook(c)) as UserWebhookEvent;
 
-    const userData = event.data.public_user_data;
+    //Grab user data
+    //const userData = event.data;
 
-    const userPayload = {
-      userId: userData.user_id,
-      role: event.data.role,
-      firstName: userData.first_name,
-      lastName: userData.last_name,
-      email: userData.identifier,
-      imageUrl: userData.image_url,
-      profileImageUrl: userData.profile_image_url,
-      createdAt: event.data.created_at,
-      updatedAt: event.data.updated_at,
-    };
+    // const userPayload = {
+    //   userId: userData.user_id,
+    //   role: event.data.role,
+    //   firstName: userData.first_name,
+    //   lastName: userData.last_name,
+    //   email: userData.identifier,
+    //   imageUrl: userData.image_url,
+    //   profileImageUrl: userData.profile_image_url,
+    //   createdAt: event.data.created_at,
+    //   updatedAt: event.data.updated_at,
+    // };
 
     /* Grab orgId */
-    const orgId = event.data.organization.id;
-    const db = createDb({ c, orgId });
+    // const orgId = event.data.organization.id;
+    // const db = createDb({ c, orgId });
 
     switch (event.type) {
       /* Create user */
-      case "organizationMembership.created":
+      case "user.updated":
+        const userData = 
         // Check if the user already exists
         const existingUser = await db.query.user.findFirst({
           where: eq(user.userId, userPayload.userId),
@@ -154,15 +160,17 @@ clerkWebhook.post("/user", async (c) => {
   }
 });
 
-// function getPrimaryEmail(emails: EmailAddressJSON[], primaryEmailId: string) {
-//   const primaryEmail = emails.find(
-//     (e) => e.id === primaryEmailId,
-//   )?.email_address;
+function getPrimaryEmail(emails: EmailAddressJSON[], primaryEmailId: string) {
+  const primaryEmail = emails.find(
+    (email) => email.id === primaryEmailId,
+  )?.email_address;
 
-//   // This in theory should never happen since users need to provide an email address to sign up
-//   if (!primaryEmail) {
-//     throw new Error("No primary email found");
-//   }
+  // This in theory should never happen since users need to provide an email address to sign up
+  if (!primaryEmail) {
+    throw new HTTPException(500, {
+      message: `Primary email address could not be found`,
+    });
+  }
 
-//   return primaryEmail;
-// }
+  return primaryEmail;
+}
