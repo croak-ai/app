@@ -121,29 +121,26 @@ clerkWebhook.post("/user", async (c) => {
     switch (event.type) {
       /* Create user */
       case "user.updated":
-        const userData = 
-        // Check if the user already exists
-        const existingUser = await db.query.user.findFirst({
-          where: eq(user.userId, userPayload.userId),
-        });
+        const userData = event.data;
+        /* Grab users primary email */
+        const userEmail = getPrimaryEmail(
+          userData.email_addresses,
+          userData.primary_email_address_id,
+        );
 
-        if (existingUser) {
-          return c.text(`user with id ${userPayload.userId} already exists.`);
-        }
+        /* Grab users organization memberships */
+        const userMemberships = await fetch(
+          `https://api.clerk.com/v1/users/${userData.id}/organization_memberships?limit=10&offset=0`,
+          {
+            headers: {
+              Authorization: `Bearer ${c.env.CLERK_SECRET_KEY}`,
+            },
+          },
+        );
+        console.log(userData);
+
         await db.insert(user).values(userPayload);
         return c.text(`User with id ${userPayload.userId} created`, 200);
-      /* Update user */
-      /*This is only hit when a users organizaiton role changes*/
-      case "organizationMembership.updated":
-        await db
-          .update(user)
-          .set(userPayload)
-          .where(eq(user.userId, userPayload.userId));
-        return c.text(`User with id ${userPayload.userId} updated`, 200);
-      /* Delete user */
-      case "organizationMembership.deleted":
-        await db.delete(user).where(eq(user.userId, userPayload.userId));
-        return c.text(`User with id ${userPayload.userId} deleted`, 200);
       default:
         throw new HTTPException(500, {
           message: "Invalid event type",
