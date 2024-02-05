@@ -2,7 +2,7 @@ import { Context } from "hono";
 import { HonoConfig } from "../../config";
 import { HTTPException } from "hono/http-exception";
 
-export async function verifyWebhook(
+export async function fetchUserMemberships(
   userId: string,
   c: Context<HonoConfig>,
 ): Promise<OrganizationMembership> {
@@ -35,8 +35,8 @@ type OrganizationMembership = {
   data: {
     object: string;
     id: string;
-    public_metadata: Record<string, any>;
-    private_metadata: Record<string, any>;
+    public_metadata: Record<string, unknown>;
+    private_metadata: Record<string, unknown>;
     role: string;
     permissions: string[];
     created_at: number;
@@ -50,8 +50,8 @@ type OrganizationMembership = {
       has_image: boolean;
       max_allowed_memberships: number;
       admin_delete_enabled: boolean;
-      public_metadata: Record<string, any>;
-      private_metadata: Record<string, any>;
+      public_metadata: Record<string, unknown>;
+      private_metadata: Record<string, unknown>;
       created_by: string;
       created_at: number;
       updated_at: number;

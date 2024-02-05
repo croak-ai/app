@@ -9,9 +9,11 @@ import { Hono } from "hono";
 import type { HonoConfig } from "../../config";
 import { createDb } from "../../functions/db";
 import { verifyWebhook } from "../../functions/webhook/verifyWebhook";
+
 import { HTTPException } from "hono/http-exception";
 import { user } from "@packages/db/schema/tenant";
 import { eq } from "@packages/db";
+import { fetchUserMemberships } from "../../functions/webhook/fetchUserMemberships";
 
 /*
 This route handles organization membership webhook events from Clerk.
@@ -119,33 +121,40 @@ clerkWebhook.post("/user", async (c) => {
     // const db = createDb({ c, orgId });
 
     switch (event.type) {
-      /* Create user */
+      /* Update user */
       case "user.updated":
-        const userData = event.data;
+        const userId = event.data.id;
         /* Grab users primary email */
-        const userEmail = getPrimaryEmail(
-          userData.email_addresses,
-          userData.primary_email_address_id,
-        );
+        // const userEmail = getPrimaryEmail(
+        //   userData.email_addresses,
+        //   userData.primary_email_address_id,
+        // );
 
-        /* Grab users organization memberships (Throw this in function eventually)*/
-        const userMembershipsRes = await fetch(
-          `https://api.clerk.com/v1/users/${userData.id}/organization_memberships?limit=10&offset=0`,
-          {
-            headers: {
-              Authorization: `Bearer ${c.env.CLERK_SECRET_KEY}`,
-            },
-          },
-        );
-        const userMemberships: OrganizationMembership =
-          await userMembershipsRes.json();
+        /* Grab users organization memberships */
+        const userMemberships = await fetchUserMemberships(userId, c);
+        /* Loop through orgs, connect to dbs, update user table */
+        for (const membership of userMemberships.data) {
+          const userData = membership.public_user_data;
+          const orgId = membership.organization.id;
+          const db = createDb({ c, orgId });
 
-        console.log("DATA: ", userData);
-        console.log("EMAIL: ", userEmail);
-        console.log("ORGANIZATIONS: ", userMemberships);
+          const updatedUser = {
+            firstName: userData.first_name,
+            lastName: userData.last_name,
+            email: userData.identifier,
+            imageUrl: userData.image_url,
+            profileImageUrl: userData.profile_image_url,
+            updatedAt: Date.now(),
+          };
 
-        await db.insert(user).values(userPayload);
-        return c.text(`User with id ${userPayload.userId} created`, 200);
+          await db
+            .update(user)
+            .set(updatedUser)
+            .where(eq(user.userId, userData.user_id));
+        }
+
+        // await db.insert(user).values(userPayload);
+        return c.text(`User with id ${userId} updated`, 200);
       default:
         throw new HTTPException(500, {
           message: "Invalid event type",
@@ -176,42 +185,3 @@ function getPrimaryEmail(emails: EmailAddressJSON[], primaryEmailId: string) {
 
   return primaryEmail;
 }
-
-type OrganizationMembership = {
-  data: {
-    object: string;
-    id: string;
-    public_metadata: Record<string, any>;
-    private_metadata: Record<string, any>;
-    role: string;
-    permissions: string[];
-    created_at: number;
-    updated_at: number;
-    organization: {
-      object: string;
-      id: string;
-      name: string;
-      slug: string;
-      image_url: string | null;
-      has_image: boolean;
-      max_allowed_memberships: number;
-      admin_delete_enabled: boolean;
-      public_metadata: Record<string, any>;
-      private_metadata: Record<string, any>;
-      created_by: string;
-      created_at: number;
-      updated_at: number;
-      logo_url: string | null;
-    };
-    public_user_data: {
-      first_name: string;
-      last_name: string;
-      image_url: string | null;
-      has_image: boolean;
-      identifier: string;
-      profile_image_url: string;
-      user_id: string;
-    };
-  }[];
-  total_count: number;
-};
