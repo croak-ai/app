@@ -106,25 +106,6 @@ clerkWebhook.post("/user", async (c) => {
       c,
     )) as UserWebhookEvent;
 
-    //Grab user data
-    //const userData = event.data;
-
-    // const userPayload = {
-    //   userId: userData.user_id,
-    //   role: event.data.role,
-    //   firstName: userData.first_name,
-    //   lastName: userData.last_name,
-    //   email: userData.identifier,
-    //   imageUrl: userData.image_url,
-    //   profileImageUrl: userData.profile_image_url,
-    //   createdAt: event.data.created_at,
-    //   updatedAt: event.data.updated_at,
-    // };
-
-    /* Grab orgId */
-    // const orgId = event.data.organization.id;
-    // const db = createDb({ c, orgId });
-
     switch (event.type) {
       /* Update user */
       case "user.updated":
