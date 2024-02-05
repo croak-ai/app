@@ -10,17 +10,23 @@
     "push": "drizzle-kit push:sqlite",
     "migrate": "pnpm ts-node ./scripts/migrate.ts",
     "wipe": "pnpm ts-node ./scripts/wipe.ts",
+    "group": "pnpm ts-node ./scripts/group",
     "generate": "drizzle-kit generate:sqlite"
   },
   "dependencies": {
     "@acme/shared-functions": "*",
+    "@inquirer/prompts": "^4.0.0",
     "@libsql/client": "0.4.0-pre.5",
     "@planetscale/database": "^1.10.0",
+    "@tursodatabase/api": "^1.2.2",
+    "chalk": "4.1.2",
     "drizzle-orm": "^0.28.6",
+    "ora": "^5.4.1",
     "znv": "^0.4.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@types/inquirer": "^9.0.7",
     "dotenv-cli": "^7.2.1",
     "drizzle-kit": "^0.19.13",
     "ts-node": "^10.9.2",
