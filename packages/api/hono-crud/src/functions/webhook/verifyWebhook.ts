@@ -5,11 +5,10 @@ import { Webhook } from "svix";
 import { WebhookEvent } from "@clerk/backend";
 
 export async function verifyWebhook(
+  WEBHOOK_SECRET: string,
   c: Context<HonoConfig>,
 ): Promise<WebhookEvent> {
   try {
-    const WEBHOOK_SECRET = c.env.CLERK_WEBHOOK_SECRET_KEY;
-
     if (!WEBHOOK_SECRET) {
       throw new HTTPException(401, {
         message: "Please add WEBHOOK_SECRET from Clerk Dashboard to .dev.vars",

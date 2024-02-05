@@ -6,7 +6,8 @@ import type { Context, Input } from "hono";
 export type Bindings = {
   CLERK_SECRET_KEY: string;
   CLERK_PUBLISHABLE_KEY: string;
-  CLERK_WEBHOOK_SECRET_KEY: string;
+  CLERK_ORG_WEBHOOK_SECRET_KEY: string;
+  CLERK_USER_WEBHOOK_SECRET_KEY: string;
   TRPC_TURSO_DB_TOKEN: string;
   TRPC_TURSO_ORG_SLUG: string;
   TRPC_TURSO_DEFAULT_GROUP: string;

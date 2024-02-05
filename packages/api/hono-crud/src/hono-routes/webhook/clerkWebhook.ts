@@ -26,6 +26,7 @@ export const clerkWebhook = new Hono<HonoConfig>();
 clerkWebhook.post("/organizationMembership", async (c) => {
   try {
     const event = (await verifyWebhook(
+      c.env.CLERK_ORG_WEBHOOK_SECRET_KEY,
       c,
     )) as OrganizationMembershipWebhookEvent;
 
@@ -100,7 +101,10 @@ users in a specific organization.
 */
 clerkWebhook.post("/user", async (c) => {
   try {
-    const event = (await verifyWebhook(c)) as UserWebhookEvent;
+    const event = (await verifyWebhook(
+      c.env.CLERK_USER_WEBHOOK_SECRET_KEY,
+      c,
+    )) as UserWebhookEvent;
 
     //Grab user data
     //const userData = event.data;
