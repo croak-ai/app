@@ -5,11 +5,10 @@ import { Webhook } from "svix";
 import { WebhookEvent } from "@clerk/backend";
 
 export async function verifyWebhook(
+  WEBHOOK_SECRET: string,
   c: Context<HonoConfig>,
 ): Promise<WebhookEvent> {
   try {
-    const WEBHOOK_SECRET = c.env.CLERK_WEBHOOK_SECRET_KEY;
-
     if (!WEBHOOK_SECRET) {
       throw new HTTPException(401, {
         message: "Please add WEBHOOK_SECRET from Clerk Dashboard to .dev.vars",
@@ -44,35 +43,3 @@ export async function verifyWebhook(
     }
   }
 }
-
-export type OrganizationMembershipEvent = {
-  data: {
-    created_at: number;
-    id: string;
-    object: string;
-    organization: {
-      created_at: number;
-      created_by: string;
-      id: string;
-      image_url: string;
-      logo_url: string;
-      name: string;
-      object: string;
-      public_metadata: Record<string, unknown>;
-      slug: string;
-      updated_at: number;
-    };
-    public_user_data: {
-      first_name: string;
-      identifier: string;
-      image_url: string;
-      last_name: string;
-      profile_image_url: string;
-      user_id: string;
-    };
-    role: string;
-    updated_at: number;
-  };
-  object: string;
-  type: string;
-};
