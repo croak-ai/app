@@ -128,8 +128,8 @@ clerkWebhook.post("/user", async (c) => {
           userData.primary_email_address_id,
         );
 
-        /* Grab users organization memberships */
-        const userMemberships = await fetch(
+        /* Grab users organization memberships (Throw this in function eventually)*/
+        const userMembershipsRes = await fetch(
           `https://api.clerk.com/v1/users/${userData.id}/organization_memberships?limit=10&offset=0`,
           {
             headers: {
@@ -137,7 +137,12 @@ clerkWebhook.post("/user", async (c) => {
             },
           },
         );
-        console.log(userData);
+        const userMemberships: OrganizationMembership =
+          await userMembershipsRes.json();
+
+        console.log("DATA: ", userData);
+        console.log("EMAIL: ", userEmail);
+        console.log("ORGANIZATIONS: ", userMemberships);
 
         await db.insert(user).values(userPayload);
         return c.text(`User with id ${userPayload.userId} created`, 200);
@@ -171,3 +176,42 @@ function getPrimaryEmail(emails: EmailAddressJSON[], primaryEmailId: string) {
 
   return primaryEmail;
 }
+
+type OrganizationMembership = {
+  data: {
+    object: string;
+    id: string;
+    public_metadata: Record<string, any>;
+    private_metadata: Record<string, any>;
+    role: string;
+    permissions: string[];
+    created_at: number;
+    updated_at: number;
+    organization: {
+      object: string;
+      id: string;
+      name: string;
+      slug: string;
+      image_url: string | null;
+      has_image: boolean;
+      max_allowed_memberships: number;
+      admin_delete_enabled: boolean;
+      public_metadata: Record<string, any>;
+      private_metadata: Record<string, any>;
+      created_by: string;
+      created_at: number;
+      updated_at: number;
+      logo_url: string | null;
+    };
+    public_user_data: {
+      first_name: string;
+      last_name: string;
+      image_url: string | null;
+      has_image: boolean;
+      identifier: string;
+      profile_image_url: string;
+      user_id: string;
+    };
+  }[];
+  total_count: number;
+};
