@@ -14,6 +14,7 @@ import { HTTPException } from "hono/http-exception";
 import { user } from "@packages/db/schema/tenant";
 import { eq } from "@packages/db";
 import { fetchUserMemberships } from "../../functions/webhook/fetchUserMemberships";
+import { updateOrgUser } from "../../functions/webhook/updateOrgUser";
 
 /*
 This route handles organization membership webhook events from Clerk.
@@ -124,37 +125,16 @@ clerkWebhook.post("/user", async (c) => {
       /* Update user */
       case "user.updated":
         const userId = event.data.id;
-        /* Grab users primary email */
-        // const userEmail = getPrimaryEmail(
-        //   userData.email_addresses,
-        //   userData.primary_email_address_id,
-        // );
 
         /* Grab users organization memberships */
         const userMemberships = await fetchUserMemberships(userId, c);
-        /* Loop through orgs, connect to dbs, update user table */
-        for (const membership of userMemberships.data) {
-          const userData = membership.public_user_data;
-          const orgId = membership.organization.id;
-          const db = createDb({ c, orgId });
 
-          const updatedUser = {
-            firstName: userData.first_name,
-            lastName: userData.last_name,
-            email: userData.identifier,
-            imageUrl: userData.image_url,
-            profileImageUrl: userData.profile_image_url,
-            updatedAt: Date.now(),
-          };
+        updateOrgUser(userMemberships, c);
 
-          await db
-            .update(user)
-            .set(updatedUser)
-            .where(eq(user.userId, userData.user_id));
-        }
-
-        // await db.insert(user).values(userPayload);
-        return c.text(`User with id ${userId} updated`, 200);
+        return c.text(
+          `User with id ${userId} updated for all organizations`,
+          200,
+        );
       default:
         throw new HTTPException(500, {
           message: "Invalid event type",
@@ -171,17 +151,17 @@ clerkWebhook.post("/user", async (c) => {
   }
 });
 
-function getPrimaryEmail(emails: EmailAddressJSON[], primaryEmailId: string) {
-  const primaryEmail = emails.find(
-    (email) => email.id === primaryEmailId,
-  )?.email_address;
+// function getPrimaryEmail(emails: EmailAddressJSON[], primaryEmailId: string) {
+//   const primaryEmail = emails.find(
+//     (email) => email.id === primaryEmailId,
+//   )?.email_address;
 
-  // This in theory should never happen since users need to provide an email address to sign up
-  if (!primaryEmail) {
-    throw new HTTPException(500, {
-      message: `Primary email address could not be found`,
-    });
-  }
+//   // This in theory should never happen since users need to provide an email address to sign up
+//   if (!primaryEmail) {
+//     throw new HTTPException(500, {
+//       message: `Primary email address could not be found`,
+//     });
+//   }
 
-  return primaryEmail;
-}
+//   return primaryEmail;
+// }

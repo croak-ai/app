@@ -31,7 +31,7 @@ export async function fetchUserMemberships(
   }
 }
 
-type OrganizationMembership = {
+export type OrganizationMembership = {
   data: {
     object: string;
     id: string;
