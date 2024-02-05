@@ -34,6 +34,8 @@ import { successCheck } from "@acme/lottie-animations";
 import { reactTRPC } from "@/utils/trpc/reactTRPCClient";
 import { Icons } from "@acme/ui/components/bonus/icons";
 import dynamic from "next/dynamic";
+import { Skeleton } from "@acme/ui/components/ui/skeleton";
+import { SkeletonButtonText } from "@acme/ui/components/skeleton/skeleton-button";
 
 const Lottie = dynamic(() => import("lottie-react"), {
   ssr: false,
@@ -47,8 +49,8 @@ export default function CreateMainDB({ currentStep }: { currentStep: number }) {
 
   const utils = reactTRPC.useUtils();
 
-  // const createWorkspace =
-  //   reactTRPC.createWorkspace.createWorkspace.useMutation();
+  const createNewMainDB =
+    reactTRPC.createNewTursoDB.createNewTursoDB.useMutation();
 
   const groupLocations =
     reactTRPC.getAvailableGroups.getAvailableGroups.useQuery({} as any);
@@ -59,7 +61,7 @@ export default function CreateMainDB({ currentStep }: { currentStep: number }) {
   }
 
   const formSchema = z.object({
-    groupCode: z.string().min(3).max(3),
+    groupCode: z.string().min(1),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -72,19 +74,13 @@ export default function CreateMainDB({ currentStep }: { currentStep: number }) {
     try {
       setLoading(true);
 
-      // const { insertedWorkspaceSlug } = await createWorkspace.mutateAsync({
-      //   zName: data.workspaceName,
-      //   zSlug: data.workspaceSlug,
-      //   zDescription: data.workspaceDescription,
-      // });
+      const result = await createNewMainDB.mutateAsync({
+        group: data.groupCode,
+      });
 
-      // utils.getWorkspaceMemberships.invalidate();
-
-      // const url = new URL(window.location.href);
-
-      // url.searchParams.set("workspaceSlug", insertedWorkspaceSlug);
-
-      // router.replace(url.toString());
+      if (result) {
+        setCreatedMainDB(true);
+      }
     } catch (e) {
       setError(e as Error);
     }
@@ -149,15 +145,26 @@ export default function CreateMainDB({ currentStep }: { currentStep: number }) {
                       </FormControl>
 
                       <SelectContent>
-                        {groupLocations?.data?.availableGroups?.map(
-                          (location) => (
-                            <SelectItem
-                              key={location.primary}
-                              value={location.primary} // Use location.code here for selection value.
-                            >
-                              {location.locationName}
-                            </SelectItem>
-                          ),
+                        {groupLocations.isLoading ? (
+                          <Button
+                            disabled={true}
+                            className="w-full"
+                            variant={"outline"}
+                            size={"sm"}
+                          >
+                            <Loading name="Loading Regions" />
+                          </Button>
+                        ) : (
+                          groupLocations.data?.availableGroups.map(
+                            (location) => (
+                              <SelectItem
+                                key={location.name}
+                                value={location.name} // Use location.code here for selection value.
+                              >
+                                {location.locationName}
+                              </SelectItem>
+                            ),
+                          )
                         )}
                       </SelectContent>
                     </Select>
