@@ -1,9 +1,6 @@
 import "dotenv/config";
 import { createClient } from "@libsql/client";
-import {
-  MIGRATIONS_TURSO_ORG_SLUG,
-  MIGRATIONS_TURSO_AUTH_TOKEN,
-} from "../../env";
+import { MIGRATIONS_TURSO_ORG_SLUG, MIGRATIONS_TURSO_AUTH_TOKEN } from "../env";
 import ora from "ora";
 
 async function cleanTables(db: {

@@ -1,8 +1,5 @@
 import ora from "ora";
-import {
-  MIGRATIONS_TURSO_ORG_SLUG,
-  MIGRATIONS_TURSO_AUTH_TOKEN,
-} from "../../env";
+import { MIGRATIONS_TURSO_ORG_SLUG, MIGRATIONS_TURSO_AUTH_TOKEN } from "../env";
 import chalk from "chalk";
 
 export interface Group {

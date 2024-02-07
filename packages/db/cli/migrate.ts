@@ -2,10 +2,7 @@ import "dotenv/config";
 import { migrate } from "drizzle-orm/libsql/migrator";
 import { drizzle } from "drizzle-orm/libsql";
 import { createClient } from "@libsql/client";
-import {
-  MIGRATIONS_TURSO_ORG_SLUG,
-  MIGRATIONS_TURSO_AUTH_TOKEN,
-} from "../../env";
+import { MIGRATIONS_TURSO_ORG_SLUG, MIGRATIONS_TURSO_AUTH_TOKEN } from "../env";
 import { getEmptyDatabaseName } from "@acme/shared-functions";
 import ora from "ora";
 import chalk from "chalk";

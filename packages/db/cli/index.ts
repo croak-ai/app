@@ -10,14 +10,12 @@ import {
 } from "@inquirer/prompts";
 import migrateGroups from "./migrate";
 import wipeGroups from "./wipe";
-import {
-  MIGRATIONS_TURSO_ORG_SLUG,
-  MIGRATIONS_TURSO_AUTH_TOKEN,
-} from "../../env";
+import { MIGRATIONS_TURSO_ORG_SLUG, MIGRATIONS_TURSO_AUTH_TOKEN } from "../env";
 import chalk from "chalk";
 import { Group, createGroups } from "./create-group";
 import ora from "ora";
 import { deleteGroups } from "./delete-group";
+import execa from "execa";
 interface LocationsResponse {
   locations: {
     [key: string]: string;
@@ -198,6 +196,11 @@ async function runTestInquirerScript() {
         description: "Leave the script.",
       },
       {
+        name: "Generate",
+        value: "generate",
+        description: "Generates Drizzle Migrations meta JSON and SQL files.",
+      },
+      {
         name: "Migrate",
         value: "migrate",
         description: "Migrate the selected groups",
@@ -238,6 +241,14 @@ async function runTestInquirerScript() {
   });
 
   if (answer === "exit") {
+    process.exit(0);
+  }
+
+  if (answer === "generate") {
+    console.log(
+      "To Generate Drizzle Migrations meta JSON and SQL files, you need to run the following command in the root of the project:",
+    );
+    console.log(chalk.blue("pnpm db:generate"));
     process.exit(0);
   }
 
