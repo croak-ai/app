@@ -8,8 +8,9 @@ import {
   editor,
   rawlist,
 } from "@inquirer/prompts";
+import migrateGroups from "./migrate";
+import wipeGroups from "./wipe";
 import {
-  MIGRATIONS_TURSO_ORG_DB_GROUPS,
   MIGRATIONS_TURSO_ORG_SLUG,
   MIGRATIONS_TURSO_AUTH_TOKEN,
 } from "../../env";
@@ -136,9 +137,24 @@ const getSelectedGroupNames = async (
   return selectedGroups;
 };
 
+const getGroups = async (): Promise<Group[]> => {
+  const groupsResponse = await fetch(
+    `https://api.turso.tech/v1/organizations/${MIGRATIONS_TURSO_ORG_SLUG}/groups`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${MIGRATIONS_TURSO_AUTH_TOKEN}`,
+      },
+    },
+  );
+
+  const { groups }: { groups: Group[] } = await groupsResponse.json();
+  return groups;
+};
+
 async function runTestInquirerScript() {
-  if (!MIGRATIONS_TURSO_ORG_DB_GROUPS) {
-    console.error("MIGRATIONS_TURSO_ORG_DB_GROUPS is not set");
+  if (!MIGRATIONS_TURSO_AUTH_TOKEN) {
+    console.error("MIGRATIONS_TURSO_AUTH_TOKEN is not set");
     process.exit(1);
   }
 
@@ -157,20 +173,11 @@ async function runTestInquirerScript() {
   const locations: LocationsResponse = await locationsResponse.json();
 
   spinner.text = "Getting Groups";
-
-  const groupsResponse = await fetch(
-    `https://api.turso.tech/v1/organizations/${MIGRATIONS_TURSO_ORG_SLUG}/groups`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${MIGRATIONS_TURSO_AUTH_TOKEN}`,
-      },
-    },
-  );
-
+  const groups = await getGroups();
   spinner.stop();
 
-  const { groups }: { groups: Group[] } = await groupsResponse.json();
+  console.log(chalk.green("\n---------------------------------------------\n"));
+  console.log("Groups: " + chalk.blue(groups.length));
 
   groups.forEach((group) => {
     console.log(
@@ -185,6 +192,23 @@ async function runTestInquirerScript() {
   const answer = await select({
     message: "What do you want to do?",
     choices: [
+      {
+        name: "Exit",
+        value: "exit",
+        description: "Leave the script.",
+      },
+      {
+        name: "Migrate",
+        value: "migrate",
+        description: "Migrate the selected groups",
+        disabled: groups.length === 0,
+      },
+      {
+        name: "Wipe Group Data",
+        value: "wipe",
+        description: "Wipe data in all databases in the selected groups",
+        disabled: groups.length === 0,
+      },
       {
         name: "Create Secrets for Already Created Groups",
         value: "create-secrets-for-existing-groups",
@@ -203,23 +227,55 @@ async function runTestInquirerScript() {
         description: "Creates new groups and secrets for those groups.",
       },
       {
-        name: "Delete Dev Groups",
+        name: "Delete Dev or Staging Groups",
         value: "delete",
         description: "Deletes groups. You can only delete dev groups.",
         disabled:
           groups.length === 0 ||
           !groups.some((group) => !group.name.startsWith("prod-")),
       },
-      {
-        name: "Exit",
-        value: "exit",
-        description: "Leave the script.",
-      },
     ],
   });
 
   if (answer === "exit") {
     process.exit(0);
+  }
+
+  if (answer === "migrate") {
+    const migrateByEnv = await confirm({
+      message: "Do you want to migrate groups by environment? (recommended)",
+    });
+
+    if (migrateByEnv) {
+      const desiredEnv = await getEnvironment();
+
+      const groupsToMigrate = groups.filter((group) =>
+        group.name.startsWith(desiredEnv),
+      );
+
+      if (groupsToMigrate.length === 0) {
+        console.log("No groups found for the selected environment");
+        process.exit(0);
+      }
+
+      await migrateGroups({
+        groupNames: groupsToMigrate.map((group) => group.name),
+      });
+    } else {
+      const selectedGroups = await getSelectedGroupNames(groups, {
+        bBlockProdGroups: false,
+      });
+
+      await migrateGroups({ groupNames: selectedGroups });
+    }
+  }
+
+  if (answer === "wipe") {
+    const selectedGroups = await getSelectedGroupNames(groups, {
+      bBlockProdGroups: false,
+    });
+
+    await wipeGroups({ groupNames: selectedGroups });
   }
 
   if (answer === "create-secrets-for-existing-groups") {
@@ -239,16 +295,19 @@ async function runTestInquirerScript() {
   }
 
   if (answer === "create") {
+    const environment = await getEnvironment();
+
     const confirmMigration = await confirm({
-      message:
-        "Creating a new group will force a migration. Do you want to continue?",
+      message: `Creating new groups in ${chalk.blue(
+        environment,
+      )} will force a migration in ${chalk.red(
+        "all databases in " + environment,
+      )}. Do you want to continue?`,
     });
 
     if (!confirmMigration) {
       process.exit(0);
     }
-
-    const environment = await getEnvironment();
 
     const groupsAlreadyCreated = groups
       .filter((group) => group.name === `${environment}-${group.primary}`)
@@ -268,6 +327,22 @@ async function runTestInquirerScript() {
       locationCodes: selectedLocations as string[],
       environment,
     });
+
+    const delaySpinner = ora(
+      "Waiting 5 seconds before starting migration",
+    ).start();
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+    delaySpinner.stop();
+
+    const refreshedGroups = await getGroups();
+
+    const groupNamesInEnvironment = refreshedGroups
+      .map((group) => group.name)
+      .filter((group) => group.startsWith(environment));
+
+    await migrateGroups({ groupNames: groupNamesInEnvironment });
+
+    console.log(`Migrated all groups in ${chalk.blue(environment)}!`);
   }
 
   if (answer === "delete") {
@@ -281,7 +356,7 @@ async function runTestInquirerScript() {
     }
 
     const selectedGroups = await getSelectedGroupNames(groups, {
-      bBlockProdGroups: false,
+      bBlockProdGroups: true,
     });
 
     await deleteGroups({ groupNames: selectedGroups });

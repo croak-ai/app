@@ -55,7 +55,7 @@ export async function createGroups({
       process.exit(1);
     }
 
-    console.log(` - Created Group: ${chalk.blue(name)}`);
+    spinner.succeed(`Created Group: ${chalk.blue(name)}`);
 
     num++;
   });
@@ -65,5 +65,5 @@ export async function createGroups({
   spinner.stop();
   spinner.clear();
 
-  console.log("Groups Created: " + num);
+  console.log("Groups Created: " + chalk.blue(num));
 }

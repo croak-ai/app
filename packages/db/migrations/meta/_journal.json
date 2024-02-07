@@ -5,64 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1705375907424,
-      "tag": "0000_unusual_madame_hydra",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1706252743662,
-      "tag": "0001_spicy_micromax",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1706489333715,
-      "tag": "0002_amazing_dracula",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1706730942155,
-      "tag": "0003_breezy_natasha_romanoff",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1706731715863,
-      "tag": "0004_broken_toad_men",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "5",
-      "when": 1706732790384,
-      "tag": "0005_soft_red_hulk",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "5",
-      "when": 1706732829058,
-      "tag": "0006_light_stryfe",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "5",
-      "when": 1706735731079,
-      "tag": "0007_modern_emma_frost",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "5",
-      "when": 1706735765919,
-      "tag": "0008_furry_gertrude_yorkes",
+      "when": 1707285083137,
+      "tag": "0000_far_sleepwalker",
       "breakpoints": true
     }
   ]
