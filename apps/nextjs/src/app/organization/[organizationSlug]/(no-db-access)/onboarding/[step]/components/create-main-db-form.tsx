@@ -60,6 +60,10 @@ export default function CreateMainDB({ currentStep }: { currentStep: number }) {
     throw error;
   }
 
+  if (groupLocations.error) {
+    throw groupLocations.error;
+  }
+
   const formSchema = z.object({
     groupCode: z.string().min(1),
   });
@@ -116,13 +120,11 @@ export default function CreateMainDB({ currentStep }: { currentStep: number }) {
         <div className="space-y-6 pb-6">
           <div>
             <h3 className="text-lg font-medium">
-              First Create your Workspace.
+              Choose your primary region for your Organization.
             </h3>
             <p className="text-sm text-muted-foreground">
-              Your workspace is where you store some piece of your company's
-              communcations. This could be a team, a mutual resource, or
-              something else.
-              {groupLocations.isFetching ? <>asd</> : null}
+              This is the primary region for your Organization, but we will
+              replicate your data globally. You can not change this later.
             </p>
           </div>
           <Separator />
