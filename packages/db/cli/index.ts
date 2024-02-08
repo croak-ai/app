@@ -1,20 +1,11 @@
-import {
-  input,
-  select,
-  checkbox,
-  confirm,
-  password,
-  expand,
-  editor,
-  rawlist,
-} from "@inquirer/prompts";
+import { select, checkbox, confirm } from "@inquirer/prompts";
 import migrateGroups from "./migrate";
-import wipeGroups from "./wipe";
 import { MIGRATIONS_TURSO_ORG_SLUG, MIGRATIONS_TURSO_AUTH_TOKEN } from "../env";
 import chalk from "chalk";
 import { Group, createGroups } from "./create-group";
 import ora from "ora";
 import { deleteGroups } from "./delete-group";
+import { invalidateSecretsInEnvironment } from "./secrets";
 import execa from "execa";
 interface LocationsResponse {
   locations: {
@@ -207,12 +198,6 @@ async function runTestInquirerScript() {
         disabled: groups.length === 0,
       },
       {
-        name: "Wipe Group Data",
-        value: "wipe",
-        description: "Wipe data in all databases in the selected groups",
-        disabled: groups.length === 0,
-      },
-      {
         name: "Create Secrets for Already Created Groups",
         value: "create-secrets-for-existing-groups",
         description: "Creates new secrets for groups that were already created",
@@ -281,14 +266,6 @@ async function runTestInquirerScript() {
     }
   }
 
-  if (answer === "wipe") {
-    const selectedGroups = await getSelectedGroupNames(groups, {
-      bBlockProdGroups: false,
-    });
-
-    await wipeGroups({ groupNames: selectedGroups });
-  }
-
   if (answer === "create-secrets-for-existing-groups") {
     const selectedGroups = await getSelectedGroupNames(groups, {
       bBlockProdGroups: false,
@@ -300,9 +277,8 @@ async function runTestInquirerScript() {
   }
 
   if (answer === "invalidate-secrets") {
-    const selectedGroups = await getSelectedGroupNames(groups, {
-      bBlockProdGroups: false,
-    });
+    const environment = await getEnvironment();
+    await invalidateSecretsInEnvironment({ environment });
   }
 
   if (answer === "create") {
