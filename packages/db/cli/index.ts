@@ -5,7 +5,10 @@ import chalk from "chalk";
 import { Group, createGroups } from "./create-group";
 import ora from "ora";
 import { deleteGroups } from "./delete-group";
-import { invalidateSecretsInEnvironment } from "./secrets";
+import {
+  createSecretsInEnvironment,
+  invalidateSecretsInEnvironment,
+} from "./secrets";
 import execa from "execa";
 interface LocationsResponse {
   locations: {
@@ -182,7 +185,7 @@ async function runTestInquirerScript() {
     message: "What do you want to do?",
     choices: [
       {
-        name: "Exit",
+        name: chalk.red("Exit"),
         value: "exit",
         description: "Leave the script.",
       },
@@ -198,13 +201,13 @@ async function runTestInquirerScript() {
         disabled: groups.length === 0,
       },
       {
-        name: "Create Secrets for Already Created Groups",
+        name: "Create Environment Secrets",
         value: "create-secrets-for-existing-groups",
         description: "Creates new secrets for groups that were already created",
         disabled: groups.length === 0,
       },
       {
-        name: "Invalidate Group Secrets",
+        name: "Invalidate Environment Secrets",
         value: "invalidate-secrets",
         description: "Invalidates Secrets for Selected Groups.",
         disabled: groups.length === 0,
@@ -267,13 +270,8 @@ async function runTestInquirerScript() {
   }
 
   if (answer === "create-secrets-for-existing-groups") {
-    const selectedGroups = await getSelectedGroupNames(groups, {
-      bBlockProdGroups: false,
-    });
-
-    const invalidateOldSecrets = await confirm({
-      message: "Do you want to invalidate old secrets for these groups?",
-    });
+    const environment = await getEnvironment();
+    await createSecretsInEnvironment({ environment });
   }
 
   if (answer === "invalidate-secrets") {
@@ -315,12 +313,6 @@ async function runTestInquirerScript() {
       environment,
     });
 
-    const delaySpinner = ora(
-      "Waiting 5 seconds before starting migration",
-    ).start();
-    await new Promise((resolve) => setTimeout(resolve, 5000));
-    delaySpinner.stop();
-
     const refreshedGroups = await getGroups();
 
     const groupNamesInEnvironment = refreshedGroups
@@ -330,6 +322,8 @@ async function runTestInquirerScript() {
     await migrateGroups({ groupNames: groupNamesInEnvironment });
 
     console.log(`Migrated all groups in ${chalk.blue(environment)}!`);
+
+    await createSecretsInEnvironment({ environment });
   }
 
   if (answer === "delete") {

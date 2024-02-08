@@ -118,13 +118,15 @@ export default async function migrateGroups({
         process.exit(1);
       }
 
-      console.log(
+      spinner.succeed(
         `Created empty database for ${chalk.green(
           group.groupName,
         )}. This initalizes the group.`,
       );
     }
+    spinner.text = `Waiting 3 Seconds before migrating database (waiting for turso to initialize stuff) ${group.groupName}...`;
 
+    await new Promise((resolve) => setTimeout(resolve, 3000));
     await migrateDatabase({
       name: emptyDatabaseName,
       secret: group.token,

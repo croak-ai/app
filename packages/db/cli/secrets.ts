@@ -2,6 +2,7 @@ import ora from "ora";
 import { MIGRATIONS_TURSO_ORG_SLUG, MIGRATIONS_TURSO_AUTH_TOKEN } from "../env";
 import chalk from "chalk";
 import { Group } from "./create-group";
+import { confirm } from "@inquirer/prompts";
 
 export const invalidateSecretsInEnvironment = async ({
   environment,
@@ -13,10 +14,6 @@ export const invalidateSecretsInEnvironment = async ({
     process.exit(1);
   }
 
-  if (!MIGRATIONS_TURSO_ORG_SLUG) {
-    console.error("MIGRATIONS_TURSO_ORG_SLUG is not set");
-    process.exit(1);
-  }
   let num = 0;
 
   const spinner = ora(`Getting Groups To Invalidate`).start();
@@ -39,12 +36,6 @@ export const invalidateSecretsInEnvironment = async ({
     .map((group) => group.name);
 
   const invalidateSecretPromises = groupNames.map(async (groupName) => {
-    if (groupName.startsWith("prod-")) {
-      console.error(
-        ` - Error: Cannot invalidate prod group: ${chalk.blue(groupName)}`,
-      );
-      process.exit(1);
-    }
     const groupResponse = await fetch(
       `https://api.turso.tech/v1/organizations/${MIGRATIONS_TURSO_ORG_SLUG}/groups/${groupName}/auth/rotate`,
       {
@@ -77,4 +68,78 @@ export const invalidateSecretsInEnvironment = async ({
   return num;
 };
 
-export const createSecretsInEnvironment = async () => {};
+export const createSecretsInEnvironment = async ({
+  environment,
+}: {
+  environment: string;
+}) => {
+  console.log(chalk.blue("Creating Secrets for Environment: " + environment));
+  const invalidateOldSecrets = await confirm({
+    message: `Do you want to invalidate old secrets for ${chalk.blue(
+      environment,
+    )} before creating new ones? ( recommended )`,
+  });
+
+  if (invalidateOldSecrets) {
+    await invalidateSecretsInEnvironment({ environment });
+    console.log("Invalidated Old Secrets");
+  }
+
+  const spinner = ora(
+    `Creating Secrets for Environment: ${environment}`,
+  ).start();
+
+  const groupsResponse = await fetch(
+    `https://api.turso.tech/v1/organizations/${MIGRATIONS_TURSO_ORG_SLUG}/groups`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${MIGRATIONS_TURSO_AUTH_TOKEN}`,
+      },
+    },
+  );
+
+  const responseJson = await groupsResponse.json();
+  const groups: Group[] = responseJson.groups;
+
+  const environmentGroups = groups.filter((group) =>
+    group.name.startsWith(environment),
+  );
+
+  const createSecretPromises = environmentGroups.map(async (group) => {
+    const secretResponse = await fetch(
+      `https://api.turso.tech/v1/organizations/${MIGRATIONS_TURSO_ORG_SLUG}/groups/${group.name}/auth/tokens`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${MIGRATIONS_TURSO_AUTH_TOKEN}`,
+        },
+      },
+    );
+
+    if (secretResponse.status !== 200) {
+      console.error(
+        ` - Error creating secret for group ${group.name}: ${secretResponse.status}`,
+      );
+      process.exit(1);
+    }
+
+    const secret = await secretResponse.json();
+
+    const jwt = secret.jwt;
+
+    const secretName =
+      group.name.replace(`${environment}-`, "").toUpperCase() + "_SECRET";
+    return `${chalk.blue(secretName)}=${chalk.green(jwt)}`;
+  });
+
+  const secretsResults = await Promise.all(createSecretPromises);
+  spinner.stop();
+  spinner.clear();
+
+  spinner.succeed("Secrets Created, Copy and Paste into .devs.var \n \n");
+  console.log(
+    `${chalk.blue("DB_ENVIORNMENT_LEVEL")}=${chalk.green(environment)}`,
+  );
+  secretsResults.forEach((result) => console.log(result + "\n"));
+};
