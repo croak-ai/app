@@ -2,7 +2,7 @@ import ora from "ora";
 import { MIGRATIONS_TURSO_ORG_SLUG, MIGRATIONS_TURSO_AUTH_TOKEN } from "../env";
 import chalk from "chalk";
 import { Group } from "./create-group";
-import { confirm } from "@inquirer/prompts";
+import { confirm, select } from "@inquirer/prompts";
 
 export const invalidateSecretsInEnvironment = async ({
   environment,
@@ -75,15 +75,24 @@ export const createSecretsInEnvironment = async ({
 }) => {
   console.log(chalk.blue("Creating Secrets for Environment: " + environment));
   const invalidateOldSecrets = await confirm({
-    message: `Do you want to invalidate old secrets for ${chalk.blue(
+    message: `Do you want to invalidate ${chalk.red(
+      "ALL",
+    )} old secrets for ${chalk.blue(
       environment,
     )} before creating new ones? ( recommended )`,
   });
 
   if (invalidateOldSecrets) {
     await invalidateSecretsInEnvironment({ environment });
-    console.log("Invalidated Old Secrets");
   }
+
+  const accessType = await select({
+    message: "Select the access type for the secrets:",
+    choices: [
+      { name: "Full Access", value: "full-access" },
+      { name: "Read Only", value: "read-only" },
+    ],
+  });
 
   const spinner = ora(
     `Creating Secrets for Environment: ${environment}`,
@@ -108,7 +117,7 @@ export const createSecretsInEnvironment = async ({
 
   const createSecretPromises = environmentGroups.map(async (group) => {
     const secretResponse = await fetch(
-      `https://api.turso.tech/v1/organizations/${MIGRATIONS_TURSO_ORG_SLUG}/groups/${group.name}/auth/tokens`,
+      `https://api.turso.tech/v1/organizations/${MIGRATIONS_TURSO_ORG_SLUG}/groups/${group.name}/auth/tokens?authorization=${accessType}`,
       {
         method: "POST",
         headers: {
@@ -137,7 +146,11 @@ export const createSecretsInEnvironment = async ({
   spinner.stop();
   spinner.clear();
 
-  spinner.succeed("Secrets Created, Copy and Paste into .devs.var \n \n");
+  spinner.succeed(
+    `${chalk.green(
+      accessType.toUpperCase(),
+    )} Secrets Created, Copy and Paste into .devs.var \n \n`,
+  );
   console.log(
     `${chalk.blue("DB_ENVIORNMENT_LEVEL")}=${chalk.green(environment)}`,
   );
