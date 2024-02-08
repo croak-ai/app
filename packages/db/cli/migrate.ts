@@ -145,32 +145,20 @@ export default async function migrateGroups({
     (db) => !db.Name.includes("empty"),
   );
 
-  let isFirstGroup = true;
-
   for (const group of groupsWithTokens) {
+    spinner.start(`Migrating Databases for ${group.groupName}`);
     const databasesInGroup = nonEmptyDatabases.filter(
       (db) => db.group === group.groupName,
     );
-    let isFirstDatabase = true;
 
-    for (const database of databasesInGroup) {
-      try {
-        await migrateDatabase({
+    await Promise.all(
+      databasesInGroup.map((database, index) =>
+        migrateDatabase({
           name: database.Name,
           secret: group.token,
-        });
-      } catch (error) {
-        // We only want to stop the process if it's the very first iteration of both loops
-        if (isFirstGroup && isFirstDatabase) {
-          throw error;
-        }
-        console.error(`Error migrating database ${database.Name}: ${error}`);
-      }
-
-      isFirstDatabase = false;
-    }
-
-    isFirstGroup = false;
+        }),
+      ),
+    );
   }
 
   spinner.succeed(chalk.green("Finished Migrating Databases"));

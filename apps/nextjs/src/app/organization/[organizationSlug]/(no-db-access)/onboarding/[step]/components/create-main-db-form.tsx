@@ -47,10 +47,6 @@ export default function CreateMainDB({ currentStep }: { currentStep: number }) {
 
   const { isLoaded, user } = useUser();
 
-  if (!isLoaded || !user) {
-    return <Loading name="Loading User" />;
-  }
-
   const createNewMainDB =
     reactTRPC.createNewTursoDB.createNewTursoDB.useMutation();
 
@@ -85,7 +81,7 @@ export default function CreateMainDB({ currentStep }: { currentStep: number }) {
       });
 
       if (result) {
-        user.reload();
+        user?.reload();
         setCreatedMainDB(true);
       }
     } catch (e) {
