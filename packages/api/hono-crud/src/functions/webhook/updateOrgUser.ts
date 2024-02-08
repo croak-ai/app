@@ -3,11 +3,11 @@ organization they have a membership with */
 
 import { HTTPException } from "hono/http-exception";
 import { OrganizationMembership } from "./fetchUserMemberships";
-import { createDb } from "../db";
+import { getDbAuthToken } from "../db";
 import { Context } from "hono";
 import { HonoConfig } from "../../config";
 import { user } from "@packages/db/schema/tenant";
-import { eq } from "@packages/db";
+import { createDbClient, eq } from "@packages/db";
 
 export async function updateOrgUser(
   userMemberships: OrganizationMembership,
@@ -17,8 +17,19 @@ export async function updateOrgUser(
     /* Loop through memberships, connect to orgDB, update user */
     for (const membership of userMemberships.data) {
       const userData = membership.public_user_data;
-      const orgId = membership.organization.id;
-      const db = createDb({ c, orgId });
+
+      /* Get DB conection */
+      const tursoDbName =
+        membership.organization.public_metadata?.main_database_turso_db_name;
+      const tursoGroupName =
+        membership.organization.public_metadata?.main_database_turso_group_name;
+      const tursoOrgName =
+        membership.organization.public_metadata?.main_database_turso_org_name;
+
+      const url = `libsql://${tursoDbName}-${tursoOrgName}.turso.io`;
+      const token = getDbAuthToken({ c, groupName: tursoGroupName as string });
+
+      const db = createDbClient(url, token);
 
       const updatedUser = {
         firstName: userData.first_name,
