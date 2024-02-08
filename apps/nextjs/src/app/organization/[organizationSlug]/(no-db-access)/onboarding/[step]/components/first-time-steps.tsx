@@ -105,7 +105,7 @@ export const FirstTimeSteps: StepFunction[] = [
         <div className="flex justify-end py-4">
           <BackwardButton currentStep={props.currentStep} />
           <div className="ml-auto">
-            <Link href={`/`}>
+            <Link href={`/organization/${props.organizationSlug}`}>
               <ContinueButton name="Go To Workspace" />
             </Link>
           </div>

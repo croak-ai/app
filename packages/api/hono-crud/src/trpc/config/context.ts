@@ -1,13 +1,12 @@
 import { type inferAsyncReturnType } from "@trpc/server";
-import type {
-  SignedInAuthObject,
-  SignedOutAuthObject,
-} from "@clerk/nextjs/api";
+
+import { createDbClient } from "@packages/db";
 
 import { getAuth } from "@hono/clerk-auth";
 import { HonoContext } from "../../config";
 import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
-import { createDb } from "../../functions/db";
+import { getDbAuthToken } from "../../functions/db";
+import { getClerkOrgInfo } from "../../functions/clerk";
 
 export function createTRPCContextFromHonoContext(c: HonoContext) {
   return (opts: FetchCreateContextFnOptions) => {
@@ -15,6 +14,7 @@ export function createTRPCContextFromHonoContext(c: HonoContext) {
      * Here we spawn a new database connection for each request.
      * This is because we can't share a connection between requests in a Cloudflare Worker.
      */
+
     const auth = getAuth(c);
     const clerk = c.get("clerk");
 
@@ -22,9 +22,9 @@ export function createTRPCContextFromHonoContext(c: HonoContext) {
       throw new Error("No auth object");
     }
 
-    const orgId = auth?.orgId;
+    const clerkInfo = getClerkOrgInfo({ auth });
 
-    if (!orgId) {
+    if (!clerkInfo) {
       return {
         ...opts,
         db: undefined,
@@ -34,7 +34,12 @@ export function createTRPCContextFromHonoContext(c: HonoContext) {
       };
     }
 
-    const db = createDb({ c, orgId });
+    const { tursoDbName, tursoGroupName, tursoOrgName } = clerkInfo;
+
+    const url = `libsql://${tursoDbName}-${tursoOrgName}.turso.io`;
+    const token = getDbAuthToken({ c, groupName: tursoGroupName as string });
+
+    const db = createDbClient(url, token);
 
     return {
       ...opts,

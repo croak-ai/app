@@ -17,13 +17,13 @@ export const createNewTursoDB = router({
         if (ctx.auth.orgRole !== "admin") {
           throw new Error("You must be an admin to create a new database.");
         }
-        console.log("2");
 
         const group = input.group;
-        const orgSlug = ctx.env.TRPC_TURSO_ORG_SLUG;
+        const tursoOrgName = ctx.env.TRPC_TURSO_ORG_SLUG;
         const tursoToken = ctx.env.TRPC_TURSO_AUTH_TOKEN;
+        const clerkToken = ctx.env.CLERK_SECRET_KEY;
 
-        if (!orgSlug || !tursoToken) {
+        if (!tursoOrgName || !tursoToken) {
           throw new Error(
             "No or TRPC_TURSO_ORG_SLUG, or TRPC_TURSO_TOKEN Make sure you configured your .env file correctly.",
           );
@@ -34,13 +34,13 @@ export const createNewTursoDB = router({
         if (!orgId) {
           throw new Error("No organization ID");
         }
-        console.log("3");
+
         const newDatabaseName = getTursoDbNameFromClerkOrgId(orgId);
 
         const emptyDatabaseName = getEmptyDatabaseName({ groupName: group });
-        console.log("4");
+
         const newDatabaseResponse = await fetch(
-          `https://api.turso.tech/v1/organizations/${orgSlug}/databases`,
+          `https://api.turso.tech/v1/organizations/${tursoOrgName}/databases`,
           {
             method: "POST",
             headers: {
@@ -56,8 +56,11 @@ export const createNewTursoDB = router({
             }),
           },
         );
-        console.log("5");
+
         if (!newDatabaseResponse.ok) {
+          if (newDatabaseResponse.status === 409) {
+            throw new Error(`Database already exists. Please Contact Support.`);
+          }
           throw new Error(`HTTP error! status: ${newDatabaseResponse.status}`);
         }
 
@@ -66,6 +69,31 @@ export const createNewTursoDB = router({
         console.log(
           `Created a new Database! -> ${JSON.stringify(newDatabaseData)}`,
         );
+
+        const clerkUpdateResponse = await fetch(
+          `https://api.clerk.dev/v1/organizations/${orgId}`,
+          {
+            method: "PATCH",
+            headers: {
+              Authorization: `Bearer ${clerkToken}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              public_metadata: {
+                main_database_turso_org_name: tursoOrgName,
+                main_database_turso_group_name: group,
+                main_database_turso_db_name: newDatabaseName,
+              },
+            }),
+          },
+        );
+
+        if (!clerkUpdateResponse.ok) {
+          throw new Error(
+            `Error updating Clerk metadata. HTTP status: ${clerkUpdateResponse.status}`,
+          );
+        }
+
         return "Created new database";
       } catch (error) {
         console.error(error);

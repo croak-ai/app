@@ -32,10 +32,8 @@ import { Separator } from "@acme/ui/components/ui/separator";
 
 import { successCheck } from "@acme/lottie-animations";
 import { reactTRPC } from "@/utils/trpc/reactTRPCClient";
-import { Icons } from "@acme/ui/components/bonus/icons";
 import dynamic from "next/dynamic";
-import { Skeleton } from "@acme/ui/components/ui/skeleton";
-import { SkeletonButtonText } from "@acme/ui/components/skeleton/skeleton-button";
+import { useUser } from "@clerk/nextjs";
 
 const Lottie = dynamic(() => import("lottie-react"), {
   ssr: false,
@@ -47,7 +45,11 @@ export default function CreateMainDB({ currentStep }: { currentStep: number }) {
   const [error, setError] = useState<Error | null>(null);
   const [createdMainDB, setCreatedMainDB] = useState(false);
 
-  const utils = reactTRPC.useUtils();
+  const { isLoaded, user } = useUser();
+
+  if (!isLoaded || !user) {
+    return <Loading name="Loading User" />;
+  }
 
   const createNewMainDB =
     reactTRPC.createNewTursoDB.createNewTursoDB.useMutation();
@@ -83,6 +85,7 @@ export default function CreateMainDB({ currentStep }: { currentStep: number }) {
       });
 
       if (result) {
+        user.reload();
         setCreatedMainDB(true);
       }
     } catch (e) {
@@ -187,7 +190,7 @@ export default function CreateMainDB({ currentStep }: { currentStep: number }) {
       <div className="flex justify-end py-4">
         {loading ? (
           <Button disabled={true}>
-            <Loading name="Submitting" />
+            <Loading name={"Creating Database"} />
           </Button>
         ) : (
           <Button

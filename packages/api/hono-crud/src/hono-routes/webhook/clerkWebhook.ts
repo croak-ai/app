@@ -6,11 +6,12 @@ import {
 } from "@clerk/backend";
 import { Hono } from "hono";
 import type { HonoConfig } from "../../config";
-import { createDb } from "../../functions/db";
+import { createDbClient } from "@packages/db";
 import { verifyWebhook } from "../../functions/webhook/verifyWebhook";
 import { HTTPException } from "hono/http-exception";
 import { user } from "@packages/db/schema/tenant";
 import { eq } from "@packages/db";
+import { getDbAuthToken } from "../../functions/db";
 
 /*
 This route handles organization membership webhook events from Clerk.
@@ -39,9 +40,18 @@ clerkWebhook.post("/organizationMembership", async (c) => {
       updatedAt: event.data.updated_at,
     };
 
-    /* Grab orgId */
-    const orgId = event.data.organization.id;
-    const db = createDb({ c, orgId });
+    /* Get DB conection */
+    const tursoDbName =
+      event.data.organization.public_metadata?.main_database_turso_db_name;
+    const tursoGroupName =
+      event.data.organization.public_metadata?.main_database_turso_group_name;
+    const tursoOrgName =
+      event.data.organization.public_metadata?.main_database_turso_org_name;
+
+    const url = `libsql://${tursoDbName}-${tursoOrgName}.turso.io`;
+    const token = getDbAuthToken({ c, groupName: tursoGroupName as string });
+
+    const db = createDbClient(url, token);
 
     switch (event.type) {
       /* Create user */

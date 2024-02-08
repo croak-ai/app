@@ -89,49 +89,53 @@ export default async function migrateGroups({
     spinner.succeed(`Tables migrated for ${chalk.green(db.name)}.`);
   }
 
-  for (const group of groupsWithTokens) {
-    const emptyDatabaseName = getEmptyDatabaseName({
-      groupName: group.groupName,
-    });
+  await Promise.all(
+    groupsWithTokens.map(async (group) => {
+      const emptyDatabaseName = getEmptyDatabaseName({
+        groupName: group.groupName,
+      });
 
-    if (!databasesBeforeMigration.some((db) => db.Name === emptyDatabaseName)) {
-      const response = await fetch(
-        `https://api.turso.tech/v1/organizations/${MIGRATIONS_TURSO_ORG_SLUG}/databases`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${MIGRATIONS_TURSO_AUTH_TOKEN}`,
+      if (
+        !databasesBeforeMigration.some((db) => db.Name === emptyDatabaseName)
+      ) {
+        const response = await fetch(
+          `https://api.turso.tech/v1/organizations/${MIGRATIONS_TURSO_ORG_SLUG}/databases`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${MIGRATIONS_TURSO_AUTH_TOKEN}`,
+            },
+            body: JSON.stringify({
+              name: emptyDatabaseName,
+              group: group.groupName,
+            }),
           },
-          body: JSON.stringify({
-            name: emptyDatabaseName,
-            group: group.groupName,
-          }),
-        },
-      );
-
-      if (response.status !== 200) {
-        spinner.fail(
-          `Failed to create empty database for ${
-            group.groupName
-          }. Error message: ${JSON.stringify(await response.json())}`,
         );
-        process.exit(1);
+
+        if (response.status !== 200) {
+          spinner.fail(
+            `Failed to create empty database for ${
+              group.groupName
+            }. Error message: ${JSON.stringify(await response.json())}`,
+          );
+          process.exit(1);
+        }
+
+        spinner.succeed(
+          `Created empty database for ${chalk.green(
+            group.groupName,
+          )}. This initializes the group.`,
+        );
       }
+      spinner.text = `Waiting 3 Seconds before migrating database (waiting for turso to initialize stuff) ${group.groupName}...`;
 
-      spinner.succeed(
-        `Created empty database for ${chalk.green(
-          group.groupName,
-        )}. This initalizes the group.`,
-      );
-    }
-    spinner.text = `Waiting 3 Seconds before migrating database (waiting for turso to initialize stuff) ${group.groupName}...`;
-
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-    await migrateDatabase({
-      name: emptyDatabaseName,
-      secret: group.token,
-    });
-  }
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      return migrateDatabase({
+        name: emptyDatabaseName,
+        secret: group.token,
+      });
+    }),
+  );
 
   spinner.succeed("Finished Migrating Empty Databases");
 

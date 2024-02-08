@@ -17,6 +17,10 @@ export default authMiddleware({
 
     const redirectUrl = `/organization/${auth.orgSlug}/onboarding`;
 
+    if (req.nextUrl.pathname.startsWith("/sign-in")) {
+      return NextResponse.next();
+    }
+
     if (req.nextUrl.pathname.includes(redirectUrl)) {
       return NextResponse.next();
     }
@@ -26,8 +30,9 @@ export default authMiddleware({
     }
 
     if (
-      !publicMetadata?.main_database_group_name ||
-      !publicMetadata?.main_database_name
+      !publicMetadata?.main_database_turso_org_name ||
+      !publicMetadata?.main_database_turso_group_name ||
+      !publicMetadata?.main_database_turso_db_name
     ) {
       const url = req.nextUrl.clone();
       url.pathname = `/organization/${auth.orgSlug}/onboarding`;
