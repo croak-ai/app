@@ -514,6 +514,9 @@ importers:
       '@clerk/clerk-react':
         specifier: ^4.30.4
         version: 4.30.4(react@18.2.0)
+      '@clerk/themes':
+        specifier: ^1.7.9
+        version: 1.7.9(react@18.2.0)
       '@tanstack/react-query':
         specifier: ^5.17.19
         version: 5.18.1(react@18.2.0)

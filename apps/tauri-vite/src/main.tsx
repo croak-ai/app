@@ -9,7 +9,9 @@ import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 // import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
-import { ClerkProvider } from "@clerk/clerk-react";
+import { ClerkProvider, SignedIn, SignedOut } from "@clerk/clerk-react";
+import SignInPage from "./components/sign-in";
+import { ThemeProvider } from "./theme";
 
 // Set up a Router instance
 const router = createRouter({
@@ -30,11 +32,18 @@ function App() {
   return (
     // Build our routes and render our router
     <>
-      <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
-        <TRPCProvider>
-          <RouterProvider router={router} />
-        </TRPCProvider>
-      </ClerkProvider>
+      <ThemeProvider>
+        <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+          <TRPCProvider>
+            <SignedIn>
+              <RouterProvider router={router} />
+            </SignedIn>
+            <SignedOut>
+              <SignInPage />
+            </SignedOut>
+          </TRPCProvider>
+        </ClerkProvider>
+      </ThemeProvider>
     </>
   );
 }
