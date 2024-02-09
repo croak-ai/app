@@ -1,4 +1,3 @@
-import React from "react";
 import { SignIn } from "@clerk/clerk-react";
 import { useTheme } from "@/theme"; // If you're using Context
 import { dark } from "@clerk/themes";
