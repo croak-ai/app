@@ -606,6 +606,9 @@ importers:
       drizzle-orm:
         specifier: ^0.28.6
         version: 0.28.6(@libsql/client@0.4.0-pre.5)(@planetscale/database@1.11.0)
+      sqlite-vss:
+        specifier: ^0.1.2
+        version: 0.1.2
       znv:
         specifier: ^0.4.0
         version: 0.4.0(zod@3.22.4)
@@ -16354,6 +16357,38 @@ packages:
 
   /sprintf-js@1.0.3:
     resolution: {integrity: sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==}
+    dev: false
+
+  /sqlite-vss-darwin-arm64@0.1.2:
+    resolution: {integrity: sha512-zyDk9eg33nBABrUC4cqQ7el8KJaRPzsqp8Y/nGZ0CAt7o1PMqLoCOgREorill5MGiZEBmLqxdAgw0O2MFwq4mw==}
+    cpu: [arm64]
+    os: [darwin]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  /sqlite-vss-darwin-x64@0.1.2:
+    resolution: {integrity: sha512-w+ODOH2dNkyO6UaGclwC0jwNf/FBsKaE53XKJ7dFmpOvlvO0/9sA1stkWXygykRVWwa3UD8ow0qbQpRwdOFyqg==}
+    cpu: [x64]
+    os: [darwin]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  /sqlite-vss-linux-x64@0.1.2:
+    resolution: {integrity: sha512-y1qktcHAZcfN1nYMcF5os/cCRRyaisaNc2C9I3ceLKLPAqUWIocsOdD5nNK/dIeGPag/QeT2ZItJ6uYWciLiAg==}
+    cpu: [x64]
+    os: [linux]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  /sqlite-vss@0.1.2:
+    resolution: {integrity: sha512-MgTz3GLT04ckv1kaesbrsUU6/kcVsA6vGeCS/HO5d/8zKqCuZFCD0QlJaQnS6zwaMyPG++BO/uu40MMrMa0cow==}
+    optionalDependencies:
+      sqlite-vss-darwin-arm64: 0.1.2
+      sqlite-vss-darwin-x64: 0.1.2
+      sqlite-vss-linux-x64: 0.1.2
     dev: false
 
   /ssri@8.0.1:

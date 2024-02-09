@@ -16,6 +16,7 @@
     "@libsql/client": "0.4.0-pre.5",
     "@planetscale/database": "^1.10.0",
     "drizzle-orm": "^0.28.6",
+    "sqlite-vss": "^0.1.2",
     "znv": "^0.4.0",
     "zod": "^3.22.4"
   },
