@@ -20,7 +20,7 @@
     "@clerk/backend": "^0.30.*",
     "@hono/clerk-auth": "^1.0.0",
     "@hono/trpc-server": "*",
-    "@trpc/server": "^10.45.0",
+    "@trpc/server": "next",
     "cors": "^2.8.5",
     "hono": "^3.11.7",
     "superjson": "1.9.1",
