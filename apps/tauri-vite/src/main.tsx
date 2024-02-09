@@ -1,12 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import "@acme/ui/styles/globals.css";
 
 import { TRPCProvider } from "./utils/trpc";
 
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 
 import { routeTree } from "./routeTree.gen";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+// import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 import { ClerkProvider } from "@clerk/clerk-react";
 
@@ -32,7 +33,6 @@ function App() {
       <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
         <TRPCProvider>
           <RouterProvider router={router} />
-          <ReactQueryDevtools position={"right"} />
         </TRPCProvider>
       </ClerkProvider>
     </>
