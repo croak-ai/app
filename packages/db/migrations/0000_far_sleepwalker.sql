@@ -1,6 +1,6 @@
 CREATE TABLE `channel` (
 	`id` integer PRIMARY KEY NOT NULL,
-	`name` text(256) NOT NULL,
+	`slug` text(256) NOT NULL,
 	`description` text(512) NOT NULL,
 	`workspaceId` integer NOT NULL,
 	`channelType` text(256) NOT NULL,
@@ -42,6 +42,28 @@ CREATE TABLE `dekEncryptionKeyUserAccess` (
 	`deletedAt` integer
 );
 --> statement-breakpoint
+CREATE TABLE `message` (
+	`id` integer PRIMARY KEY NOT NULL,
+	`channelId` integer NOT NULL,
+	`userId` text NOT NULL,
+	`message` text(60000) NOT NULL,
+	`createdAt` integer NOT NULL,
+	`updatedAt` integer NOT NULL,
+	`deletedAt` integer
+);
+--> statement-breakpoint
+CREATE TABLE `user` (
+	`userId` text(256) PRIMARY KEY NOT NULL,
+	`role` text(256) NOT NULL,
+	`firstName` text(256),
+	`lastName` text(256),
+	`email` text(256) NOT NULL,
+	`imageUrl` text(512),
+	`profileImageUrl` text(512),
+	`createdAt` integer NOT NULL,
+	`updatedAt` integer NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE `workspace` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`name` text(256) NOT NULL,
@@ -65,7 +87,8 @@ CREATE TABLE `workspaceMember` (
 	`deletedAt` integer
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `channel_workspaceId_name_unique` ON `channel` (`workspaceId`,`name`);--> statement-breakpoint
+CREATE UNIQUE INDEX `channel_workspaceId_slug_unique` ON `channel` (`workspaceId`,`slug`);--> statement-breakpoint
 CREATE UNIQUE INDEX `dekEncryptionKey_key_unique` ON `dekEncryptionKey` (`key`);--> statement-breakpoint
+CREATE UNIQUE INDEX `user_email_unique` ON `user` (`email`);--> statement-breakpoint
 CREATE UNIQUE INDEX `workspace_slug_unique` ON `workspace` (`slug`);--> statement-breakpoint
 CREATE INDEX `slug_idx` ON `workspace` (`slug`);
