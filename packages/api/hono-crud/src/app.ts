@@ -14,17 +14,7 @@ const app = new Hono<HonoConfig>()
   .use(
     "*",
     cors({
-      origin: [
-        // Admin tool dev server
-        "http://localhost:3000",
-        // Club website dev server
-        "http://localhost:3001",
-        // Knight Hacks 2024 dev server
-        "http://localhost:3002",
-        // Admin tool production server
-        "https://knighthacks-admin.pages.dev",
-        "https://admin.knighthacks.org",
-      ],
+      origin: ["http://localhost:3000", "http://localhost:1420"],
     }),
   )
   .use("*", clerk)
