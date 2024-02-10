@@ -91,21 +91,9 @@ export function OrgLayout({ children }: { children: React.ReactNode }) {
             </div>
           </span>
           <div className="flex space-x-4 justify-self-center">
-            <Nav
-              title="Workspace"
-              href={`/organization/${orgSlug}/workspace`}
-              icon={TextQuote}
-            />
-            <Nav
-              title="Inbox"
-              href={`/organization/${orgSlug}/inbox`}
-              icon={Inbox}
-            />
-            <Nav
-              title="Notifications"
-              href={`/organization/${orgSlug}/user`}
-              icon={BellDot}
-            />
+            <Nav title="Workspace" to={`/`} icon={TextQuote} />
+            <Nav title="Inbox" to={`/`} icon={Inbox} />
+            <Nav title="Notifications" to={`/`} icon={BellDot} />
             <ThemeToggle />
           </div>
           <div className="mx-4 justify-self-end">

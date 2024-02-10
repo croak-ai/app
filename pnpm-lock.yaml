@@ -341,7 +341,7 @@ importers:
         version: 7.3.1(@milkdown/core@7.3.1)(@milkdown/ctx@7.3.1)(@milkdown/prose@7.3.1)(@milkdown/transformer@7.3.1)
       '@milkdown/plugin-collab':
         specifier: 7.3.1
-        version: 7.3.1(@milkdown/core@7.3.1)(@milkdown/ctx@7.3.1)(@milkdown/prose@7.3.1)(@milkdown/transformer@7.3.1)(y-prosemirror@1.2.2)(y-protocols@1.0.6)(yjs@13.6.11)
+        version: 7.3.1(@milkdown/core@7.3.1)(@milkdown/ctx@7.3.1)(@milkdown/prose@7.3.1)(@milkdown/transformer@7.3.1)(y-prosemirror@1.2.2)(y-protocols@1.0.6)(yjs@13.6.12)
       '@milkdown/plugin-cursor':
         specifier: 7.3.1
         version: 7.3.1(@milkdown/core@7.3.1)(@milkdown/ctx@7.3.1)(@milkdown/prose@7.3.1)(@milkdown/transformer@7.3.1)
@@ -4412,7 +4412,7 @@ packages:
       - '@milkdown/transformer'
     dev: false
 
-  /@milkdown/plugin-collab@7.3.1(@milkdown/core@7.3.1)(@milkdown/ctx@7.3.1)(@milkdown/prose@7.3.1)(@milkdown/transformer@7.3.1)(y-prosemirror@1.2.2)(y-protocols@1.0.6)(yjs@13.6.11):
+  /@milkdown/plugin-collab@7.3.1(@milkdown/core@7.3.1)(@milkdown/ctx@7.3.1)(@milkdown/prose@7.3.1)(@milkdown/transformer@7.3.1)(y-prosemirror@1.2.2)(y-protocols@1.0.6)(yjs@13.6.12):
     resolution: {integrity: sha512-KIk80NApf5KYqgHR47sg+FVgUBWYy5huzf/Rw3bdI1Z0ROn+sCFqwnLxgDKUMb95/rCg/QGzsgq1LSAqGohbIg==}
     peerDependencies:
       '@milkdown/core': ^7.2.0
@@ -4428,9 +4428,9 @@ packages:
       '@milkdown/prose': 7.3.1
       '@milkdown/utils': 7.3.1(@milkdown/core@7.3.1)(@milkdown/ctx@7.3.1)(@milkdown/prose@7.3.1)(@milkdown/transformer@7.3.1)
       tslib: 2.6.2
-      y-prosemirror: 1.2.2(prosemirror-model@1.19.4)(prosemirror-state@1.4.3)(prosemirror-view@1.32.7)(y-protocols@1.0.6)(yjs@13.6.11)
-      y-protocols: 1.0.6(yjs@13.6.11)
-      yjs: 13.6.11
+      y-prosemirror: 1.2.2(prosemirror-model@1.19.4)(prosemirror-state@1.4.3)(prosemirror-view@1.32.7)(y-protocols@1.0.6)(yjs@13.6.12)
+      y-protocols: 1.0.6(yjs@13.6.12)
+      yjs: 13.6.12
     transitivePeerDependencies:
       - '@milkdown/transformer'
     dev: false
@@ -18674,7 +18674,7 @@ packages:
     resolution: {integrity: sha512-ibF0Or+FivM9lNrg+HGJfVX8WJqgo+kCLDc4vx6xMeTce7Aj+DLttKbxxRR/gNLSAelRc1omAPlJ77N/Jem07A==}
     dev: true
 
-  /y-prosemirror@1.2.2(prosemirror-model@1.19.4)(prosemirror-state@1.4.3)(prosemirror-view@1.32.7)(y-protocols@1.0.6)(yjs@13.6.11):
+  /y-prosemirror@1.2.2(prosemirror-model@1.19.4)(prosemirror-state@1.4.3)(prosemirror-view@1.32.7)(y-protocols@1.0.6)(yjs@13.6.12):
     resolution: {integrity: sha512-hHdnIAhfa8mIoLWtTkMDb6RBzN3lye1QVkaZwVm58sledAA1zTl+yyEtgkrY/sdH6SaQL0rsLj61zHjgr5D0HQ==}
     engines: {node: '>=16.0.0', npm: '>=8.0.0'}
     peerDependencies:
@@ -18688,18 +18688,18 @@ packages:
       prosemirror-model: 1.19.4
       prosemirror-state: 1.4.3
       prosemirror-view: 1.32.7
-      y-protocols: 1.0.6(yjs@13.6.11)
-      yjs: 13.6.11
+      y-protocols: 1.0.6(yjs@13.6.12)
+      yjs: 13.6.12
     dev: false
 
-  /y-protocols@1.0.6(yjs@13.6.11):
+  /y-protocols@1.0.6(yjs@13.6.12):
     resolution: {integrity: sha512-vHRF2L6iT3rwj1jub/K5tYcTT/mEYDUppgNPXwp8fmLpui9f7Yeq3OEtTLVF012j39QnV+KEQpNqoN7CWU7Y9Q==}
     engines: {node: '>=16.0.0', npm: '>=8.0.0'}
     peerDependencies:
       yjs: ^13.0.0
     dependencies:
       lib0: 0.2.88
-      yjs: 13.6.11
+      yjs: 13.6.12
     dev: false
 
   /y18n@4.0.3:
@@ -18791,8 +18791,8 @@ packages:
       yargs-parser: 21.1.1
     dev: true
 
-  /yjs@13.6.11:
-    resolution: {integrity: sha512-FvRRJKX9u270dOLkllGF/UDCWwmIv2Z+ucM4v1QO1TuxdmoiMnSUXH1HAcOKOrkBEhQtPTkxep7tD2DrQB+l0g==}
+  /yjs@13.6.12:
+    resolution: {integrity: sha512-KOT8ILoyVH2f/PxPadeu5kVVS055D1r3x1iFfJVJzFdnN98pVGM8H07NcKsO+fG3F7/0tf30Vnokf5YIqhU/iw==}
     engines: {node: '>=16.0.0', npm: '>=8.0.0'}
     dependencies:
       lib0: 0.2.88

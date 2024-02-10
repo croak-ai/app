@@ -9,8 +9,7 @@ import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 // import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
-import { ClerkProvider, SignedIn, SignedOut } from "@clerk/clerk-react";
-import SignInPage from "./components/sign-in";
+import { ClerkProvider } from "@clerk/clerk-react";
 import { ThemeProvider } from "./theme";
 import { TooltipProvider } from "@acme/ui/components/ui/tooltip";
 
@@ -37,12 +36,7 @@ function App() {
         <ThemeProvider>
           <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
             <TRPCProvider>
-              <SignedIn>
-                <RouterProvider router={router} />
-              </SignedIn>
-              <SignedOut>
-                <SignInPage />
-              </SignedOut>
+              <RouterProvider router={router} />
             </TRPCProvider>
           </ClerkProvider>
         </ThemeProvider>

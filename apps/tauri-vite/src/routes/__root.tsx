@@ -1,7 +1,10 @@
 import React, { Suspense } from "react";
-import { Link, Outlet, createRootRoute } from "@tanstack/react-router";
+import { Outlet, createRootRoute } from "@tanstack/react-router";
 import OrgLayout from "@/components/main-layout/org-layout";
-import { useAuth } from "@clerk/clerk-react";
+import { SignedIn, SignedOut, useAuth } from "@clerk/clerk-react";
+import SignInPage from "@/components/login/sign-in";
+import Spinner from "@/components/Spinner";
+import OrganizationSelector from "@/components/login/organization-selector";
 
 const TanStackRouterDevtools =
   process.env.NODE_ENV === "production"
@@ -21,14 +24,23 @@ export const Route = createRootRoute({
 });
 
 function RootComponent() {
-  const { orgSlug } = useAuth();
+  const { orgSlug, isLoaded, isSignedIn } = useAuth();
+
+  if (!isLoaded) {
+    return <Spinner />;
+  }
+
+  if (isLoaded && !isSignedIn) {
+    return <SignInPage />;
+  }
+
+  if (isLoaded && !orgSlug) {
+    return <OrganizationSelector />;
+  }
+
   return (
     <>
-      <OrgLayout
-        defaultCollapsibleIsAICollapsed={true}
-        defaultCollapsibleLayoutValues={[50, 25]}
-        organizationSlug={orgSlug || ""}
-      >
+      <OrgLayout>
         <Outlet />
       </OrgLayout>
       <Suspense>
