@@ -10,7 +10,7 @@ const SignInPage = () => {
       <h1 className="mb-4 py-48 text-4xl font-bold text-primary">
         Welcome to Croak
       </h1>
-      <SignIn appearance={theme ? (dark as any) : undefined} />
+      <SignIn appearance={theme === "dark" ? (dark as any) : undefined} />
     </div>
   );
 };

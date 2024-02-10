@@ -1,5 +1,7 @@
 import React, { Suspense } from "react";
 import { Link, Outlet, createRootRoute } from "@tanstack/react-router";
+import OrgLayout from "@/components/main-layout/org-layout";
+import { useAuth } from "@clerk/clerk-react";
 
 const TanStackRouterDevtools =
   process.env.NODE_ENV === "production"
@@ -19,23 +21,16 @@ export const Route = createRootRoute({
 });
 
 function RootComponent() {
+  const { orgSlug } = useAuth();
   return (
     <>
-      <div className="container py-10">
-        <div className="flex gap-2 p-2 text-lg">
-          <Link
-            to="/"
-            activeProps={{
-              className: "font-bold",
-            }}
-            activeOptions={{ exact: true }}
-          >
-            Home
-          </Link>
-        </div>
-        <hr />
+      <OrgLayout
+        defaultCollapsibleIsAICollapsed={true}
+        defaultCollapsibleLayoutValues={[50, 25]}
+        organizationSlug={orgSlug || ""}
+      >
         <Outlet />
-      </div>
+      </OrgLayout>
       <Suspense>
         <TanStackRouterDevtools />
       </Suspense>
