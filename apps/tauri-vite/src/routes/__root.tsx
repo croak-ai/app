@@ -1,12 +1,11 @@
-import React, { Suspense } from "react";
+import React, { Suspense, memo } from "react";
 import { Outlet, createRootRoute } from "@tanstack/react-router";
 import OrgLayout from "@/components/main-layout/org-layout";
-import { SignedIn, SignedOut, useAuth, useUser } from "@clerk/clerk-react";
-import SignInPage from "@/components/login/sign-in";
+import { useAuth, useUser } from "@clerk/clerk-react";
 import Spinner from "@/components/Spinner";
-import OrganizationSelector from "@/components/login/organization-selector";
-import CreateMainDB from "@/components/login/create-main-db-form";
-
+import OnboardNewOrg from "@/components/pre-app/onboard-new-org";
+import OrganizationSelector from "@/components/pre-app/organization-selector";
+import SignInPage from "@/components/pre-app/sign-in";
 const TanStackRouterDevtools =
   process.env.NODE_ENV === "production"
     ? () => null // Render nothing in production
@@ -37,13 +36,12 @@ function RootComponent() {
     return <SignInPage />;
   }
 
-  // If we're not in an organization, show the organization selector
   if (isLoaded && !orgSlug) {
     return <OrganizationSelector />;
   }
 
-  // See if we should onboard
   if (!user) {
+    OrganizationSelector;
     return <Spinner />;
   }
 
@@ -64,22 +62,7 @@ function RootComponent() {
     !matchingOrganizationMembership.organization.publicMetadata
       .main_database_turso_db_name
   ) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center px-4">
-        <div className="flex flex-row pb-6">
-          <div className={" mb-4 ml-4 text-center"}>
-            <h2 className="text-4xl font-bold">Your Almost There!</h2>
-            <h2 className="mt-1 text-2xl font-bold">
-              Choose Your Region To Get Started!
-            </h2>
-          </div>
-          <span>s</span>
-        </div>
-        <div className="w-[50vh]">
-          <CreateMainDB />
-        </div>
-      </div>
-    );
+    return <OnboardNewOrg />;
   }
 
   return (
