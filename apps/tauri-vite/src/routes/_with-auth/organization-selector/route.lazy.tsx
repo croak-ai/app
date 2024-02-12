@@ -1,8 +1,9 @@
+import { createLazyFileRoute } from "@tanstack/react-router";
 import { OrganizationList, UserButton } from "@clerk/clerk-react";
 import { useTheme } from "@/theme"; // If you're using Context
 import { dark } from "@clerk/themes";
 
-const OrganizationSelector = () => {
+function OrganizationSelector() {
   const { theme } = useTheme(); // If you're using Context
 
   return (
@@ -17,6 +18,8 @@ const OrganizationSelector = () => {
       </div>
     </div>
   );
-};
+}
 
-export default OrganizationSelector;
+export const Route = createLazyFileRoute("/_with-auth/organization-selector")({
+  component: OrganizationSelector,
+});

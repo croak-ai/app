@@ -1,10 +1,11 @@
+import { createFileRoute } from "@tanstack/react-router";
 import { OrganizationSwitcher, UserButton } from "@clerk/clerk-react";
-import CreateMainDB from "@/components/forms/create-main-db-form";
+import CreateMainDB from "./-components/-create-main-db-form";
 import { useTheme } from "@/theme";
 import { dark } from "@clerk/themes";
 import { Icons } from "@acme/ui/components/bonus/icons";
 
-const OnboardNewOrg = () => {
+function OnboardNewOrg() {
   const { theme } = useTheme();
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4">
@@ -37,6 +38,8 @@ const OnboardNewOrg = () => {
       </div>
     </div>
   );
-};
+}
 
-export default OnboardNewOrg;
+export const Route = createFileRoute("/_with-auth/onboard-new-org")({
+  component: OnboardNewOrg,
+});

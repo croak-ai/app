@@ -84,7 +84,7 @@ export function OrgLayout({ children }: { children: React.ReactNode }) {
             />
             <div className="mt-2">
               <OrganizationSwitcher
-                afterSelectOrganizationUrl={`/organization/:slug`}
+                afterSelectOrganizationUrl={`/workspace`}
                 hidePersonal={true}
                 appearance={theme === "dark" ? (dark as any) : undefined}
               />

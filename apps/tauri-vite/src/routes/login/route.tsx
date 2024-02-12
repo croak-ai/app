@@ -1,9 +1,14 @@
+import { createFileRoute, createLazyFileRoute } from "@tanstack/react-router";
 import { SignIn } from "@clerk/clerk-react";
 import { useTheme } from "@/theme"; // If you're using Context
 import { dark } from "@clerk/themes";
 import { BackgroundBeams } from "@acme/ui/components/aceternity/background-beams";
 
-const SignInPage = () => {
+export const Route = createFileRoute("/login")({
+  component: SignInPage,
+});
+
+function SignInPage() {
   const { theme } = useTheme(); // If you're using Context
 
   return (
@@ -21,11 +26,12 @@ const SignInPage = () => {
           </div>
         </div>
         <div className="w-[50vh]">
-          <SignIn appearance={theme === "dark" ? (dark as any) : undefined} />
+          <SignIn
+            appearance={theme === "dark" ? (dark as any) : undefined}
+            path="/login"
+          />
         </div>
       </div>
     </div>
   );
-};
-
-export default SignInPage;
+}

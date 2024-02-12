@@ -25,10 +25,12 @@ import {
 } from "@acme/ui/components/ui/select";
 import { trpc } from "@/utils/trpc";
 import { useUser } from "@clerk/clerk-react";
+import { Navigate } from "@tanstack/react-router";
 
 export default function CreateMainDB() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [success, setSuccess] = useState(false);
 
   const { user } = useUser();
 
@@ -66,13 +68,17 @@ export default function CreateMainDB() {
       });
 
       if (result) {
-        user?.reload();
+        await user?.reload();
+        setSuccess(true);
       }
     } catch (e) {
       setError(e as Error);
     }
   };
 
+  if (success) {
+    return <Navigate to="/workspace" />;
+  }
   return (
     <>
       <div className="space-y-6 pb-6">
