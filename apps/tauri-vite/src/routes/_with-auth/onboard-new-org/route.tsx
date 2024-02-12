@@ -4,9 +4,20 @@ import CreateMainDB from "./-components/-create-main-db-form";
 import { useTheme } from "@/theme";
 import { dark } from "@clerk/themes";
 import { Icons } from "@acme/ui/components/bonus/icons";
+import { z } from "zod";
+
+const urlRedirectSchema = z.object({
+  redirect: z.string().url().optional(),
+});
+
+export const Route = createFileRoute("/_with-auth/onboard-new-org")({
+  component: OnboardNewOrg,
+  validateSearch: (search) => urlRedirectSchema.parse(search),
+});
 
 function OnboardNewOrg() {
   const { theme } = useTheme();
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4">
       <div className="flex flex-row pb-6">
@@ -34,12 +45,8 @@ function OnboardNewOrg() {
         </div>
       </div>
       <div className="w-[50vh]">
-        <CreateMainDB />
+        <CreateMainDB redirect={"/workspace"} />
       </div>
     </div>
   );
 }
-
-export const Route = createFileRoute("/_with-auth/onboard-new-org")({
-  component: OnboardNewOrg,
-});

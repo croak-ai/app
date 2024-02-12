@@ -27,7 +27,7 @@ import { trpc } from "@/utils/trpc";
 import { useUser } from "@clerk/clerk-react";
 import { Navigate } from "@tanstack/react-router";
 
-export default function CreateMainDB() {
+export default function CreateMainDB({ redirect }: { redirect: string }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [success, setSuccess] = useState(false);
@@ -77,7 +77,7 @@ export default function CreateMainDB() {
   };
 
   if (success) {
-    return <Navigate to="/workspace" />;
+    return <Navigate to={redirect} />;
   }
   return (
     <>

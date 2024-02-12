@@ -34,9 +34,6 @@ export const Route = createFileRoute("/_with-auth/_with-org")({
     ) {
       throw redirect({
         to: "/onboard-new-org",
-        search: {
-          redirect: location.href,
-        },
       });
     }
   },
