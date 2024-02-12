@@ -1,11 +1,13 @@
 import React, { Suspense } from "react";
-import { Outlet, createRootRoute } from "@tanstack/react-router";
+import { Outlet } from "@tanstack/react-router";
 import OrgLayout from "@/components/main-layout/org-layout";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import Spinner from "@/components/Spinner";
 import OnboardNewOrg from "@/components/pre-app/onboard-new-org";
 import OrganizationSelector from "@/components/pre-app/organization-selector";
 import SignInPage from "@/components/pre-app/sign-in";
+import { createRootRouteWithContext } from "@tanstack/react-router";
+import { apiUtilsType } from "@/utils/trpc";
 const TanStackRouterDevtools =
   process.env.NODE_ENV === "production"
     ? () => null // Render nothing in production
@@ -17,9 +19,12 @@ const TanStackRouterDevtools =
           // default: res.TanStackRouterDevtoolsPanel
         })),
       );
+interface RootContext {
+  apiUtils: apiUtilsType;
+}
 
 // Set up a Router instance
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<RootContext>()({
   component: RootComponent,
 });
 

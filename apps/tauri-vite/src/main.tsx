@@ -1,8 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "@acme/ui/styles/globals.css";
-
-import { TRPCProvider } from "./utils/trpc";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { httpBatchLink } from "@trpc/client";
+import { createTRPCQueryUtils, createTRPCReact } from "@trpc/react-query";
+import superjson from "superjson";
+import { useAuth } from "@clerk/clerk-react";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { trpc } from "./utils/trpc";
 
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 
@@ -17,6 +22,9 @@ import { TooltipProvider } from "@acme/ui/components/ui/tooltip";
 const router = createRouter({
   routeTree,
   defaultPreload: "intent",
+  context: {
+    apiUtils: undefined!,
+  },
 });
 
 declare module "@tanstack/react-router" {
@@ -28,6 +36,44 @@ const rootElement = document.getElementById("root")!;
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
+export const queryClient = new QueryClient();
+
+function InnerApp() {
+  const { getToken } = useAuth();
+  const [queryClient] = React.useState(() => new QueryClient());
+  const [trpcClient] = React.useState(() =>
+    trpc.createClient({
+      links: [
+        httpBatchLink({
+          async headers() {
+            const authToken = await getToken();
+
+            return {
+              Authorization: authToken ?? undefined,
+            };
+          },
+          url: `http://localhost:8080/trpc`,
+          transformer: superjson, // Add this line
+        }),
+      ],
+    }),
+  );
+
+  // We will use this in the route loaders
+  const apiUtils = createTRPCQueryUtils({
+    client: trpcClient,
+    queryClient,
+  });
+
+  return (
+    <trpc.Provider client={trpcClient} queryClient={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} context={{ apiUtils }} />
+      </QueryClientProvider>
+    </trpc.Provider>
+  );
+}
+
 function App() {
   return (
     // Build our routes and render our router
@@ -35,9 +81,7 @@ function App() {
       <TooltipProvider>
         <ThemeProvider>
           <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
-            <TRPCProvider>
-              <RouterProvider router={router} />
-            </TRPCProvider>
+            <InnerApp />
           </ClerkProvider>
         </ThemeProvider>
       </TooltipProvider>

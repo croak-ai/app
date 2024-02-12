@@ -1,3 +1,4 @@
+import { trpc } from "@/utils/trpc";
 import { createLazyFileRoute } from "@tanstack/react-router";
 
 export const Route = createLazyFileRoute("/workspace")({
@@ -5,7 +6,7 @@ export const Route = createLazyFileRoute("/workspace")({
 });
 
 function WorkspaceComponent() {
-  const workspaceData = Route.useLoaderData();
+  const { workspacesData } = Route.useLoaderData();
 
-  return <div>{JSON.stringify(workspaceData)}</div>;
+  return <div>{JSON.stringify(workspacesData)}</div>;
 }
