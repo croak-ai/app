@@ -526,6 +526,9 @@ importers:
       '@tanstack/react-router':
         specifier: 1.12.12
         version: 1.12.12(react-dom@18.2.0)(react@18.2.0)
+      '@tanstack/router-cli':
+        specifier: ^1.16.1
+        version: 1.16.1
       '@tanstack/router-devtools':
         specifier: 1.12.13
         version: 1.12.13(react-dom@18.2.0)(react@18.2.0)
@@ -6992,6 +6995,16 @@ packages:
       use-sync-external-store: 1.2.0(react@18.2.0)
     dev: false
 
+  /@tanstack/router-cli@1.16.1:
+    resolution: {integrity: sha512-YWpaSM3FWB+qfgiZWIPS50AvM3d1mRTGk2KZsyG5jXken/8Rftvn74+tGbJTdKrzosYrojV84GvQYRNmzI/9EQ==}
+    engines: {node: '>=12'}
+    hasBin: true
+    dependencies:
+      '@tanstack/router-generator': 1.16.1
+      chokidar: 3.6.0
+      yargs: 17.7.2
+    dev: false
+
   /@tanstack/router-devtools@1.12.13(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-NAMZnGbMJuYdYflU4khZUwPxPZh/iOBwZyb2WRaCCtxZO5RuGFZ9ciWuyPVye9xs8XiMimDQWQgoTzCLnYlLKQ==}
     engines: {node: '>=12'}
@@ -7007,6 +7020,14 @@ packages:
 
   /@tanstack/router-generator@1.15.22:
     resolution: {integrity: sha512-E3yDWSTt2pH05rV4QZF3ghlzqWEPjo9iKWDxSfKEQUPripxYEduhguAaybzbbB+XKN0BdvQq+08yl/lQg7Tc3Q==}
+    engines: {node: '>=12'}
+    dependencies:
+      prettier: 3.2.5
+      zod: 3.22.4
+    dev: false
+
+  /@tanstack/router-generator@1.16.1:
+    resolution: {integrity: sha512-OXTQ5I1cxpusP8TytWWFRemQQtKF6APZpTUmBuLTSuVxYl7306WbN2zEAafIYSF8nzlUGgig7eZjsvZM1bG2oA==}
     engines: {node: '>=12'}
     dependencies:
       prettier: 3.2.5
@@ -9230,7 +9251,6 @@ packages:
       string-width: 4.2.3
       strip-ansi: 6.0.1
       wrap-ansi: 7.0.0
-    dev: true
 
   /clone-deep@4.0.1:
     resolution: {integrity: sha512-neHB9xuzh/wk0dIHweyAXv2aPGZIVk3pLMe+/RNzINf17fe0OG96QroktYAUm7SM1PBnzTabaLboqqxDyMU+SQ==}
@@ -18720,7 +18740,6 @@ packages:
   /y18n@5.0.8:
     resolution: {integrity: sha512-0pfFzegeDWJHJIAmTLRP2DwHjdF5s7jo9tuztdQxAhINCdvS+3nGINqPd00AphqJR/0LhANUS6/+7SCb98YOfA==}
     engines: {node: '>=10'}
-    dev: true
 
   /yallist@2.1.2:
     resolution: {integrity: sha512-ncTzHV7NvsQZkYe1DW7cbDLm0YpzHmZF5r/iyP3ZnQtMiJ+pjzisCiMNI+Sj+xQF5pXhSHxSB3uDbsBTzY/c2A==}
@@ -18757,7 +18776,6 @@ packages:
   /yargs-parser@21.1.1:
     resolution: {integrity: sha512-tVpsJW7DdjecAiFpbIB1e3qxIQsE6NoPc5/eTdrbbIC4h0LVsWhnoa3g+m2HclBIujHzsxZ4VJVA+GUuc2/LBw==}
     engines: {node: '>=12'}
-    dev: true
 
   /yargs@15.4.1:
     resolution: {integrity: sha512-aePbxDmcYW++PaqBsJ+HYUFwCdv4LVvdnhBy78E57PIor8/OVvhMrADFFEDh8DHDFRv/O9i3lPhsENjO7QX0+A==}
@@ -18800,7 +18818,6 @@ packages:
       string-width: 4.2.3
       y18n: 5.0.8
       yargs-parser: 21.1.1
-    dev: true
 
   /yjs@13.6.12:
     resolution: {integrity: sha512-KOT8ILoyVH2f/PxPadeu5kVVS055D1r3x1iFfJVJzFdnN98pVGM8H07NcKsO+fG3F7/0tf30Vnokf5YIqhU/iw==}

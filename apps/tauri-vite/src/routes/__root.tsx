@@ -1,4 +1,4 @@
-import React, { Suspense, memo } from "react";
+import React, { Suspense } from "react";
 import { Outlet, createRootRoute } from "@tanstack/react-router";
 import OrgLayout from "@/components/main-layout/org-layout";
 import { useAuth, useUser } from "@clerk/clerk-react";
