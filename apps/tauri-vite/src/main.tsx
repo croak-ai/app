@@ -38,6 +38,7 @@ declare module "@tanstack/react-router" {
 const rootElement = document.getElementById("root")!;
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+const HONO_URL = import.meta.env.VITE_HONO_URL;
 
 export const queryClient = new QueryClient();
 
@@ -56,7 +57,7 @@ function InnerApp() {
               Authorization: authToken ?? undefined,
             };
           },
-          url: `http://localhost:8080/trpc`,
+          url: `${HONO_URL}/trpc`,
           transformer: superjson, // Add this line
         }),
       ],
