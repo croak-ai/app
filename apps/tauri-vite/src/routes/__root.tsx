@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
-import { Link, Outlet } from "@tanstack/react-router";
-import { SignIn, useAuth } from "@clerk/clerk-react";
+import { Outlet } from "@tanstack/react-router";
+import { useAuth } from "@clerk/clerk-react";
 import { createRootRouteWithContext } from "@tanstack/react-router";
 import { apiUtilsType } from "@/utils/trpc";
 import type { UserResource } from "@clerk/types";
