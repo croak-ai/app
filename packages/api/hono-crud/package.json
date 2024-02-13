@@ -15,7 +15,6 @@
     "localtunnel": "npx lt --port 8080"
   },
   "dependencies": {
-    "@acme/db": "*",
     "@acme/shared-functions": "*",
     "@clerk/backend": "^0.30.*",
     "@hono/clerk-auth": "^1.0.0",
@@ -29,6 +28,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@acme/db": "*",
     "@cloudflare/workers-types": "^4.20231121.0",
     "eslint": "^8.56.0",
     "localtunnel": "^2.0.2",

@@ -642,9 +642,6 @@ importers:
 
   packages/api/hono-crud:
     dependencies:
-      '@acme/db':
-        specifier: '*'
-        version: link:../../db
       '@acme/shared-functions':
         specifier: '*'
         version: link:../../shared-functions
@@ -679,6 +676,9 @@ importers:
         specifier: ^3.22.4
         version: 3.22.4
     devDependencies:
+      '@acme/db':
+        specifier: '*'
+        version: link:../../db
       '@cloudflare/workers-types':
         specifier: ^4.20231121.0
         version: 4.20240208.0
