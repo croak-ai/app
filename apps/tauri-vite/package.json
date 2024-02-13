@@ -8,7 +8,8 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
-    "tsr:watch": "npx tsr watch"
+    "tsr:watch": "npx tsr watch",
+    "tsr:generate": "npx tsr generate"
   },
   "dependencies": {
     "@acme/lottie-animations": "*",

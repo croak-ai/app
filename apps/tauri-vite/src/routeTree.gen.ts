@@ -20,8 +20,8 @@ import { Route as WithAuthOrganizationSelectorRouteImport } from './routes/_with
 import { Route as WithAuthOnboardNewOrgRouteImport } from './routes/_with-auth/onboard-new-org/route'
 import { Route as WithAuthWithOrgRouteImport } from './routes/_with-auth/_with-org/route'
 import { Route as WithAuthWithOrgWorkspaceRouteImport } from './routes/_with-auth/_with-org/workspace/route'
+import { Route as WithAuthWithOrgCreateWorkspaceRouteImport } from './routes/_with-auth/_with-org/create-workspace/route'
 import { Route as WithAuthWithOrgWorkspaceIndexImport } from './routes/_with-auth/_with-org/workspace/index'
-import { Route as WithAuthWithOrgWorkspaceCreateRouteImport } from './routes/_with-auth/_with-org/workspace/create/route'
 
 // Create Virtual Routes
 
@@ -70,6 +70,12 @@ const WithAuthWithOrgWorkspaceRouteRoute =
     getParentRoute: () => WithAuthWithOrgRouteRoute,
   } as any)
 
+const WithAuthWithOrgCreateWorkspaceRouteRoute =
+  WithAuthWithOrgCreateWorkspaceRouteImport.update({
+    path: '/create-workspace',
+    getParentRoute: () => WithAuthWithOrgRouteRoute,
+  } as any)
+
 const WithAuthWithOrgWorkspaceIndexRoute =
   WithAuthWithOrgWorkspaceIndexImport.update({
     path: '/',
@@ -85,12 +91,6 @@ const WithAuthWithOrgWorkspaceWorkspaceSlugRouteLazyRoute =
       './routes/_with-auth/_with-org/workspace/$workspaceSlug/route.lazy'
     ).then((d) => d.Route),
   )
-
-const WithAuthWithOrgWorkspaceCreateRouteRoute =
-  WithAuthWithOrgWorkspaceCreateRouteImport.update({
-    path: '/create',
-    getParentRoute: () => WithAuthWithOrgWorkspaceRouteRoute,
-  } as any)
 
 // Populate the FileRoutesByPath interface
 
@@ -120,13 +120,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WithAuthOrganizationSelectorRouteImport
       parentRoute: typeof WithAuthRouteImport
     }
+    '/_with-auth/_with-org/create-workspace': {
+      preLoaderRoute: typeof WithAuthWithOrgCreateWorkspaceRouteImport
+      parentRoute: typeof WithAuthWithOrgRouteImport
+    }
     '/_with-auth/_with-org/workspace': {
       preLoaderRoute: typeof WithAuthWithOrgWorkspaceRouteImport
       parentRoute: typeof WithAuthWithOrgRouteImport
-    }
-    '/_with-auth/_with-org/workspace/create': {
-      preLoaderRoute: typeof WithAuthWithOrgWorkspaceCreateRouteImport
-      parentRoute: typeof WithAuthWithOrgWorkspaceRouteImport
     }
     '/_with-auth/_with-org/workspace/$workspaceSlug': {
       preLoaderRoute: typeof WithAuthWithOrgWorkspaceWorkspaceSlugRouteLazyImport
@@ -145,8 +145,8 @@ export const routeTree = rootRoute.addChildren([
   IndexRoute,
   WithAuthRouteRoute.addChildren([
     WithAuthWithOrgRouteRoute.addChildren([
+      WithAuthWithOrgCreateWorkspaceRouteRoute,
       WithAuthWithOrgWorkspaceRouteRoute.addChildren([
-        WithAuthWithOrgWorkspaceCreateRouteRoute,
         WithAuthWithOrgWorkspaceWorkspaceSlugRouteLazyRoute,
         WithAuthWithOrgWorkspaceIndexRoute,
       ]),
