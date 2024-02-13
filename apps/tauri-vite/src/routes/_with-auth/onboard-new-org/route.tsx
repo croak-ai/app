@@ -20,25 +20,21 @@ function OnboardNewOrg() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4">
-      <div className="flex flex-row pb-6">
-        <div className={" mb-4 ml-4 text-center"}>
-          <span className="flex px-6">
-            <div className="mt-2">
-              <UserButton />
-            </div>
+      <div className="flex flex-col items-center pb-6">
+        <div className="mb-4 text-center">
+          <div className="flex items-center justify-center space-x-4">
+            <UserButton />
             <Icons.slash
               style={{ width: "50px", height: "50px" }}
               className="bg-text"
             />
-            <div className="mt-2">
-              <OrganizationSwitcher
-                afterSelectOrganizationUrl={`/organization/:slug`}
-                hidePersonal={true}
-                appearance={theme === "dark" ? (dark as any) : undefined}
-              />
-            </div>
-          </span>
-          <h2 className="text-4xl font-bold">Your Almost There!</h2>
+            <OrganizationSwitcher
+              afterSelectOrganizationUrl={`/organization/:slug`}
+              hidePersonal={true}
+              appearance={theme === "dark" ? (dark as any) : undefined}
+            />
+          </div>
+          <h2 className="mt-4 text-4xl font-bold">Your Almost There!</h2>
           <h2 className="mt-1 text-2xl font-bold">
             Choose Your Region To Get Started!
           </h2>
