@@ -1,8 +1,4 @@
-import {
-  dekEncryptionKey,
-  workspace,
-  workspaceMember,
-} from "@packages/db/schema/tenant";
+import { workspace } from "@acme/db/schema/tenant";
 import { protectedProcedureWithOrgDB, router } from "../../config/trpc";
 import { TRPCError } from "@trpc/server";
 import { userHasRole } from "../../../functions/clerk";
