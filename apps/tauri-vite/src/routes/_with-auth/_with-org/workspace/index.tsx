@@ -23,9 +23,9 @@ const YouDontHaveAccess = () => {
 };
 
 function WorkspaceIndexRoute() {
-  const { workspacesData } = Route.useRouteContext();
+  const { workspacesInitialData } = Route.useRouteContext();
 
-  if (workspacesData.length === 0) {
+  if (workspacesInitialData.length === 0) {
     return (
       <div className=" flex h-screen items-center justify-center">
         <Protect
@@ -41,7 +41,7 @@ function WorkspaceIndexRoute() {
   return (
     <Navigate
       to={`/workspace/$workspaceSlug`}
-      params={{ workspaceSlug: workspacesData[0].workspace.slug }}
+      params={{ workspaceSlug: workspacesInitialData[0].workspace.slug }}
     />
   );
 }
