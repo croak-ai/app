@@ -18,16 +18,17 @@ import { useForm } from "react-hook-form";
 import Loading from "@acme/ui/components/bonus/loading";
 import { useState } from "react";
 import { useEffect } from "react";
-import { ScrollArea } from "@acme/ui/components/ui/scroll-area";
 import { Separator } from "@acme/ui/components/ui/separator";
 import { Icons } from "@acme/ui/components/bonus/icons";
 import { trpc } from "@/utils/trpc";
+import { useNavigate } from "@tanstack/react-router";
 
 export default function CreateWorkSpaceForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [newWorkspaceSlug, setNewWorkspaceSlug] = useState<string>("");
   const [timeoutId, setTimeoutId] = useState<number | null>(null);
+  const navigate = useNavigate({ from: "/create-workspace" });
 
   const utils = trpc.useUtils();
 
@@ -149,6 +150,13 @@ export default function CreateWorkSpaceForm() {
         zName: data.workspaceName,
         zSlug: data.workspaceSlug,
         zDescription: data.workspaceDescription,
+      });
+
+      utils.getWorkspaceMemberships.getWorkspaceMemberships.invalidate();
+
+      navigate({
+        to: "/workspace/$workspaceSlug",
+        params: { workspaceSlug: insertedWorkspaceSlug },
       });
     } catch (e) {
       setError(e as Error);
