@@ -38,7 +38,16 @@ declare module "@tanstack/react-router" {
 const rootElement = document.getElementById("root")!;
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+if (!PUBLISHABLE_KEY) {
+  throw new Error("Missing VITE_CLERK_PUBLISHABLE_KEY");
+}
+
 const HONO_URL = import.meta.env.VITE_HONO_URL;
+
+if (!HONO_URL) {
+  throw new Error("Missing VITE_HONO_URL");
+}
 
 export const queryClient = new QueryClient();
 

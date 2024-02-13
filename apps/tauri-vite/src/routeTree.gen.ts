@@ -18,6 +18,7 @@ import { Route as WithAuthOrganizationSelectorRouteImport } from './routes/_with
 import { Route as WithAuthOnboardNewOrgRouteImport } from './routes/_with-auth/onboard-new-org/route'
 import { Route as WithAuthWithOrgRouteImport } from './routes/_with-auth/_with-org/route'
 import { Route as WithAuthWithOrgWorkspaceRouteImport } from './routes/_with-auth/_with-org/workspace/route'
+import { Route as WithAuthWithOrgWorkspaceWorkspaceSlugRouteImport } from './routes/_with-auth/_with-org/workspace/$workspaceSlug/route'
 
 // Create/Update Routes
 
@@ -64,6 +65,12 @@ const WithAuthWithOrgWorkspaceRouteRoute =
     ),
   )
 
+const WithAuthWithOrgWorkspaceWorkspaceSlugRouteRoute =
+  WithAuthWithOrgWorkspaceWorkspaceSlugRouteImport.update({
+    path: '/$workspaceSlug',
+    getParentRoute: () => WithAuthWithOrgWorkspaceRouteRoute,
+  } as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -96,6 +103,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WithAuthWithOrgWorkspaceRouteImport
       parentRoute: typeof WithAuthWithOrgRouteImport
     }
+    '/_with-auth/_with-org/workspace/$workspaceSlug': {
+      preLoaderRoute: typeof WithAuthWithOrgWorkspaceWorkspaceSlugRouteImport
+      parentRoute: typeof WithAuthWithOrgWorkspaceRouteImport
+    }
   }
 }
 
@@ -104,7 +115,11 @@ declare module '@tanstack/react-router' {
 export const routeTree = rootRoute.addChildren([
   IndexRoute,
   WithAuthRouteRoute.addChildren([
-    WithAuthWithOrgRouteRoute.addChildren([WithAuthWithOrgWorkspaceRouteRoute]),
+    WithAuthWithOrgRouteRoute.addChildren([
+      WithAuthWithOrgWorkspaceRouteRoute.addChildren([
+        WithAuthWithOrgWorkspaceWorkspaceSlugRouteRoute,
+      ]),
+    ]),
     WithAuthOnboardNewOrgRouteRoute,
     WithAuthOrganizationSelectorRouteRoute,
   ]),
