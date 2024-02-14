@@ -547,9 +547,6 @@ importers:
       '@trpc/react-query':
         specifier: next
         version: 11.0.0-next-beta.283(@tanstack/react-query@5.20.5)(@trpc/client@11.0.0-next-beta.283)(@trpc/server@11.0.0-next-beta.283)(react-dom@18.2.0)(react@18.2.0)
-      command-score:
-        specifier: ^0.1.2
-        version: 0.1.2
       gemoji:
         specifier: ^8.1.0
         version: 8.1.0
@@ -884,6 +881,9 @@ importers:
       cmdk:
         specifier: ^0.2.0
         version: 0.2.1(@types/react@18.2.55)(react-dom@18.2.0)(react@17.0.2)
+      command-score:
+        specifier: ^0.1.2
+        version: 0.1.2
       date-fns:
         specifier: ^2.30.0
         version: 2.30.0
