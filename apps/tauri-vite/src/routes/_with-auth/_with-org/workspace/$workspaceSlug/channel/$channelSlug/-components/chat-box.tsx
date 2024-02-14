@@ -7,6 +7,7 @@ import { Switch } from "@acme/ui/components/ui/switch";
 import { trpc } from "@/utils/trpc";
 import { PlaygroundMilkdown } from "@/components/playground-editor";
 import { ControlPanel } from "@/components/playground/control-panel";
+import Messages from "./messages";
 
 const isInDevMode = () => {
   return process.env.NODE_ENV === "development";
@@ -69,6 +70,8 @@ export default function ChatBox({
             lock={lockCodemirror}
           />
         )}
+
+        <Messages />
 
         <PlaygroundMilkdown
           milkdownRef={milkdownRef}
