@@ -81,7 +81,11 @@ const WithAuthWithOrgWorkspaceWorkspaceSlugRouteRoute =
   WithAuthWithOrgWorkspaceWorkspaceSlugRouteImport.update({
     path: '/$workspaceSlug',
     getParentRoute: () => WithAuthWithOrgWorkspaceRouteRoute,
-  } as any)
+  } as any).lazy(() =>
+    import(
+      './routes/_with-auth/_with-org/workspace/$workspaceSlug/route.lazy'
+    ).then((d) => d.Route),
+  )
 
 const WithAuthWithOrgWorkspaceWorkspaceSlugIndexRoute =
   WithAuthWithOrgWorkspaceWorkspaceSlugIndexImport.update({

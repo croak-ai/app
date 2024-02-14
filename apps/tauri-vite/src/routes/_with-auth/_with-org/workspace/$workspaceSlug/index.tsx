@@ -11,7 +11,11 @@ function WorkspaceSlugIndex() {
   const { workspaceSlug } = Route.useParams();
 
   if (workspacesChannelsInitialData.length === 0) {
-    return <div>Create Your First Channel!</div>;
+    return (
+      <div className="flex h-full items-center justify-center text-4xl font-bold">
+        Right-click in the sidebar to create your first channel! 📁
+      </div>
+    );
   }
 
   // Assuming the intention is to navigate to a default or first channel if it exists
