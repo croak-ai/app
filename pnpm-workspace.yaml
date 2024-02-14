@@ -1,6 +1,7 @@
 packages:
   - apps/expo
   - apps/nextjs
+  - apps/tauri-vite
   - apps/landing-site
   - packages/api/fastify-crud
   - packages/api/fastify-ai

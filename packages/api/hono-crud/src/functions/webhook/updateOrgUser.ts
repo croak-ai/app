@@ -6,8 +6,8 @@ import { OrganizationMembership } from "./fetchUserMemberships";
 import { getDbAuthToken } from "../db";
 import { Context } from "hono";
 import { HonoConfig } from "../../config";
-import { user } from "@packages/db/schema/tenant";
-import { createDbClient, eq } from "@packages/db";
+import { user } from "@acme/db/schema/tenant";
+import { createDbClient, eq } from "@acme/db";
 
 export async function updateOrgUser(
   userMemberships: OrganizationMembership,
