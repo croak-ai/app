@@ -12,7 +12,7 @@ function WorkspaceSlugIndex() {
 
   if (workspacesChannelsInitialData.length === 0) {
     return (
-      <div className="flex h-full items-center justify-center text-4xl font-bold">
+      <div className="flex h-full items-center justify-center px-4 text-4xl font-bold">
         Right-click in the sidebar to create your first channel! 📁
       </div>
     );

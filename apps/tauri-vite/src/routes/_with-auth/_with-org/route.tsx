@@ -1,4 +1,4 @@
-import OrgLayout from "@/routes/_with-auth/_with-org/-components/org-layout";
+import OrgLayout from "@/routes/_with-auth/_with-org/-org-layout";
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_with-auth/_with-org")({
