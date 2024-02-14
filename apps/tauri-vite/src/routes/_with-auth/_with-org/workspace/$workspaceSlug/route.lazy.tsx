@@ -13,14 +13,33 @@ export const Route = createLazyFileRoute(
 });
 
 function WorkspaceLayout() {
+  const workspaceLayoutValues = localStorage.getItem(
+    "workspace-resizable-panels:layout",
+  );
+  const defaultWorkspaceLayoutValues: number[] = workspaceLayoutValues
+    ? JSON.parse(workspaceLayoutValues)
+    : [20, 80];
+
   return (
     <div className="h-full w-full rounded-xl border bg-card text-card-foreground shadow">
-      <ResizablePanelGroup direction="horizontal">
-        <ResizablePanel defaultSize={20} maxSize={25} minSize={15}>
+      <ResizablePanelGroup
+        direction="horizontal"
+        onLayout={(sizes: number[]) => {
+          localStorage.setItem(
+            "workspace-resizable-panels:layout",
+            JSON.stringify(sizes),
+          );
+        }}
+      >
+        <ResizablePanel
+          defaultSize={defaultWorkspaceLayoutValues[0]}
+          maxSize={25}
+          minSize={15}
+        >
           <WorkspaceSidebar />
         </ResizablePanel>
         <ResizableHandle />
-        <ResizablePanel defaultSize={80}>
+        <ResizablePanel defaultSize={defaultWorkspaceLayoutValues[1]}>
           <Outlet />
         </ResizablePanel>
       </ResizablePanelGroup>

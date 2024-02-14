@@ -11,10 +11,10 @@ import { useTheme } from "@/theme";
 
 export function OrgLayout({ children }: { children: React.ReactNode }) {
   const collapsibleLayoutValues = localStorage.getItem(
-    "react-resizable-panels:layout",
+    "org-resizable-panels:layout",
   );
   const collapsibleIsAICollapsed = localStorage.getItem(
-    "react-resizable-panels:collapsed",
+    "org-resizable-panels:collapsed",
   );
 
   const defaultCollapsibleLayoutValues: number[] = collapsibleLayoutValues

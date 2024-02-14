@@ -31,7 +31,7 @@ const ResizableWindows: React.FC<MailProps> = ({
         : aiPanelRef.current.expand();
     }
     localStorage.setItem(
-      "react-resizable-panels:collapsed",
+      "org-resizable-panels:collapsed",
       JSON.stringify(isAICollapsed),
     );
   }, [isAICollapsed]);
@@ -41,7 +41,7 @@ const ResizableWindows: React.FC<MailProps> = ({
       direction="horizontal"
       onLayout={(sizes: number[]) => {
         localStorage.setItem(
-          "react-resizable-panels:layout",
+          "org-resizable-panels:layout",
           JSON.stringify(sizes),
         );
       }}
