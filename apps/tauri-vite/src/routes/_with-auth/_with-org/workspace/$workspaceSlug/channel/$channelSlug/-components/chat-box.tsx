@@ -45,15 +45,18 @@ export default function ChatBox({
     current.update(value);
   }, []);
 
-  const sendMessage = useCallback(async (message: string) => {
-    if (message.trim() === "") return;
+  const sendMessage = useCallback(
+    async (message: string) => {
+      if (message.trim() === "") return;
 
-    await createMessage.mutate({
-      workspaceSlug: workspaceSlug,
-      channelSlug: channelSlug,
-      messageContent: message,
-    });
-  }, []);
+      await createMessage.mutate({
+        workspaceSlug: workspaceSlug,
+        channelSlug: channelSlug,
+        messageContent: message,
+      });
+    },
+    [workspaceSlug, channelSlug, createMessage],
+  );
 
   return (
     <div className="relative h-screen">

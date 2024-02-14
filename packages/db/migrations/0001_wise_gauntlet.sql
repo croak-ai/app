@@ -1,0 +1,2 @@
+ALTER TABLE message ADD `messageInChannelNumber` integer NOT NULL;--> statement-breakpoint
+CREATE UNIQUE INDEX `message_messageInChannelNumber_channelId_unique` ON `message` (`messageInChannelNumber`,`channelId`);

@@ -1,7 +1,7 @@
 import { channel, message } from "@acme/db/schema/tenant";
 import { protectedProcedureWithOrgDB, router } from "../../config/trpc";
 import { z } from "zod";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 
 import { TRPCError } from "@trpc/server";
 import { getWorkspacePermission } from "../../functions/workspace";
@@ -75,28 +75,33 @@ export const createMessage = router({
 
       ////////////////////////////////////////////////////////
       // Create the message
-      const newMessage = await ctx.db
-        .insert(message)
-        .values({
-          userId: ctx.auth.userId,
-          message: input.messageContent,
-          channelId: foundChannel.id, // Assuming the channelId is the same as workspaceId for simplicity
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
-        })
-        .returning({
-          insertedId: message.id,
-          message: message.message,
-          channelId: message.channelId,
-        });
 
-      if (newMessage.length !== 1 || !newMessage || !newMessage[0]) {
+      const statement = sql`
+      INSERT INTO message (userId, message, channelId, messageInChannelNumber, createdAt, updatedAt)
+      VALUES (
+          ${ctx.auth.userId},
+          ${input.messageContent},
+          ${foundChannel.id},
+          (
+              SELECT COALESCE(MAX(messageInChannelNumber) + 1, 1)
+              FROM message
+              WHERE channelId = ${foundChannel.id}
+          ),
+          CURRENT_TIMESTAMP,
+          CURRENT_TIMESTAMP
+      )
+      RETURNING id, message, channelId, messageInChannelNumber;
+    `;
+
+      const result = await ctx.db.run(statement);
+
+      if (result.rowsAffected !== 1 || !result.rows || !result.rows[0]) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to create new message",
         });
       }
 
-      return newMessage[0];
+      return "success";
     }),
 });
