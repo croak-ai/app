@@ -43,9 +43,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
-# wrangler
-.wrangler
-packages/api/hono-crud/.dev.vars
 # turbo
 .turbo
 
