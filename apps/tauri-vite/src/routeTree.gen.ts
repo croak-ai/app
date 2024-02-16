@@ -22,7 +22,7 @@ import { Route as WithAuthWithOrgCreateWorkspaceRouteImport } from './routes/_wi
 import { Route as WithAuthWithOrgWorkspaceIndexImport } from './routes/_with-auth/_with-org/workspace/index'
 import { Route as WithAuthWithOrgWorkspaceWorkspaceSlugRouteImport } from './routes/_with-auth/_with-org/workspace/$workspaceSlug/route'
 import { Route as WithAuthWithOrgWorkspaceWorkspaceSlugIndexImport } from './routes/_with-auth/_with-org/workspace/$workspaceSlug/index'
-import { Route as WithAuthWithOrgWorkspaceWorkspaceSlugChannelChannelSlugRouteImport } from './routes/_with-auth/_with-org/workspace/$workspaceSlug/channel/$channelSlug/route'
+import { Route as WithAuthWithOrgWorkspaceWorkspaceSlugChannelChannelIdRouteImport } from './routes/_with-auth/_with-org/workspace/$workspaceSlug/channel/$channelId/route'
 
 // Create/Update Routes
 
@@ -93,9 +93,9 @@ const WithAuthWithOrgWorkspaceWorkspaceSlugIndexRoute =
     getParentRoute: () => WithAuthWithOrgWorkspaceWorkspaceSlugRouteRoute,
   } as any)
 
-const WithAuthWithOrgWorkspaceWorkspaceSlugChannelChannelSlugRouteRoute =
-  WithAuthWithOrgWorkspaceWorkspaceSlugChannelChannelSlugRouteImport.update({
-    path: '/channel/$channelSlug',
+const WithAuthWithOrgWorkspaceWorkspaceSlugChannelChannelIdRouteRoute =
+  WithAuthWithOrgWorkspaceWorkspaceSlugChannelChannelIdRouteImport.update({
+    path: '/channel/$channelId',
     getParentRoute: () => WithAuthWithOrgWorkspaceWorkspaceSlugRouteRoute,
   } as any)
 
@@ -147,8 +147,8 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WithAuthWithOrgWorkspaceWorkspaceSlugIndexImport
       parentRoute: typeof WithAuthWithOrgWorkspaceWorkspaceSlugRouteImport
     }
-    '/_with-auth/_with-org/workspace/$workspaceSlug/channel/$channelSlug': {
-      preLoaderRoute: typeof WithAuthWithOrgWorkspaceWorkspaceSlugChannelChannelSlugRouteImport
+    '/_with-auth/_with-org/workspace/$workspaceSlug/channel/$channelId': {
+      preLoaderRoute: typeof WithAuthWithOrgWorkspaceWorkspaceSlugChannelChannelIdRouteImport
       parentRoute: typeof WithAuthWithOrgWorkspaceWorkspaceSlugRouteImport
     }
   }
@@ -164,7 +164,7 @@ export const routeTree = rootRoute.addChildren([
       WithAuthWithOrgWorkspaceRouteRoute.addChildren([
         WithAuthWithOrgWorkspaceWorkspaceSlugRouteRoute.addChildren([
           WithAuthWithOrgWorkspaceWorkspaceSlugIndexRoute,
-          WithAuthWithOrgWorkspaceWorkspaceSlugChannelChannelSlugRouteRoute,
+          WithAuthWithOrgWorkspaceWorkspaceSlugChannelChannelIdRouteRoute,
         ]),
         WithAuthWithOrgWorkspaceIndexRoute,
       ]),

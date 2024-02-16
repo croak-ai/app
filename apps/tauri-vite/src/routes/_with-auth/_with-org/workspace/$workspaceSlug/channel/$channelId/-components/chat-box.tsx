@@ -15,10 +15,10 @@ const isInDevMode = () => {
 
 export default function ChatBox({
   workspaceSlug,
-  channelSlug,
+  channelId,
 }: {
   workspaceSlug: string;
-  channelSlug: string;
+  channelId: string;
 }) {
   /* TODO: This should contain the last message if not sent */
   const [content] = useState("");
@@ -52,11 +52,11 @@ export default function ChatBox({
 
       await createMessage.mutate({
         workspaceSlug: workspaceSlug,
-        channelSlug: channelSlug,
+        channelId: channelId,
         messageContent: message,
       });
     },
-    [workspaceSlug, channelSlug, createMessage],
+    [workspaceSlug, channelId, createMessage],
   );
 
   return (
@@ -71,7 +71,7 @@ export default function ChatBox({
           />
         )}
 
-        <Messages />
+        <Messages channelId={channelId} />
 
         <PlaygroundMilkdown
           milkdownRef={milkdownRef}

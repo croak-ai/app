@@ -3,16 +3,16 @@ import ChatBoxProvider from "./-components/chat-box-provider";
 import ChatBox from "./-components/chat-box";
 
 export const Route = createFileRoute(
-  "/_with-auth/_with-org/workspace/$workspaceSlug/channel/$channelSlug",
+  "/_with-auth/_with-org/workspace/$workspaceSlug/channel/$channelId",
 )({
   component: Channel,
 });
 
 function Channel() {
-  const { workspaceSlug, channelSlug } = Route.useParams();
+  const { workspaceSlug, channelId } = Route.useParams();
   return (
     <ChatBoxProvider>
-      <ChatBox workspaceSlug={workspaceSlug} channelSlug={channelSlug} />
+      <ChatBox workspaceSlug={workspaceSlug} channelId={channelId} />
     </ChatBoxProvider>
   );
 }

@@ -19,12 +19,12 @@ function WorkspaceSlugIndex() {
   }
 
   // Assuming the intention is to navigate to a default or first channel if it exists
-  const firstChannelSlug = workspacesChannelsInitialData[0].slug;
+  const firstChannelId = workspacesChannelsInitialData[0].id;
   return (
     <Navigate
-      to={`/workspace/$workspaceSlug/channel/$channelSlug`}
+      to={`/workspace/$workspaceSlug/channel/$channelId`}
       params={{
-        channelSlug: firstChannelSlug,
+        channelId: firstChannelId.toString(),
         workspaceSlug: workspaceSlug,
       }}
     />

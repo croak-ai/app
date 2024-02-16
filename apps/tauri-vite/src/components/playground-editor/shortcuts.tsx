@@ -29,7 +29,7 @@ export const Shortcuts: FC<ShortcutsProps> = ({ shortcuts }) => {
     <>
       <div className="hidden sm:flex">
         {shortcuts.map((shortcut, index) => (
-          <Tooltip delayDuration={0}>
+          <Tooltip delayDuration={0} key={index}>
             <TooltipTrigger asChild>
               <Button
                 key={index}
