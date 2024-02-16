@@ -46,13 +46,15 @@ export default function Message({ message, previousMessage }: MessageProps) {
     }
   }
 
+  const opacity = userId === "optimistic_user_id" ? "opacity-50" : "";
+
   if (hideUsername) {
     return (
       <div className="flex items-start gap-4 pt-2">
         <div className="h-8 w-8"></div>{" "}
         {/* Placeholder for Avatar to maintain the same gap */}
         <div className="grid gap-1 text-sm">
-          <div>{content}</div>
+          <div className={opacity}>{content}</div>
         </div>
       </div>
     );
@@ -75,7 +77,7 @@ export default function Message({ message, previousMessage }: MessageProps) {
             {new Date(createdAt).toLocaleTimeString()}
           </span>
         </div>
-        <div>{content}</div>
+        <div className={opacity}>{content}</div>
       </div>
     </div>
   );

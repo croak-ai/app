@@ -8,6 +8,7 @@ import { trpc } from "@/utils/trpc";
 import { PlaygroundMilkdown } from "@/components/playground-editor";
 import { ControlPanel } from "@/components/playground/control-panel";
 import Messages from "./messages";
+import { useUser } from "@clerk/clerk-react";
 
 const isInDevMode = () => {
   return process.env.NODE_ENV === "development";
@@ -20,11 +21,76 @@ export default function ChatBox({
   workspaceSlug: string;
   channelId: string;
 }) {
-  /* TODO: This should contain the last message if not sent */
+  const utils = trpc.useUtils();
+
   const [content] = useState("");
   const [devModeEnabled, setDevModeEnabled] = useState(false);
+  const { user } = useUser();
 
-  const createMessage = trpc.createMessage.createMessage.useMutation();
+  const createMessage = trpc.createMessage.createMessage.useMutation({
+    onMutate: async (opts) => {
+      await utils.getMessages.getMessages.cancel();
+      utils.getMessages.getMessages.setInfiniteData(
+        { channelId: channelId, limit: 50 },
+        (data) => {
+          if (!data) {
+            return {
+              pages: [],
+              pageParams: [],
+            };
+          }
+
+          const newMessage = {
+            // Adjust the structure to match your expected message object structure
+            confirmed: false, // This is the new part
+            id: -1, // Mock ID for optimistic update
+            message: {
+              channelId: parseInt(opts.channelId), // Assuming channelId is a number in your data model
+              userId: "optimistic_user_id",
+              createdAt: Date.now(),
+              updatedAt: Date.now(),
+              id: Math.random(), // Assuming id is a number in your data model
+              deletedAt: null, // Assuming this field exists and is nullable
+              message: opts.messageContent,
+              messageInChannelNumber: 1, // Example value, adjust as necessary
+            },
+            user: {
+              userId: user?.id ?? "unknown", // Provide a default string value for userId if null
+              role: "some_role",
+              firstName: user?.firstName ?? "unknown",
+              lastName: user?.lastName ?? "name",
+              email: user?.primaryEmailAddress?.emailAddress ?? "unknown_email",
+              imageUrl: user?.imageUrl ?? "",
+              profileImageUrl: user?.imageUrl ?? "",
+              createdAt: Date.now(),
+              updatedAt: Date.now(),
+            },
+          };
+
+          return {
+            ...data,
+            pages: data.pages.map((page) => ({
+              ...page,
+              messages: [newMessage, ...page.messages],
+            })),
+          };
+        },
+      );
+    },
+    onError: (input, variables, context) => {
+      utils.getMessages.getMessages.setInfiniteData(
+        { channelId: variables.channelId, limit: 50 },
+        () => ({
+          pages: [],
+          pageParams: [],
+        }),
+      );
+      utils.getMessages.getMessages.refetch({ channelId: variables.channelId });
+    },
+    onSettled: () => {
+      utils.getMessages.getMessages.invalidate();
+    },
+  });
 
   const lockCodemirror = useRef(false);
   const milkdownRef = useRef<MilkdownRef>(null);
@@ -56,7 +122,7 @@ export default function ChatBox({
         messageContent: message,
       });
     },
-    [workspaceSlug, channelId, createMessage],
+    [workspaceSlug, channelId, createMessage, utils],
   );
 
   return (

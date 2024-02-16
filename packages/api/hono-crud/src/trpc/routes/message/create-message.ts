@@ -79,6 +79,6 @@ export const createMessage = router({
         });
       }
 
-      return "success";
+      return result.rows[0];
     }),
 });
