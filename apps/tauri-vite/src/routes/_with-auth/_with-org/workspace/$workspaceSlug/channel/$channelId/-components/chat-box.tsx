@@ -2,7 +2,7 @@
 
 import { CodemirrorRef } from "@/components/codemirror";
 import type { MilkdownRef } from "@/components/playground-editor";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, useEffect, useMemo } from "react";
 import { Switch } from "@acme/ui/components/ui/switch";
 import { trpc } from "@/utils/trpc";
 import { PlaygroundMilkdown } from "@/components/playground-editor";
@@ -23,8 +23,9 @@ export default function ChatBox({
 }) {
   const utils = trpc.useUtils();
 
-  const [content] = useState("");
+  const [defaultContent, setDefaultContent] = useState("");
   const [devModeEnabled, setDevModeEnabled] = useState(false);
+  const [messagesHeight, setMessagesHeight] = useState(500); // Default height
   const { user } = useUser();
 
   const createMessage = trpc.createMessage.createMessage.useMutation({
@@ -121,8 +122,49 @@ export default function ChatBox({
         channelId: channelId,
         messageContent: message,
       });
+
+      const { current } = milkdownRef;
+      if (!current) return;
+      current.update("");
     },
     [workspaceSlug, channelId, createMessage, utils],
+  );
+
+  // Effect to adjust the height of the messages based on the PlaygroundMilkdown height
+  useEffect(() => {
+    const editorElement = document.querySelector(".playground-wrapper");
+    if (!editorElement) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        const { height } = entry.contentRect;
+        console.log("Editor height", height);
+        const newMessagesHeight = window.innerHeight - height - 185;
+        setMessagesHeight(newMessagesHeight);
+        console.log(
+          "Adjusted messages height due to editor resize",
+          newMessagesHeight,
+        );
+      }
+    });
+
+    resizeObserver.observe(editorElement);
+
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  const MemoizedPlaygroundMilkdown = useMemo(
+    () => (
+      <PlaygroundMilkdown
+        milkdownRef={milkdownRef}
+        defaultContent={defaultContent}
+        onChange={onMilkdownChange}
+        onSendPressed={(content) => {
+          sendMessage(content);
+        }}
+      />
+    ),
+    [],
   );
 
   return (
@@ -131,22 +173,15 @@ export default function ChatBox({
         {devModeEnabled && (
           <ControlPanel
             codemirrorRef={codemirrorRef}
-            content={content}
+            content={defaultContent}
             onChange={onCodemirrorChange}
             lock={lockCodemirror}
           />
         )}
 
-        <Messages channelId={channelId} />
+        <Messages channelId={channelId} height={messagesHeight} />
 
-        <PlaygroundMilkdown
-          milkdownRef={milkdownRef}
-          defaultContent={content}
-          onChange={onMilkdownChange}
-          onSendPressed={(content) => {
-            sendMessage(content);
-          }}
-        />
+        <div className="playground-wrapper">{MemoizedPlaygroundMilkdown}</div>
         {isInDevMode() && (
           <div className="flex items-center justify-end">
             <Switch

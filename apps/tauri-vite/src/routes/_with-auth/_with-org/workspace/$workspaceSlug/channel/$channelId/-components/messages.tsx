@@ -3,7 +3,13 @@ import { trpc } from "@/utils/trpc";
 
 import InfiniteScroll from "react-infinite-scroll-component";
 
-export default function Messages({ channelId }: { channelId: string }) {
+export default function Messages({
+  channelId,
+  height,
+}: {
+  channelId: string;
+  height: number;
+}) {
   const messages = trpc.getMessages.getMessages.useInfiniteQuery(
     {
       channelId,
@@ -30,7 +36,7 @@ export default function Messages({ channelId }: { channelId: string }) {
     <div
       id="scrollableDiv"
       style={{
-        height: 300,
+        height: height,
         overflow: "auto",
         display: "flex",
         flexDirection: "column-reverse",
