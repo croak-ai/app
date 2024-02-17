@@ -1,10 +1,11 @@
 import { Icons } from "@acme/ui/components/bonus/icons";
 import { OrganizationSwitcher, UserButton, useAuth } from "@clerk/clerk-react";
 import { Button } from "@acme/ui/components/ui/button";
+import { Button as MovingBorderButton } from "@acme/ui/components/aceternity/moving-border";
 import ResizableWindows from "./resizable-windows";
 import { useState, useEffect } from "react";
 import { Nav } from "./main-nav-button";
-import { Inbox, TextQuote, BellDot } from "lucide-react";
+import { Inbox, TextQuote, BellDot, CalendarDays } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import { dark } from "@clerk/themes";
 import { useTheme } from "@/theme";
@@ -100,7 +101,11 @@ export function OrgLayout({ children }: { children: React.ReactNode }) {
             />
             <ThemeToggle />
           </div>
-          <div className="mx-4 justify-self-end">
+          <div className="mx-4 space-y-4 justify-self-end">
+            <Button variant={"outline"} className="mr-96">
+              <CalendarDays className="mr-2 h-6 w-6" /> Daily Standup{" "}
+              <span className="ml-2 text-xs">10:00 AM</span>
+            </Button>
             <AIButton />
           </div>
         </div>

@@ -4,7 +4,9 @@ import { Button } from "@acme/ui/components/ui/button";
 import { Input } from "@acme/ui/components/ui/input";
 import { useChat } from "ai/react";
 import SuperJSON from "superjson";
+import { ScrollArea } from "@acme/ui/components/ui/scroll-area";
 import { useState } from "react";
+import ChatGPTDummy from "./temp";
 
 //Add these types to another file
 type AIMessage = {
@@ -99,48 +101,10 @@ export default function ChatBot() {
 
   return (
     <div className="flex h-full w-full flex-col items-center ">
-      <div className="my-2 flex w-full grow flex-col gap-6 overflow-y-auto rounded-sm p-4 sm:my-10 sm:p-8">
-        <div className="flex grow flex-col justify-start gap-4 overflow-y-scroll rounded-lg border-slate-400 pr-2">
-          {messages.map(({ id, role, content }) => {
-            return (
-              <div
-                key={id}
-                className={cn(
-                  "max-w-lg  rounded-xl bg-gray-500 px-4 py-2 text-white [overflow-wrap:anywhere]",
-                  role === "user" ? "self-start bg-primary" : "self-end",
-                )}
-              >
-                {content[0]?.text.value}
-              </div>
-            );
-          })}
-          {isLoading && (
-            <>
-              <div className="m-2 flex space-x-1 self-end">
-                <div className="h-2 w-2 animate-bounce rounded-full bg-white"></div>
-                <div className="h-2 w-2 animate-bounce rounded-full bg-white [animation-delay:-0.15s]"></div>
-                <div className="h-2 w-2 animate-bounce rounded-full bg-white [animation-delay:-0.3s]"></div>
-              </div>
-            </>
-          )}
-          {messages.length === 0 && (
-            <div className="flex grow items-center justify-center self-stretch">
-              <svg
-                className="opacity-10"
-                width="150px"
-                height="150px"
-                version="1.1"
-                viewBox="0 0 100 100"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <g>
-                  <path d="m77.082 39.582h-29.164c-3.543 0-6.25 2.707-6.25 6.25v16.668c0 3.332 2.707 6.25 6.25 6.25h20.832l8.332 8.332v-8.332c3.543 0 6.25-2.918 6.25-6.25v-16.668c0-3.5391-2.707-6.25-6.25-6.25z" />
-                  <path d="m52.082 25h-29.164c-3.543 0-6.25 2.707-6.25 6.25v16.668c0 3.332 2.707 6.25 6.25 6.25v8.332l8.332-8.332h6.25v-8.332c0-5.832 4.582-10.418 10.418-10.418h10.418v-4.168c-0.003907-3.543-2.7109-6.25-6.2539-6.25z" />
-                </g>
-              </svg>
-            </div>
-          )}
-        </div>
+      <div className="my-2 flex w-full grow flex-col gap-6 overflow-hidden rounded-sm p-4 sm:my-10 sm:p-8">
+        <ScrollArea className="flex grow flex-col justify-start gap-4 overflow-auto rounded-lg border-slate-400 pr-2">
+          <ChatGPTDummy />
+        </ScrollArea>
         <form
           onSubmit={handleSubmit}
           className="flex items-center gap-2 space-x-2"

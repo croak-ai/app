@@ -81,16 +81,6 @@ export default function ChatBox({
             sendMessage(content);
           }}
         />
-        {isInDevMode() && (
-          <div className="flex items-center justify-end">
-            <Switch
-              checked={devModeEnabled}
-              onCheckedChange={setDevModeEnabled}
-              className="mr-2"
-            />
-            <span className="text-sm">Dev Mode</span>
-          </div>
-        )}
       </div>
     </div>
   );
