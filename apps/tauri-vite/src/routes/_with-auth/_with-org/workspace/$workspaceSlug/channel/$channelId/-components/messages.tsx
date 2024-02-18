@@ -1,7 +1,7 @@
 import Message from "./message";
 import { trpc } from "@/utils/trpc";
-
 import InfiniteScroll from "react-infinite-scroll-component";
+import { format, isSameDay } from "date-fns";
 
 export default function Messages({
   channelId,
@@ -31,6 +31,18 @@ export default function Messages({
   if (!messages.data) {
     return <div>No messages found</div>;
   }
+
+  // Function to determine if the message is the first of a new day
+  const isFirstMessageOfDay = (
+    message: { message: { createdAt: number } },
+    index: number,
+    arr: { message: { createdAt: number } }[],
+  ) => {
+    if (index === 0) return true; // First message in the dataset
+    const prevMessageDate = new Date(arr[index - 1].message.createdAt);
+    const messageDate = new Date(message.message.createdAt);
+    return !isSameDay(prevMessageDate, messageDate);
+  };
 
   return (
     <div
@@ -62,23 +74,30 @@ export default function Messages({
                 .slice()
                 .reverse()
                 .map((message, index, arr) => (
-                  <Message
-                    key={message.message.id}
-                    message={{
-                      ...message.message,
-                      ...message.user,
-                      userId: message.message.userId,
-                    }}
-                    previousMessage={
-                      index > 0
-                        ? {
-                            ...arr[index - 1].message,
-                            ...arr[index - 1].user,
-                            userId: arr[index - 1].message.userId,
-                          }
-                        : undefined
-                    }
-                  />
+                  <>
+                    {isFirstMessageOfDay(message, index, arr) && (
+                      <div className="date-separator">
+                        {format(new Date(message.message.createdAt), "PPP")}
+                      </div>
+                    )}
+                    <Message
+                      key={message.message.id}
+                      message={{
+                        ...message.message,
+                        ...message.user,
+                        userId: message.message.userId,
+                      }}
+                      previousMessage={
+                        index > 0
+                          ? {
+                              ...arr[index - 1].message,
+                              ...arr[index - 1].user,
+                              userId: arr[index - 1].message.userId,
+                            }
+                          : undefined
+                      }
+                    />
+                  </>
                 ))}
             </div>
           ))}
