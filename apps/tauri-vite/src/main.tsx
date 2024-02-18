@@ -3,10 +3,9 @@ import ReactDOM from "react-dom/client";
 import "@acme/ui/styles/globals.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
-import { createTRPCQueryUtils, createTRPCReact } from "@trpc/react-query";
+import { createTRPCQueryUtils } from "@trpc/react-query";
 import superjson from "superjson";
 import { useAuth, useUser } from "@clerk/clerk-react";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { trpc } from "./utils/trpc";
 
 import { createRouter, RouterProvider } from "@tanstack/react-router";
@@ -54,7 +53,6 @@ export const queryClient = new QueryClient();
 function InnerApp() {
   const auth = useAuth();
   const { user } = useUser();
-  const [queryClient] = React.useState(() => new QueryClient());
   const [trpcClient] = React.useState(() =>
     trpc.createClient({
       links: [
