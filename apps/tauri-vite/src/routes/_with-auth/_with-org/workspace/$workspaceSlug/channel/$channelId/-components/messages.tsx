@@ -34,15 +34,18 @@ export default function Messages({
 
   // Function to determine if the message is the first of a new day
   const isFirstMessageOfDay = (
-    message: { message: { createdAt: number } },
+    message: { createdAt: number },
     index: number,
-    arr: { message: { createdAt: number } }[],
+    arr: { createdAt: number }[],
   ) => {
     if (index === 0) return true; // First message in the dataset
-    const prevMessageDate = new Date(arr[index - 1].message.createdAt);
-    const messageDate = new Date(message.message.createdAt);
+    const prevMessageDate = new Date(arr[index - 1].createdAt);
+    const messageDate = new Date(message.createdAt);
     return !isSameDay(prevMessageDate, messageDate);
   };
+
+  // Combine all messages from all pages into a single array
+  const allMessages = messages.data.pages.flatMap((page) => page.messages);
 
   return (
     <div
@@ -56,7 +59,7 @@ export default function Messages({
       }}
     >
       <InfiniteScroll
-        dataLength={messages.data.pages.length}
+        dataLength={allMessages.length}
         next={() => {
           messages.fetchNextPage();
         }}
@@ -67,40 +70,40 @@ export default function Messages({
         scrollableTarget="scrollableDiv"
       >
         <div className="grid py-4">
-          {[...messages.data.pages].reverse().map((page, i) => (
-            <div key={i}>
-              {/* Reverse the order of messages for each page */}
-              {page.messages
-                .slice()
-                .reverse()
-                .map((message, index, arr) => (
-                  <>
-                    {isFirstMessageOfDay(message, index, arr) && (
-                      <div className="date-separator">
-                        {format(new Date(message.message.createdAt), "PPP")}
-                      </div>
-                    )}
-                    <Message
-                      key={message.message.id}
-                      message={{
-                        ...message.message,
-                        ...message.user,
-                        userId: message.message.userId,
-                      }}
-                      previousMessage={
-                        index > 0
-                          ? {
-                              ...arr[index - 1].message,
-                              ...arr[index - 1].user,
-                              userId: arr[index - 1].message.userId,
-                            }
-                          : undefined
-                      }
-                    />
-                  </>
-                ))}
-            </div>
-          ))}
+          {/* Render all combined messages */}
+          {allMessages
+            .slice()
+            .reverse()
+            .map((message, index, arr) => (
+              <>
+                {isFirstMessageOfDay(
+                  message.message,
+                  index,
+                  arr.map((item) => item.message),
+                ) && (
+                  <div className="date-separator">
+                    {format(new Date(message.message.createdAt), "PPP")}
+                  </div>
+                )}
+                <Message
+                  key={message.message.id}
+                  message={{
+                    ...message.message,
+                    ...message.user,
+                    userId: message.message.userId,
+                  }}
+                  previousMessage={
+                    index > 0
+                      ? {
+                          ...arr[index - 1].message,
+                          ...arr[index - 1].user,
+                          userId: arr[index - 1].message.userId,
+                        }
+                      : undefined
+                  }
+                />
+              </>
+            ))}
         </div>
       </InfiniteScroll>
     </div>
