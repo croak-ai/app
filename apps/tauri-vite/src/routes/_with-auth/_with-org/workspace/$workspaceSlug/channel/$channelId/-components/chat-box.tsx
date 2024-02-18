@@ -5,8 +5,8 @@ import type { MilkdownRef } from "@/components/playground-editor";
 import { useCallback, useRef, useState, useEffect, useMemo } from "react";
 import { Switch } from "@acme/ui/components/ui/switch";
 import { trpc } from "@/utils/trpc";
-import { PlaygroundMilkdown } from "@/components/playground-editor";
-import { ControlPanel } from "@/components/playground/control-panel";
+import { PlaygroundMilkdown as MessageBox } from "@/components/playground-editor";
+import { ControlPanel as DevMessageBoxTools } from "@/components/playground/control-panel";
 import Messages from "./messages";
 import { useUser } from "@clerk/clerk-react";
 
@@ -23,7 +23,6 @@ export default function ChatBox({
 }) {
   const utils = trpc.useUtils();
 
-  const [defaultContent, setDefaultContent] = useState("");
   const [devModeEnabled, setDevModeEnabled] = useState(false);
   const [messagesHeight, setMessagesHeight] = useState(500); // Default height
   const { user } = useUser();
@@ -138,13 +137,8 @@ export default function ChatBox({
     const resizeObserver = new ResizeObserver((entries) => {
       for (let entry of entries) {
         const { height } = entry.contentRect;
-        console.log("Editor height", height);
         const newMessagesHeight = window.innerHeight - height - 185;
         setMessagesHeight(newMessagesHeight);
-        console.log(
-          "Adjusted messages height due to editor resize",
-          newMessagesHeight,
-        );
       }
     });
 
@@ -153,11 +147,11 @@ export default function ChatBox({
     return () => resizeObserver.disconnect();
   }, []);
 
-  const MemoizedPlaygroundMilkdown = useMemo(
+  const MemoizedMessageBox = useMemo(
     () => (
-      <PlaygroundMilkdown
+      <MessageBox
         milkdownRef={milkdownRef}
-        defaultContent={defaultContent}
+        defaultContent={""}
         onChange={onMilkdownChange}
         onSendPressed={(content) => {
           sendMessage(content);
@@ -167,21 +161,26 @@ export default function ChatBox({
     [],
   );
 
+  const MemoizedDevMessageBoxTools = useMemo(
+    () => (
+      <DevMessageBoxTools
+        codemirrorRef={codemirrorRef}
+        content={""}
+        onChange={onCodemirrorChange}
+        lock={lockCodemirror}
+      />
+    ),
+    [],
+  );
+
   return (
     <div className="relative h-screen">
       <div className="absolute bottom-24 w-full p-4">
-        {devModeEnabled && (
-          <ControlPanel
-            codemirrorRef={codemirrorRef}
-            content={defaultContent}
-            onChange={onCodemirrorChange}
-            lock={lockCodemirror}
-          />
-        )}
-
         <Messages channelId={channelId} height={messagesHeight} />
 
-        <div className="playground-wrapper">{MemoizedPlaygroundMilkdown}</div>
+        {devModeEnabled && MemoizedDevMessageBoxTools}
+
+        <div className="playground-wrapper">{MemoizedMessageBox}</div>
         {isInDevMode() && (
           <div className="flex items-center justify-end">
             <Switch
