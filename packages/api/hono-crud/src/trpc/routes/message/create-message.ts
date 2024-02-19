@@ -54,20 +54,15 @@ export const createMessage = router({
       const currentTime = Date.now();
 
       const statement = sql`
-      INSERT INTO message (userId, message, channelId, messageInChannelNumber, createdAt, updatedAt)
+      INSERT INTO message (userId, message, channelId, createdAt, updatedAt)
       VALUES (
           ${ctx.auth.userId},
           ${input.messageContent},
           ${input.channelId},
-          (
-              SELECT COALESCE(MAX(messageInChannelNumber) + 1, 1)
-              FROM message
-              WHERE channelId = ${input.channelId}
-          ),
           ${currentTime},
           ${currentTime}
       )
-      RETURNING id, message, channelId, messageInChannelNumber;
+      RETURNING id, message, channelId;
     `;
 
       const result = await ctx.db.run(statement);

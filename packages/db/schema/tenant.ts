@@ -83,22 +83,15 @@ export const workspaceMember = sqliteTable("workspaceMember", {
   deletedAt: integer("deletedAt"),
 });
 
-export const message = sqliteTable(
-  "message",
-  {
-    id: integer("id").primaryKey(),
-    channelId: integer("channelId").notNull(),
-    userId: text("userId").notNull(),
-    message: text("message", { length: 60000 }).notNull(),
-    messageInChannelNumber: integer("messageInChannelNumber").notNull(),
-    createdAt: integer("createdAt").notNull(),
-    updatedAt: integer("updatedAt").notNull(),
-    deletedAt: integer("deletedAt"),
-  },
-  (t) => ({
-    unq: unique().on(t.messageInChannelNumber, t.channelId),
-  }),
-);
+export const message = sqliteTable("message", {
+  id: integer("id").primaryKey(),
+  channelId: integer("channelId").notNull(),
+  userId: text("userId").notNull(),
+  message: text("message", { length: 60000 }).notNull(),
+  createdAt: integer("createdAt").notNull(),
+  updatedAt: integer("updatedAt").notNull(),
+  deletedAt: integer("deletedAt"),
+});
 
 /*
  *
