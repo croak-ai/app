@@ -2,7 +2,6 @@ import Message from "./message";
 import { trpc } from "@/utils/trpc";
 import { format, isSameDay } from "date-fns";
 import React, { useEffect } from "react";
-import SkeletonMessages from "./skeleton-messages";
 import { useInView } from "react-intersection-observer";
 
 export default function Messages({
@@ -15,7 +14,7 @@ export default function Messages({
   const messages = trpc.getMessages.getMessages.useInfiniteQuery(
     {
       channelId,
-      limit: 50,
+      limit: 100,
     },
     {
       getNextPageParam: (lastPage) => {
@@ -25,7 +24,7 @@ export default function Messages({
     },
   );
 
-  const { ref, inView } = useInView({ threshold: 0.5 });
+  const { ref, inView } = useInView({ threshold: 0 });
 
   useEffect(() => {
     if (inView && messages.hasNextPage) {
@@ -71,13 +70,13 @@ export default function Messages({
       }}
     >
       <div className="grid py-4">
-        {messages.hasNextPage && <SkeletonMessages count={15} />}
         <div ref={ref}></div>
+
         {allMessages
           .slice()
           .reverse()
           .map((message, index, arr) => (
-            <React.Fragment>
+            <React.Fragment key={message.message.id}>
               {isFirstMessageOfDay(
                 message.message,
                 index,
