@@ -7,12 +7,12 @@ import {
 } from "@clerk/backend";
 import { Hono } from "hono";
 import type { HonoConfig } from "../../config";
-import { createDbClient } from "@packages/db";
+import { createDbClient } from "@acme/db";
 import { verifyWebhook } from "../../functions/webhook/verifyWebhook";
 
 import { HTTPException } from "hono/http-exception";
-import { user } from "@packages/db/schema/tenant";
-import { eq } from "@packages/db";
+import { user } from "@acme/db/schema/tenant";
+import { eq } from "@acme/db";
 import { getDbAuthToken } from "../../functions/db";
 import { fetchUserMemberships } from "../../functions/webhook/fetchUserMemberships";
 import { updateOrgUser } from "../../functions/webhook/updateOrgUser";

@@ -1,6 +1,4 @@
-import { type inferAsyncReturnType } from "@trpc/server";
-
-import { createDbClient } from "@packages/db";
+import { createDbClient } from "@acme/db";
 
 import { getAuth } from "@hono/clerk-auth";
 import { HonoContext } from "../../config";
@@ -51,6 +49,6 @@ export function createTRPCContextFromHonoContext(c: HonoContext) {
   };
 }
 
-export type Context = inferAsyncReturnType<
-  typeof createTRPCContextFromHonoContext
+export type Context = ReturnType<
+  ReturnType<typeof createTRPCContextFromHonoContext>
 >;

@@ -3,7 +3,7 @@ import {
   dekEncryptionKeyUserAccess,
   workspace,
   workspaceMember,
-} from "@packages/db/schema/tenant";
+} from "@acme/db/schema/tenant";
 import { protectedProcedureWithOrgDB, router } from "../../config/trpc";
 import { z } from "zod";
 type newWorkspaceType = typeof workspace.$inferInsert;
