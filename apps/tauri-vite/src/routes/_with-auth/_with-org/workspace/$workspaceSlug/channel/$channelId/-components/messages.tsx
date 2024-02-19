@@ -1,7 +1,9 @@
 import Message from "./message";
 import { trpc } from "@/utils/trpc";
-import InfiniteScroll from "react-infinite-scroll-component";
 import { format, isSameDay } from "date-fns";
+import React, { useEffect } from "react";
+import SkeletonMessages from "./skeleton-messages";
+import { useInView } from "react-intersection-observer";
 
 export default function Messages({
   channelId,
@@ -22,6 +24,15 @@ export default function Messages({
       initialCursor: undefined,
     },
   );
+
+  const { ref, inView } = useInView({ threshold: 0.5 });
+
+  useEffect(() => {
+    if (inView && messages.hasNextPage) {
+      console.log("fetching next page");
+      messages.fetchNextPage();
+    }
+  }, [inView]);
 
   if (messages.error) {
     return <div>Error: {messages.error.message}</div>;
@@ -59,33 +70,24 @@ export default function Messages({
         overflowAnchor: "none",
       }}
     >
-      <InfiniteScroll
-        dataLength={allMessages.length}
-        next={() => {
-          messages.fetchNextPage();
-        }}
-        hasMore={messages.hasNextPage}
-        style={{ display: "flex", flexDirection: "column-reverse" }} //To put endMessage and loader to the top.
-        inverse={true} //
-        loader={<h4>Loading...</h4>}
-        scrollableTarget="scrollableDiv"
-      >
-        <div className="grid py-4">
-          {/* Render all combined messages */}
-          {allMessages
-            .slice()
-            .reverse()
-            .map((message, index, arr) => (
-              <>
-                {isFirstMessageOfDay(
-                  message.message,
-                  index,
-                  arr.map((item) => item.message),
-                ) && (
-                  <div className="date-separator">
-                    {format(new Date(message.message.createdAt), "PPP")}
-                  </div>
-                )}
+      <div className="grid py-4">
+        {messages.hasNextPage && <SkeletonMessages count={15} />}
+        <div ref={ref}></div>
+        {allMessages
+          .slice()
+          .reverse()
+          .map((message, index, arr) => (
+            <React.Fragment>
+              {isFirstMessageOfDay(
+                message.message,
+                index,
+                arr.map((item) => item.message),
+              ) && (
+                <div className="date-separator sticky top-0">
+                  {format(new Date(message.message.createdAt), "PPP")}
+                </div>
+              )}
+              <div>
                 <Message
                   key={message.message.id}
                   message={{
@@ -103,10 +105,10 @@ export default function Messages({
                       : undefined
                   }
                 />
-              </>
-            ))}
-        </div>
-      </InfiniteScroll>
+              </div>
+            </React.Fragment>
+          ))}
+      </div>
     </div>
   );
 }
