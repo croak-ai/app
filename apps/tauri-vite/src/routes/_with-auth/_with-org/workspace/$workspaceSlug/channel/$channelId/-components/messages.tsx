@@ -19,6 +19,7 @@ export default function Messages({
       getNextPageParam: (lastPage) => {
         return lastPage.nextCursor;
       },
+      initialCursor: undefined,
     },
   );
 
