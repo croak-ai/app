@@ -1,7 +1,9 @@
+import { Button } from "@acme/ui/components/ui/button";
+import { Separator } from "@acme/ui/components/ui/separator";
 import Message from "./message";
-import { trpc } from "@/utils/trpc";
-import { format, isSameDay } from "date-fns";
-import React, { useEffect } from "react";
+import { RouterOutput, trpc } from "@/utils/trpc";
+import { format } from "date-fns";
+import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 
 export default function Messages({
@@ -11,52 +13,56 @@ export default function Messages({
   channelId: string;
   height: number;
 }) {
-  const messages = trpc.getMessages.getMessages.useInfiniteQuery(
-    {
-      channelId,
-      limit: 100,
-    },
-    {
-      getNextPageParam: (lastPage) => {
-        return lastPage.nextCursor;
+  const { data, hasNextPage, fetchNextPage, error, isLoading } =
+    trpc.getMessages.getMessages.useInfiniteQuery(
+      {
+        channelId,
+        limit: 100,
       },
-      initialCursor: undefined,
-    },
-  );
+      {
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+        initialCursor: undefined,
+      },
+    );
 
   const { ref, inView } = useInView({ threshold: 0 });
 
   useEffect(() => {
-    if (inView && messages.hasNextPage) {
+    if (inView && hasNextPage) {
       console.log("fetching next page");
-      messages.fetchNextPage();
+      fetchNextPage();
     }
-  }, [inView]);
+  }, [inView, hasNextPage, fetchNextPage]);
 
-  if (messages.error) {
-    return <div>Error: {messages.error.message}</div>;
+  if (error) {
+    return <div>Error: {error.message}</div>;
   }
-  if (messages.isLoading) {
+  if (isLoading) {
     return <div>Loading...</div>;
   }
-  if (!messages.data) {
+  if (!data) {
     return <div>No messages found</div>;
   }
 
-  // Function to determine if the message is the first of a new day
-  const isFirstMessageOfDay = (
-    message: { createdAt: number },
-    index: number,
-    arr: { createdAt: number }[],
-  ) => {
-    if (index === 0) return true; // First message in the dataset
-    const prevMessageDate = new Date(arr[index - 1].createdAt);
-    const messageDate = new Date(message.createdAt);
-    return !isSameDay(prevMessageDate, messageDate);
+  type Messages = RouterOutput["getMessages"]["getMessages"]["messages"];
+
+  const groupMessagesByDate = (messages: Messages) => {
+    return messages.reduce(
+      (acc: { [key: string]: typeof messages }, message) => {
+        const date = format(new Date(message.message.createdAt), "yyyy-MM-dd");
+        if (!acc[date]) {
+          acc[date] = [];
+        }
+        acc[date].push(message);
+        return acc;
+      },
+      {},
+    );
   };
 
   // Combine all messages from all pages into a single array
-  const allMessages = messages.data.pages.flatMap((page) => page.messages);
+  const allMessages = data.pages.flatMap((page) => page.messages);
+  const groupedMessages = groupMessagesByDate(allMessages);
 
   return (
     <div
@@ -69,45 +75,28 @@ export default function Messages({
         overflowAnchor: "none",
       }}
     >
-      <div className="grid py-4">
-        <div ref={ref}></div>
-
-        {allMessages
-          .slice()
-          .reverse()
-          .map((message, index, arr) => (
-            <React.Fragment key={message.message.id}>
-              {isFirstMessageOfDay(
-                message.message,
-                index,
-                arr.map((item) => item.message),
-              ) && (
-                <div className="date-separator sticky top-0">
-                  {format(new Date(message.message.createdAt), "PPP")}
-                </div>
-              )}
-              <div>
-                <Message
-                  key={message.message.id}
-                  message={{
-                    ...message.message,
-                    ...message.user,
-                    userId: message.message.userId,
-                  }}
-                  previousMessage={
-                    index > 0
-                      ? {
-                          ...arr[index - 1].message,
-                          ...arr[index - 1].user,
-                          userId: arr[index - 1].message.userId,
-                        }
-                      : undefined
-                  }
-                />
-              </div>
-            </React.Fragment>
+      {Object.entries(groupedMessages).map(([date, messages]) => (
+        <div key={date} className="messages-section">
+          <Separator className="my-4" />
+          <div className="sticky top-0 flex w-full items-center justify-center">
+            <div className="flex-1"></div>
+            <div className="mx-2">
+              <Button
+                variant={"secondary"}
+                size={"sm"}
+                className="date-separator"
+              >
+                {format(new Date(messages[0].message.createdAt), "PPP")}
+              </Button>
+            </div>
+            <div className="flex-1"></div>
+          </div>
+          {messages.map((message) => (
+            <Message key={message.message.id} message={message.message} />
           ))}
-      </div>
+        </div>
+      ))}
+      <div ref={ref}></div>
     </div>
   );
 }

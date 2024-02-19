@@ -137,7 +137,7 @@ export default function ChatBox({
     const resizeObserver = new ResizeObserver((entries) => {
       for (let entry of entries) {
         const { height } = entry.contentRect;
-        const newMessagesHeight = window.innerHeight - height - 185;
+        const newMessagesHeight = window.innerHeight - height - 146;
         setMessagesHeight(newMessagesHeight);
       }
     });
