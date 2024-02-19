@@ -31,7 +31,7 @@ export default function ChatBox({
     onMutate: async (opts) => {
       await utils.getMessages.getMessages.cancel();
       utils.getMessages.getMessages.setInfiniteData(
-        { channelId: channelId, limit: 50 },
+        { channelId: channelId, limit: 100 },
         (data) => {
           if (!data) {
             return {
@@ -137,7 +137,7 @@ export default function ChatBox({
     const resizeObserver = new ResizeObserver((entries) => {
       for (let entry of entries) {
         const { height } = entry.contentRect;
-        const newMessagesHeight = window.innerHeight - height - 146;
+        const newMessagesHeight = window.innerHeight - height - 175;
         setMessagesHeight(newMessagesHeight);
       }
     });
@@ -180,7 +180,7 @@ export default function ChatBox({
 
         {devModeEnabled && MemoizedDevMessageBoxTools}
 
-        <div className="playground-wrapper">{MemoizedMessageBox}</div>
+        <div className="playground-wrapper my-2">{MemoizedMessageBox}</div>
         {isInDevMode() && (
           <div className="flex items-center justify-end">
             <Switch

@@ -78,6 +78,8 @@ export default function Messages({
       {Object.entries(groupedMessages).map(([date, messages]) => (
         <div key={date} className="messages-section">
           <Separator className="my-4" />
+          <div ref={ref}></div>
+
           <div className="sticky top-0 flex w-full items-center justify-center">
             <div className="flex-1"></div>
             <div className="mx-2">
@@ -91,16 +93,18 @@ export default function Messages({
             </div>
             <div className="flex-1"></div>
           </div>
-          {messages.map((message, index) => (
-            <Message
-              key={message.message.id}
-              message={message.message}
-              previousMessage={messages[index - 1]?.message}
-            />
-          ))}
+          {messages
+            .slice()
+            .reverse()
+            .map((message, index, arr) => (
+              <Message
+                key={message.message.id}
+                message={message.message}
+                previousMessage={arr[index - 1]?.message}
+              />
+            ))}
         </div>
       ))}
-      <div ref={ref}></div>
     </div>
   );
 }
