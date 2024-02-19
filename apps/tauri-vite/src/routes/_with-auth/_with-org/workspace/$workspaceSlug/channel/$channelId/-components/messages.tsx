@@ -91,8 +91,12 @@ export default function Messages({
             </div>
             <div className="flex-1"></div>
           </div>
-          {messages.map((message) => (
-            <Message key={message.message.id} message={message.message} />
+          {messages.map((message, index) => (
+            <Message
+              key={message.message.id}
+              message={message.message}
+              previousMessage={messages[index - 1]?.message}
+            />
           ))}
         </div>
       ))}
