@@ -100,6 +100,12 @@ export const message = sqliteTable(
   }),
 );
 
+export const conversation = sqliteTable("conversation", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  startDate: integer("startDate").notNull(),
+  endDate: integer("endDate").notNull(),
+});
+
 /*
  *
  * This table is used to store the encryption keys for messages.
@@ -134,9 +140,3 @@ export const dekEncryptionKeyUserAccess = sqliteTable(
     deletedAt: integer("deletedAt"),
   },
 );
-
-export const conversation = sqliteTable("conversation", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  startDate: integer("startDate").notNull(),
-  endDate: integer("endDate").notNull(),
-});
