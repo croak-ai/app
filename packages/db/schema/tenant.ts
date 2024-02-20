@@ -88,6 +88,7 @@ export const message = sqliteTable(
   {
     id: integer("id").primaryKey(),
     channelId: integer("channelId").notNull(),
+    conversationId: integer("conversationId").notNull(),
     userId: text("userId").notNull(),
     message: text("message", { length: 60000 }).notNull(),
     messageInChannelNumber: integer("messageInChannelNumber").notNull(),
