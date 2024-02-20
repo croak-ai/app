@@ -103,6 +103,7 @@ export const message = sqliteTable(
 
 export const conversation = sqliteTable("conversation", {
   id: integer("id").primaryKey({ autoIncrement: true }),
+  channelId: integer("channelId").notNull(),
   startDate: integer("startDate").notNull(),
   endDate: integer("endDate").notNull(),
 });
