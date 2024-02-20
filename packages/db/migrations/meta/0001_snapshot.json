@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "738d44aa-c463-4a8c-88ef-0cb18f461e06",
-  "prevId": "e8847dfa-efb6-4c67-94ab-594f6e9d0ba3",
+  "id": "aa0cef2d-63ef-462d-913a-217270c0bc3a",
+  "prevId": "e9b98ea0-f079-46c3-8898-0c914fb67a5d",
   "tables": {
     "channel": {
       "name": "channel",
@@ -160,6 +160,36 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "conversations": {
+      "name": "conversations",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "startDate": {
+          "name": "startDate",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "endDate": {
+          "name": "endDate",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
           "autoincrement": false
         }
       },

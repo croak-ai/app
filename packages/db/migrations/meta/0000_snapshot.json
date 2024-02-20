@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "e8847dfa-efb6-4c67-94ab-594f6e9d0ba3",
+  "id": "e9b98ea0-f079-46c3-8898-0c914fb67a5d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "channel": {
@@ -316,6 +316,13 @@
           "notNull": true,
           "autoincrement": false
         },
+        "messageInChannelNumber": {
+          "name": "messageInChannelNumber",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
         "createdAt": {
           "name": "createdAt",
           "type": "integer",
@@ -335,6 +342,31 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "message_messageInChannelNumber_channelId_unique": {
+          "name": "message_messageInChannelNumber_channelId_unique",
+          "columns": [
+            "messageInChannelNumber",
+            "channelId"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "testyy": {
+      "name": "testyy",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
           "autoincrement": false
         }
       },
