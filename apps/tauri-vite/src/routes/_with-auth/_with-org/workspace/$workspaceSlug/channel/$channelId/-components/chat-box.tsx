@@ -1,10 +1,8 @@
-"use client";
-
 import { CodemirrorRef } from "@/components/codemirror";
 import type { MilkdownRef } from "@/components/playground-editor";
 import { useCallback, useRef, useState, useEffect, useMemo } from "react";
 import { Switch } from "@acme/ui/components/ui/switch";
-import { trpc } from "@/utils/trpc";
+import { RouterInput, trpc } from "@/utils/trpc";
 import { PlaygroundMilkdown as MessageBox } from "@/components/playground-editor";
 import { ControlPanel as DevMessageBoxTools } from "@/components/playground/control-panel";
 import Messages from "./messages";
@@ -14,12 +12,16 @@ const isInDevMode = () => {
   return process.env.NODE_ENV === "development";
 };
 
+type Cursor = RouterInput["getMessages"]["getMessages"]["cursor"];
+
 export default function ChatBox({
   workspaceSlug,
   channelId,
+  initialCursor,
 }: {
   workspaceSlug: string;
   channelId: string;
+  initialCursor: Cursor;
 }) {
   const utils = trpc.useUtils();
 
@@ -28,68 +30,83 @@ export default function ChatBox({
   const { user } = useUser();
 
   const createMessage = trpc.createMessage.createMessage.useMutation({
-    onMutate: async (opts) => {
-      await utils.getMessages.getMessages.cancel();
-      utils.getMessages.getMessages.setInfiniteData(
-        { channelId: channelId, limit: 100 },
-        (data) => {
-          if (!data) {
-            return {
-              pages: [],
-              pageParams: [],
-            };
-          }
+    // onMutate: async (opts) => {
+    //   await utils.getMessages.getMessages.cancel();
+    //   utils.getMessages.getMessages.setInfiniteData(
+    //     {
+    //       channelId: channelId,
+    //       limit: 100,
+    //       cursor: {
+    //         createdAt: Date.now(), // Use the current timestamp or the appropriate value
+    //         id: "cursor_id", // Replace "cursor_id" with the actual cursor ID you have
+    //         direction: "next", // or "previous", depending on your use case
+    //       },
+    //     },
+    //     (data) => {
+    //       if (!data) {
+    //         return {
+    //           pages: [],
+    //           pageParams: [],
+    //         };
+    //       }
 
-          const newMessage = {
-            // Adjust the structure to match your expected message object structure
-            confirmed: false, // This is the new part
-            id: -1, // Mock ID for optimistic update
-            message: {
-              channelId: parseInt(opts.channelId), // Assuming channelId is a number in your data model
-              userId: "optimistic_user_id",
-              createdAt: Date.now(),
-              updatedAt: Date.now(),
-              id: Math.random(), // Assuming id is a number in your data model
-              deletedAt: null, // Assuming this field exists and is nullable
-              message: opts.messageContent,
-              messageInChannelNumber: 1, // Example value, adjust as necessary
-            },
-            user: {
-              userId: user?.id ?? "unknown", // Provide a default string value for userId if null
-              role: "some_role",
-              firstName: user?.firstName ?? "unknown",
-              lastName: user?.lastName ?? "name",
-              email: user?.primaryEmailAddress?.emailAddress ?? "unknown_email",
-              imageUrl: user?.imageUrl ?? "",
-              profileImageUrl: user?.imageUrl ?? "",
-              createdAt: Date.now(),
-              updatedAt: Date.now(),
-            },
-          };
+    //       const newMessage = {
+    //         // Adjust the structure to match your expected message object structure
+    //         confirmed: false, // This is the new part
+    //         id: -1, // Mock ID for optimistic update
+    //         message: {
+    //           channelId: parseInt(opts.channelId), // Assuming channelId is a number in your data model
+    //           userId: "optimistic_user_id",
+    //           createdAt: Date.now(),
+    //           updatedAt: Date.now(),
+    //           id: Math.random(), // Assuming id is a number in your data model
+    //           deletedAt: null, // Assuming this field exists and is nullable
+    //           message: opts.messageContent,
+    //           messageInChannelNumber: 1, // Example value, adjust as necessary
+    //         },
+    //         user: {
+    //           userId: user?.id ?? "unknown", // Provide a default string value for userId if null
+    //           role: "some_role",
+    //           firstName: user?.firstName ?? "unknown",
+    //           lastName: user?.lastName ?? "name",
+    //           email: user?.primaryEmailAddress?.emailAddress ?? "unknown_email",
+    //           imageUrl: user?.imageUrl ?? "",
+    //           profileImageUrl: user?.imageUrl ?? "",
+    //           createdAt: Date.now(),
+    //           updatedAt: Date.now(),
+    //         },
+    //       };
 
-          return {
-            ...data,
-            pages: data.pages.map((page) => ({
-              ...page,
-              messages: [newMessage, ...page.messages],
-            })),
-          };
-        },
-      );
-    },
+    //       return {
+    //         ...data,
+    //         pages: data.pages.map((page) => ({
+    //           ...page,
+    //           messages: [newMessage, ...page.messages],
+    //         })),
+    //       };
+    //     },
+    //   );
+    // },
     onError: (input, variables, context) => {
       utils.getMessages.getMessages.setInfiniteData(
-        { channelId: variables.channelId, limit: 50 },
+        {
+          channelId: variables.channelId,
+          limit: 100,
+          cursor: {
+            createdAt: Date.now(), // Use the current timestamp or the appropriate value
+            id: "cursor_id", // Replace "cursor_id" with the actual cursor ID you have
+            direction: "next", // or "previous", depending on your use case
+          },
+        },
         () => ({
           pages: [],
           pageParams: [],
         }),
       );
-      utils.getMessages.getMessages.refetch({ channelId: variables.channelId });
     },
-    onSettled: () => {
-      utils.getMessages.getMessages.invalidate();
-    },
+    // onSettled: () => {
+    //   utils.getMessages.getMessages.invalidate();
+    // },
   });
 
   const lockCodemirror = useRef(false);
@@ -176,7 +193,11 @@ export default function ChatBox({
   return (
     <div className="relative h-screen">
       <div className="absolute bottom-24 w-full p-4">
-        <Messages channelId={channelId} height={messagesHeight} />
+        <Messages
+          channelId={channelId}
+          height={messagesHeight}
+          initialCursor={initialCursor}
+        />
 
         {devModeEnabled && MemoizedDevMessageBoxTools}
 

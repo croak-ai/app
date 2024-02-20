@@ -11,6 +11,7 @@ import { getWorkspaceChannels } from "./channel/get-workspace-channels";
 import { createMessage } from "./message/create-message";
 import { getAvailableGroups } from "./turso-meta/get-available-groups";
 import { getMessages } from "./message/get-messages";
+import { getNewestMessage } from "./message/get-newest-message";
 
 export const appRouter = router({
   createNewTursoDB,
@@ -24,6 +25,7 @@ export const appRouter = router({
   createMessage,
   getAvailableGroups,
   getMessages,
+  getNewestMessage,
 });
 
 // export type definition of API

@@ -1,7 +1,7 @@
 import { Button } from "@acme/ui/components/ui/button";
 import { Separator } from "@acme/ui/components/ui/separator";
 import Message from "./message";
-import { RouterOutput, trpc } from "@/utils/trpc";
+import { RouterInput, RouterOutput, trpc } from "@/utils/trpc";
 import { format } from "date-fns";
 import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
@@ -9,30 +9,42 @@ import { useInView } from "react-intersection-observer";
 export default function Messages({
   channelId,
   height,
+  initialCursor,
 }: {
   channelId: string;
   height: number;
+  initialCursor: RouterInput["getMessages"]["getMessages"]["cursor"];
 }) {
-  const { data, hasNextPage, fetchNextPage, error, isLoading } =
-    trpc.getMessages.getMessages.useInfiniteQuery(
-      {
-        channelId,
-        limit: 100,
-      },
-      {
-        getNextPageParam: (lastPage) => lastPage.nextCursor,
-        initialCursor: undefined,
-      },
-    );
+  const {
+    data,
+    hasNextPage,
+    fetchNextPage,
+    fetchPreviousPage,
+    error,
+    isLoading,
+  } = trpc.getMessages.getMessages.useInfiniteQuery(
+    {
+      channelId,
+      limit: 100,
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+      getPreviousPageParam: (firstPage, pages, page) =>
+        firstPage.previousCursor,
+      initialCursor: initialCursor,
+    },
+  );
 
-  const { ref, inView } = useInView({ threshold: 0 });
+  const { ref: NextPageRef, inView: NextPageInView } = useInView({
+    threshold: 0,
+  });
 
   useEffect(() => {
-    if (inView && hasNextPage) {
+    if (NextPageInView && hasNextPage) {
       console.log("fetching next page");
       fetchNextPage();
     }
-  }, [inView, hasNextPage, fetchNextPage]);
+  }, [NextPageInView, hasNextPage, fetchNextPage]);
 
   if (error) {
     return <div>Error: {error.message}</div>;
@@ -65,46 +77,50 @@ export default function Messages({
   const groupedMessages = groupMessagesByDate(allMessages);
 
   return (
-    <div
-      id="scrollableDiv"
-      style={{
-        height: height,
-        overflow: "auto",
-        display: "flex",
-        flexDirection: "column-reverse",
-        overflowAnchor: "none",
-      }}
-    >
-      {Object.entries(groupedMessages).map(([date, messages]) => (
-        <div key={date} className="messages-section">
-          <Separator className="my-4" />
-          <div ref={ref}></div>
+    <div>
+      <div
+        id="scrollableDiv"
+        style={{
+          height: height,
+          overflow: "auto",
+          display: "flex",
+          flexDirection: "column-reverse",
+          overflowAnchor: "none",
+        }}
+      >
+        {Object.entries(groupedMessages).map(([date, messages], index) => (
+          <div key={index} className="messages-section">
+            <Separator className="my-4" />
+            <div ref={NextPageRef}></div>
 
-          <div className="sticky top-0 flex w-full items-center justify-center">
-            <div className="flex-1"></div>
-            <div className="mx-2">
-              <Button
-                variant={"secondary"}
-                size={"sm"}
-                className="date-separator"
-              >
-                {format(new Date(messages[0].message.createdAt), "PPP")}
-              </Button>
+            <div className="sticky top-0 flex w-full items-center justify-center">
+              <div className="flex-1"></div>
+              <div className="mx-2">
+                <Button
+                  variant={"secondary"}
+                  size={"sm"}
+                  className="date-separator"
+                >
+                  {format(new Date(messages[0].message.createdAt), "PPP")}
+                </Button>
+              </div>
+              <div className="flex-1"></div>
             </div>
-            <div className="flex-1"></div>
+            {messages
+              .slice()
+              .reverse()
+              .map((message, index, arr) => (
+                <Message
+                  key={message.message.id}
+                  message={message.message}
+                  previousMessage={arr[index - 1]?.message}
+                />
+              ))}
           </div>
-          {messages
-            .slice()
-            .reverse()
-            .map((message, index, arr) => (
-              <Message
-                key={message.message.id}
-                message={message.message}
-                previousMessage={arr[index - 1]?.message}
-              />
-            ))}
-        </div>
-      ))}
+        ))}
+      </div>
+      <Button onClick={() => fetchPreviousPage()}>Previous</Button>
+      {/* <div ref={PreviousPageRef}></div> */}
     </div>
   );
 }
