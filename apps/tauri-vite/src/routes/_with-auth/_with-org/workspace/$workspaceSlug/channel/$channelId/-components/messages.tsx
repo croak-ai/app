@@ -25,7 +25,7 @@ export default function Messages({
   } = trpc.getMessages.getMessages.useInfiniteQuery(
     {
       channelId,
-      limit: 100,
+      limit: 50,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -39,12 +39,23 @@ export default function Messages({
     threshold: 0,
   });
 
+  const { ref: PreviousPageRef, inView: PreviousPageInView } = useInView({
+    threshold: 0,
+  });
+
   useEffect(() => {
     if (NextPageInView && hasNextPage) {
       console.log("fetching next page");
       fetchNextPage();
     }
   }, [NextPageInView, hasNextPage, fetchNextPage]);
+
+  useEffect(() => {
+    if (PreviousPageInView) {
+      console.log("fetching previous page");
+      fetchPreviousPage();
+    }
+  }, [PreviousPageInView, fetchPreviousPage]);
 
   if (error) {
     return <div>Error: {error.message}</div>;
@@ -88,36 +99,39 @@ export default function Messages({
           overflowAnchor: "none",
         }}
       >
-        {Object.entries(groupedMessages).map(([date, messages], index) => (
-          <div key={index} className="messages-section">
-            <Separator className="my-4" />
-            <div ref={NextPageRef}></div>
+        <>
+          <div ref={PreviousPageRef}></div>
+          {Object.entries(groupedMessages).map(([date, messages], index) => (
+            <div key={index} className="messages-section">
+              <Separator />
 
-            <div className="sticky top-0 flex w-full items-center justify-center">
-              <div className="flex-1"></div>
-              <div className="mx-2">
-                <Button
-                  variant={"secondary"}
-                  size={"sm"}
-                  className="date-separator"
-                >
-                  {format(new Date(messages[0].message.createdAt), "PPP")}
-                </Button>
+              <div className="sticky top-0 flex w-full items-center justify-center">
+                <div className="flex-1"></div>
+                <div className="mx-2">
+                  <Button
+                    variant={"secondary"}
+                    size={"sm"}
+                    className="date-separator my-8"
+                  >
+                    {format(new Date(messages[0].message.createdAt), "PPP")}
+                  </Button>
+                </div>
+                <div className="flex-1"></div>
               </div>
-              <div className="flex-1"></div>
+              {messages
+                .slice()
+                .reverse()
+                .map((message, index, arr) => (
+                  <Message
+                    key={message.message.id}
+                    message={message.message}
+                    previousMessage={arr[index - 1]?.message}
+                  />
+                ))}
             </div>
-            {messages
-              .slice()
-              .reverse()
-              .map((message, index, arr) => (
-                <Message
-                  key={message.message.id}
-                  message={message.message}
-                  previousMessage={arr[index - 1]?.message}
-                />
-              ))}
-          </div>
-        ))}
+          ))}
+          <div ref={NextPageRef}></div>
+        </>
       </div>
       <Button onClick={() => fetchPreviousPage()}>Previous</Button>
       {/* <div ref={PreviousPageRef}></div> */}
