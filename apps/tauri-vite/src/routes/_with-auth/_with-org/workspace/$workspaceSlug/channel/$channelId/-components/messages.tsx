@@ -34,7 +34,7 @@ export default function Messages({
       getPreviousPageParam: (firstPage, pages, page) =>
         firstPage.previousCursor,
       initialCursor: initialCursor,
-      maxPages: 2,
+      maxPages: 3,
     },
   );
 
@@ -54,11 +54,18 @@ export default function Messages({
     const messageElement = scrollBoxRef.current?.querySelector(
       `[data-key='${messageId}']`,
     );
-    if (messageElement) {
-      messageElement.scrollIntoView({ behavior: "instant" });
+    if (messageElement && scrollBoxRef.current) {
+      messageElement.scrollIntoView({
+        behavior: "instant",
+        block: "start",
+        inline: "nearest",
+      });
+      const padding = 100;
+      if (scrollBoxRef.current) {
+        scrollBoxRef.current.scrollTop -= padding;
+      }
     }
   };
-
   const messageInList = (messageId: number) => {
     return Boolean(
       data?.pages.some((page) =>
@@ -181,7 +188,7 @@ export default function Messages({
                     <Button
                       variant={"secondary"}
                       size={"sm"}
-                      className="date-separator my-8"
+                      className="date-separator my-4"
                     >
                       {format(new Date(messages[0].message.createdAt), "PPP")}
                     </Button>
@@ -209,7 +216,7 @@ export default function Messages({
           )}
         </>
       </div>
-      <Button onClick={() => fetchPreviousPage()}>Previous</Button>
+      {/* <Button onClick={() => fetchPreviousPage()}>Previous</Button> */}
     </div>
   );
 }
