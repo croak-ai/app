@@ -5,6 +5,7 @@ import { RouterInput, RouterOutput, trpc } from "@/utils/trpc";
 import { format } from "date-fns";
 import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
+import SkeletonMessages from "./skeleton-messages";
 
 export default function Messages({
   channelId,
@@ -18,6 +19,7 @@ export default function Messages({
   const {
     data,
     hasNextPage,
+    hasPreviousPage,
     fetchNextPage,
     fetchPreviousPage,
     error,
@@ -100,7 +102,9 @@ export default function Messages({
         }}
       >
         <>
-          <div ref={PreviousPageRef}></div>
+          <div ref={PreviousPageRef}>
+            {hasPreviousPage && <SkeletonMessages />}
+          </div>
           {Object.entries(groupedMessages).map(([date, messages], index) => (
             <div key={index} className="messages-section">
               <Separator />
@@ -130,7 +134,11 @@ export default function Messages({
                 ))}
             </div>
           ))}
-          <div ref={NextPageRef}></div>
+          {hasNextPage && (
+            <div ref={NextPageRef}>
+              <SkeletonMessages />
+            </div>
+          )}
         </>
       </div>
       <Button onClick={() => fetchPreviousPage()}>Previous</Button>
