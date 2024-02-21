@@ -1,8 +1,5 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import openai from "../ai/client";
-import { createOrRetrieveAssistant } from "../ai/helpers/createOrRetrieveAssistant";
-import { Run } from "openai/resources/beta/threads/runs/runs";
-import { query } from "../ai/functions/query";
 
 type Message = {
   userId: string;
