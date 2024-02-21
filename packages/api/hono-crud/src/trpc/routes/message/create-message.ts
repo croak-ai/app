@@ -75,13 +75,17 @@ export const createMessage = router({
 
       ////////////////////////////////////////////////////////
       // Create the message
+      //How should we get the conversation ID here????
+      //Possibly load it into the context?
+      //Possibly have to keep track of conversations client side (Could get messy)
 
       const statement = sql`
-      INSERT INTO message (userId, message, channelId, messageInChannelNumber, createdAt, updatedAt)
+      INSERT INTO message (userId, message, channelId, conversationId, messageInChannelNumber, createdAt, updatedAt)
       VALUES (
           ${ctx.auth.userId},
           ${input.messageContent},
           ${foundChannel.id},
+          ${1},
           (
               SELECT COALESCE(MAX(messageInChannelNumber) + 1, 1)
               FROM message
