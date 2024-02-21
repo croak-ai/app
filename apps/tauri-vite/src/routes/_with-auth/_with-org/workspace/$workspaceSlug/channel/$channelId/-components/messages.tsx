@@ -142,7 +142,6 @@ export default function Messages({
         </>
       </div>
       <Button onClick={() => fetchPreviousPage()}>Previous</Button>
-      {/* <div ref={PreviousPageRef}></div> */}
     </div>
   );
 }
