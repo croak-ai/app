@@ -3,7 +3,7 @@ import { Separator } from "@acme/ui/components/ui/separator";
 import Message from "./message";
 import { RouterInput, RouterOutput, trpc } from "@/utils/trpc";
 import { format } from "date-fns";
-import { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import SkeletonMessages from "./skeleton-messages";
 
@@ -27,13 +27,14 @@ export default function Messages({
   } = trpc.getMessages.getMessages.useInfiniteQuery(
     {
       channelId,
-      limit: 50,
+      limit: 100,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
       getPreviousPageParam: (firstPage, pages, page) =>
         firstPage.previousCursor,
       initialCursor: initialCursor,
+      maxPages: 2,
     },
   );
 
@@ -45,19 +46,83 @@ export default function Messages({
     threshold: 0,
   });
 
-  useEffect(() => {
-    if (NextPageInView && hasNextPage) {
-      console.log("fetching next page");
-      fetchNextPage();
+  const scrollBoxRef = useRef<HTMLDivElement>(null);
+  const nextPageTargetElement = useRef<number | null>(null);
+  const previousPageTargetElement = useRef<number | null>(null);
+
+  const scrollToMessageById = (messageId: number) => {
+    const messageElement = scrollBoxRef.current?.querySelector(
+      `[data-key='${messageId}']`,
+    );
+    if (messageElement) {
+      messageElement.scrollIntoView({ behavior: "instant" });
     }
+  };
+
+  const messageInList = (messageId: number) => {
+    return Boolean(
+      data?.pages.some((page) =>
+        page.messages.some((message) => message.message.id === messageId),
+      ),
+    );
+  };
+
+  // This useEffect is used to make sure that the scroll position is maintained
+  // See since we have only 2 pages in the query, sometimes the scroll gets messed up during a
+  // fetchNextPage or fetchPreviousPage.
+  useEffect(() => {
+    const newestMessage =
+      data?.pages[data.pages.length - 1]?.messages[
+        data.pages[data.pages.length - 1].messages.length - 1
+      ];
+
+    const oldestMessage = data?.pages[0]?.messages[0];
+
+    if (!oldestMessage || !newestMessage) {
+      return;
+    }
+
+    if (nextPageTargetElement.current && previousPageTargetElement.current) {
+      // This happens if we "lose" the previous page so we should fix the scroll
+      if (
+        messageInList(nextPageTargetElement.current) &&
+        !messageInList(previousPageTargetElement.current)
+      ) {
+        console.log("scrolling to next page");
+        scrollToMessageById(nextPageTargetElement.current);
+      }
+
+      // This happens if we "lose" the next page so we should fix the scroll
+      if (
+        messageInList(previousPageTargetElement.current) &&
+        !messageInList(nextPageTargetElement.current)
+      ) {
+        console.log("scrolling to previous page");
+        scrollToMessageById(previousPageTargetElement.current);
+      }
+    }
+
+    nextPageTargetElement.current = newestMessage.message.id;
+    previousPageTargetElement.current = oldestMessage.message.id;
+  }, [data]);
+
+  useEffect(() => {
+    const fetchNext = async () => {
+      if (hasNextPage && NextPageInView) {
+        await fetchNextPage();
+      }
+    };
+    fetchNext();
   }, [NextPageInView, hasNextPage, fetchNextPage]);
 
   useEffect(() => {
-    if (PreviousPageInView) {
-      console.log("fetching previous page");
-      fetchPreviousPage();
-    }
-  }, [PreviousPageInView, fetchPreviousPage]);
+    const fetchPrevious = async () => {
+      if (hasPreviousPage && PreviousPageInView) {
+        await fetchPreviousPage();
+      }
+    };
+    fetchPrevious();
+  }, [PreviousPageInView, hasPreviousPage, fetchPreviousPage]);
 
   if (error) {
     return <div>Error: {error.message}</div>;
@@ -92,6 +157,7 @@ export default function Messages({
   return (
     <div>
       <div
+        ref={scrollBoxRef}
         id="scrollableDiv"
         style={{
           height: height,
@@ -105,35 +171,37 @@ export default function Messages({
           <div ref={PreviousPageRef}>
             {hasPreviousPage && <SkeletonMessages />}
           </div>
-          {Object.entries(groupedMessages).map(([date, messages], index) => (
-            <div key={index} className="messages-section">
-              <Separator />
-
-              <div className="sticky top-0 flex w-full items-center justify-center">
-                <div className="flex-1"></div>
-                <div className="mx-2">
-                  <Button
-                    variant={"secondary"}
-                    size={"sm"}
-                    className="date-separator my-8"
-                  >
-                    {format(new Date(messages[0].message.createdAt), "PPP")}
-                  </Button>
+          {Object.entries(groupedMessages).map(
+            ([date, messages], groupIndex) => (
+              <div key={groupIndex} className="messages-section">
+                <Separator />
+                <div className="sticky top-0 flex w-full items-center justify-center">
+                  <div className="flex-1"></div>
+                  <div className="mx-2">
+                    <Button
+                      variant={"secondary"}
+                      size={"sm"}
+                      className="date-separator my-8"
+                    >
+                      {format(new Date(messages[0].message.createdAt), "PPP")}
+                    </Button>
+                  </div>
+                  <div className="flex-1"></div>
                 </div>
-                <div className="flex-1"></div>
+                {messages
+                  .slice()
+                  .reverse()
+                  .map((message, messageIndex, arr) => (
+                    <div key={message.message.id} data-key={message.message.id}>
+                      <Message
+                        message={message.message}
+                        previousMessage={arr[messageIndex - 1]?.message}
+                      />
+                    </div>
+                  ))}
               </div>
-              {messages
-                .slice()
-                .reverse()
-                .map((message, index, arr) => (
-                  <Message
-                    key={message.message.id}
-                    message={message.message}
-                    previousMessage={arr[index - 1]?.message}
-                  />
-                ))}
-            </div>
-          ))}
+            ),
+          )}
           {hasNextPage && (
             <div ref={NextPageRef}>
               <SkeletonMessages />
