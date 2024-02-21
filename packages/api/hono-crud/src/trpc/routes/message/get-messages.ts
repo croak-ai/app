@@ -1,7 +1,7 @@
 import { router, protectedProcedureWithOrgDB } from "../../config/trpc";
 import { z } from "zod";
 import { message, user } from "@acme/db/schema/tenant";
-import { desc, eq, and, gt, lt, or, lte, gte } from "drizzle-orm";
+import { asc, desc, eq, and, gt, lt, or, lte, gte } from "drizzle-orm";
 
 const zCursor = z.object({
   createdAt: z.number(),
@@ -37,40 +37,51 @@ export const getMessages = router({
 
       const { createdAt, id, direction, includeCursorInResult } = cursor;
       if (direction === "next") {
-        queryBuilder = queryBuilder.where(
-          or(
-            lt(message.createdAt, createdAt),
-            and(
-              lte(message.createdAt, createdAt),
-              lt(message.id, parseInt(id, 10)),
+        queryBuilder = queryBuilder
+          .where(
+            or(
+              lt(message.createdAt, createdAt),
+              and(
+                lte(message.createdAt, createdAt),
+                lt(message.id, parseInt(id, 10)),
+              ),
+              includeCursorInResult
+                ? eq(message.id, parseInt(id, 10))
+                : undefined,
             ),
-            includeCursorInResult
-              ? eq(message.id, parseInt(id, 10))
-              : undefined,
-          ),
-        );
+          )
+          .orderBy(desc(message.createdAt), desc(message.id));
       }
 
       if (direction === "previous") {
-        queryBuilder = queryBuilder.where(
-          or(
-            gt(message.createdAt, createdAt),
-            and(
-              gte(message.createdAt, createdAt),
-              gt(message.id, parseInt(id, 10)),
+        queryBuilder = queryBuilder
+          .where(
+            or(
+              gt(message.createdAt, createdAt),
+              and(
+                gte(message.createdAt, createdAt),
+                gt(message.id, parseInt(id, 10)),
+              ),
+              includeCursorInResult
+                ? eq(message.id, parseInt(id, 10))
+                : undefined,
             ),
-            includeCursorInResult
-              ? eq(message.id, parseInt(id, 10))
-              : undefined,
-          ),
-        );
+          )
+          .orderBy(asc(message.createdAt), asc(message.id));
       }
 
-      // Continue building the query
       const messagesQuery = await queryBuilder
-        .orderBy(desc(message.createdAt), desc(message.id))
         .limit(limit) // Fetch one more than the limit to check for next page
         .execute(); // Make sure to execute the query
+
+      if (cursor.direction === "previous") {
+        messagesQuery.sort((a, b) => {
+          if (a.message.createdAt === b.message.createdAt) {
+            return b.message.id - a.message.id;
+          }
+          return b.message.createdAt - a.message.createdAt;
+        });
+      }
 
       let nextCursor: zCursorType | undefined = undefined;
       let previousCursor: zCursorType | undefined = undefined;
