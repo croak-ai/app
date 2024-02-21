@@ -6,7 +6,7 @@ import { asc, desc, eq, and, gt, lt, or, lte, gte } from "drizzle-orm";
 const zCursor = z.object({
   createdAt: z.number(),
   id: z.string(),
-  direction: z.enum(["next", "previous"]),
+  direction: z.enum(["older", "newer"]),
   includeCursorInResult: z.boolean().optional(),
 });
 
@@ -28,7 +28,6 @@ export const getMessages = router({
 
       const { channelId, cursor, limit } = input;
 
-      // Start building the query without the condition
       let queryBuilder = ctx.db
         .select()
         .from(message)
@@ -36,7 +35,7 @@ export const getMessages = router({
         .where(eq(message.channelId, parseInt(channelId, 10)));
 
       const { createdAt, id, direction, includeCursorInResult } = cursor;
-      if (direction === "next") {
+      if (direction === "older") {
         queryBuilder = queryBuilder
           .where(
             or(
@@ -53,7 +52,7 @@ export const getMessages = router({
           .orderBy(desc(message.createdAt), desc(message.id));
       }
 
-      if (direction === "previous") {
+      if (direction === "newer") {
         queryBuilder = queryBuilder
           .where(
             or(
@@ -70,11 +69,9 @@ export const getMessages = router({
           .orderBy(asc(message.createdAt), asc(message.id));
       }
 
-      const messagesQuery = await queryBuilder
-        .limit(limit) // Fetch one more than the limit to check for next page
-        .execute(); // Make sure to execute the query
+      const messagesQuery = await queryBuilder.limit(limit).execute();
 
-      if (cursor.direction === "previous") {
+      if (cursor.direction === "newer") {
         messagesQuery.sort((a, b) => {
           if (a.message.createdAt === b.message.createdAt) {
             return b.message.id - a.message.id;
@@ -83,64 +80,64 @@ export const getMessages = router({
         });
       }
 
-      let nextCursor: zCursorType | undefined = undefined;
-      let previousCursor: zCursorType | undefined = undefined;
+      let olderCursor: zCursorType | undefined = undefined;
+      let newerCursor: zCursorType | undefined = undefined;
       const firstMessage = messagesQuery[0]; // Get the first item without removing it
       const lastMessage = messagesQuery[messagesQuery.length - 1]; // Get the last item without removing it
 
       if (!firstMessage || !lastMessage) {
-        if (direction === "next") {
+        if (direction === "older") {
           const messages: typeof messagesQuery = [];
-          const previousCursor: zCursorType = {
+          const newerCursor: zCursorType = {
             ...cursor,
-            direction: "previous",
+            direction: "newer",
             includeCursorInResult: true,
           };
           return {
             messages,
-            previousCursor,
+            newerCursor,
           };
         }
-        if (direction === "previous") {
+        if (direction === "newer") {
           const messages: typeof messagesQuery = [];
-          const nextCursor: zCursorType = {
+          const olderCursor: zCursorType = {
             ...cursor,
-            direction: "next",
+            direction: "older",
             includeCursorInResult: true,
           };
           return {
             messages,
-            nextCursor,
+            olderCursor,
           };
         }
 
         throw new Error("Unknown Error");
       }
 
-      previousCursor = {
+      newerCursor = {
         createdAt: firstMessage.message.createdAt,
         id: firstMessage.message.id.toString(),
-        direction: "previous",
+        direction: "newer",
       };
 
-      // If the direction is "next" and the length of the messages is less than the limit, then there are no more messages.
-      if (cursor.direction === "next" && messagesQuery.length < limit) {
+      // If the direction is "older" and the length of the messages is less than the limit, then there are no more messages.
+      if (cursor.direction === "older" && messagesQuery.length < limit) {
         return {
           messages: messagesQuery,
-          previousCursor,
+          newerCursor,
         };
       }
 
-      nextCursor = {
+      olderCursor = {
         createdAt: lastMessage.message.createdAt,
         id: lastMessage.message.id.toString(),
-        direction: "next",
+        direction: "older",
       };
 
       return {
         messages: messagesQuery,
-        nextCursor,
-        previousCursor,
+        olderCursor,
+        newerCursor,
       };
     }),
 });

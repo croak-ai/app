@@ -32,7 +32,7 @@ function Channel() {
   const initialCursor: Cursor = {
     id: newestMessage.message.message.id.toString(),
     createdAt: newestMessage.message.message.createdAt,
-    direction: "next",
+    direction: "older",
     includeCursorInResult: true,
   };
 

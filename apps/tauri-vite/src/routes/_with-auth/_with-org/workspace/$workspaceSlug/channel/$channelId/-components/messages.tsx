@@ -30,9 +30,8 @@ export default function Messages({
       limit: 100,
     },
     {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-      getPreviousPageParam: (firstPage, pages, page) =>
-        firstPage.previousCursor,
+      getNextPageParam: (lastPage) => lastPage.olderCursor,
+      getPreviousPageParam: (firstPage, pages, page) => firstPage.newerCursor,
       initialCursor: initialCursor,
       maxPages: 3,
     },

@@ -95,7 +95,7 @@ export default function ChatBox({
           cursor: {
             createdAt: Date.now(), // Use the current timestamp or the appropriate value
             id: "cursor_id", // Replace "cursor_id" with the actual cursor ID you have
-            direction: "next", // or "previous", depending on your use case
+            direction: "older", // or "previous", depending on your use case
           },
         },
         () => ({
