@@ -92,7 +92,7 @@ export function OrgLayout({ children }: { children: React.ReactNode }) {
           </span>
           <div className="flex space-x-4 justify-self-center">
             <Nav title="Workspace" to={`/workspace`} icon={TextQuote} />
-            <Nav title="Inbox" to={`/create-workspace`} icon={Inbox} />
+            <Nav title="Meetings" to={`/meetings`} icon={Inbox} />
             <Nav
               title="Notifications"
               to={`/create-workspace`}
