@@ -5,57 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1708372617476,
-      "tag": "0000_overrated_captain_britain",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1708459083488,
-      "tag": "0001_clear_may_parker",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1708466852187,
-      "tag": "0002_fuzzy_deathbird",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1708467251935,
-      "tag": "0003_new_raza",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1708569522115,
-      "tag": "0004_jittery_whistler",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "5",
-      "when": 1708625738172,
-      "tag": "0006_talented_doctor_faustus",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1708313312694,
-      "tag": "0002_flat_doctor_faustus",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1708627837382,
-      "tag": "0003_pink_radioactive_man",
+      "when": 1708633902824,
+      "tag": "0000_serious_mattie_franklin",
       "breakpoints": true
     }
   ]

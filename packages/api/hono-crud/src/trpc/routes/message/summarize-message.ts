@@ -1,12 +1,8 @@
-import { channel, conversation } from "@acme/db/schema/tenant";
+import { conversation } from "@acme/db/schema/tenant";
 import { protectedProcedureWithOrgDB, router } from "../../config/trpc";
 import { z } from "zod";
-import { eq, and, sql } from "drizzle-orm";
-
+import { eq, sql, desc } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import { getWorkspacePermission } from "../../functions/workspace";
-import { userHasRole } from "../../../functions/clerk";
-import { eq } from "drizzle-orm"; // Add the missing import statement
 
 const zMessage = z.object({
   id: z.string().min(2).max(256),
@@ -53,16 +49,14 @@ export const summarizeMessage = router({
           id: conversation.id,
         })
         .from(conversation)
-        .where(eq(conversation.channelId, foundChannel.id)) // Fix the closing parenthesis and dot in the .where clause
-        .orderBy(conversation.createdAt, "desc")
+        .where(eq(conversation.channelId, input.channelId))
+        .orderBy(desc(conversation.createdAt))
         .limit(conversationLimit);
 
-      if (foundChannels.length !== 1 || !foundChannels || !foundChannels[0]) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Channel not found",
-        });
-      }
+      // const conversationMessages = await ctx.db
+      //   .select()
+      //   .from(conversationMessages)
+      //   .whereIn(conversationMessages.conversationId, conversationIds);
 
       ////////////////////////////////////////////////////////
       // Create the message

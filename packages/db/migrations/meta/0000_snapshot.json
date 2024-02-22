@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "e9b98ea0-f079-46c3-8898-0c914fb67a5d",
+  "id": "19ec0d07-7688-43e3-8a49-bf2b2e7f0406",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "channel": {
@@ -168,6 +168,73 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
+    "conversation": {
+      "name": "conversation",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "channelId": {
+          "name": "channelId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "conversationMessages": {
+      "name": "conversationMessages",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "messageId": {
+          "name": "messageId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "conversationId": {
+          "name": "conversationId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
     "dekEncryptionKey": {
       "name": "dekEncryptionKey",
       "columns": {
@@ -316,13 +383,6 @@
           "notNull": true,
           "autoincrement": false
         },
-        "messageInChannelNumber": {
-          "name": "messageInChannelNumber",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
         "createdAt": {
           "name": "createdAt",
           "type": "integer",
@@ -342,31 +402,6 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false
-        }
-      },
-      "indexes": {
-        "message_messageInChannelNumber_channelId_unique": {
-          "name": "message_messageInChannelNumber_channelId_unique",
-          "columns": [
-            "messageInChannelNumber",
-            "channelId"
-          ],
-          "isUnique": true
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "testyy": {
-      "name": "testyy",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true,
           "autoincrement": false
         }
       },

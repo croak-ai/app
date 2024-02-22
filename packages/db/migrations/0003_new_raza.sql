@@ -1,1 +1,0 @@
-ALTER TABLE conversation ADD `channelId` integer NOT NULL;
