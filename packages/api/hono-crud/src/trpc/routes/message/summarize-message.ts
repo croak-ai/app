@@ -1,4 +1,4 @@
-import { channel, message } from "@acme/db/schema/tenant";
+import { channel, conversation } from "@acme/db/schema/tenant";
 import { protectedProcedureWithOrgDB, router } from "../../config/trpc";
 import { z } from "zod";
 import { eq, and, sql } from "drizzle-orm";
@@ -6,8 +6,10 @@ import { eq, and, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { getWorkspacePermission } from "../../functions/workspace";
 import { userHasRole } from "../../../functions/clerk";
+import { eq } from "drizzle-orm"; // Add the missing import statement
 
 const zMessage = z.object({
+  id: z.string().min(2).max(256),
   userId: z.string().min(2).max(256),
   message: z.string().min(2).max(60000),
   channelId: z.number(),
@@ -21,24 +23,39 @@ export const summarizeMessage = router({
   summarizeMessagee: protectedProcedureWithOrgDB
     .input(zMessage)
     .mutation(async ({ ctx, input }) => {
-      //Is message part of existing conversation?
-      //Need this to pull past conversations depending on current messages channel
+      /* OPTIMIZE LATER */
+      /*
+      Pull x previous conversations in this channel depending on the date
+      Ask AI what conversation this message should belong to.
 
+      NOTE: (Context should contain all messages from previous x conversations.
+      Context should inform AI that short responses such as "yeah sure" or "I dont like that"
+      should be added to closest previous conversation unless it is a direct reply to someone else)
+
+      AI should be able to make an informed decision on what conversation this message should go in.
+      Now how do we decide when it should summarize these messages?
+      OPTIONS:
+      1. We could have a background process that summarizes conversations after 5 
+      new messages have been added to the conversation
+      2. Summarize conversation after each new message is added. Then update the 
+      vector database with the newest summary every time.
+      3. When we ask AI to choose which conversation the message belongs in we should, Also ask it 
+      if it deems the conversation as "complete" or not.
+      If complete we summarize and update vector database. If not we are done.
+      */
       ////////////////////////////////////////////////////////
       // Get the channel
-      const foundChannels = await ctx.db
+
+      const conversationLimit = 5;
+
+      const recentConversations = await ctx.db
         .select({
-          id: channel.id,
-          slug: channel.slug,
-          workspaceId: channel.workspaceId,
+          id: conversation.id,
         })
-        .from(channel)
-        .where(
-          and(
-            eq(channel.slug, input.channelSlug),
-            eq(channel.workspaceId, workspace.foundWorkspace.workspace.id),
-          ),
-        );
+        .from(conversation)
+        .where(eq(conversation.channelId, foundChannel.id)) // Fix the closing parenthesis and dot in the .where clause
+        .orderBy(conversation.createdAt, "desc")
+        .limit(conversationLimit);
 
       if (foundChannels.length !== 1 || !foundChannels || !foundChannels[0]) {
         throw new TRPCError({
@@ -46,8 +63,6 @@ export const summarizeMessage = router({
           message: "Channel not found",
         });
       }
-
-      const foundChannel = foundChannels[0];
 
       ////////////////////////////////////////////////////////
       // Create the message

@@ -96,8 +96,8 @@ export const message = sqliteTable("message", {
 export const conversation = sqliteTable("conversation", {
   id: integer("id").primaryKey(),
   channelId: integer("channelId").notNull(),
-  startDate: integer("startDate").notNull(),
-  endDate: integer("endDate").notNull(),
+  createdAt: integer("createdAt").notNull(),
+  updatedAt: integer("updatedAt").notNull(),
 });
 
 export const conversationMessages = sqliteTable("conversationMessages", {

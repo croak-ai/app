@@ -50,9 +50,6 @@ export const createMessage = router({
 
       ////////////////////////////////////////////////////////
       // Create the message
-      //How should we get the conversation ID here????
-      //Possibly load it into the context?
-      //Possibly have to keep track of conversations client side (Could get messy)
 
       const currentTime = Date.now();
 
