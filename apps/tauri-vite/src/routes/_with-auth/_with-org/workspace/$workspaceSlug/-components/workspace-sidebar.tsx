@@ -26,7 +26,8 @@ export default function WorkspaceSidebar() {
     return (
       <ChannelList
         workspaceChannels={workspaceChannels.data.map((channel) => ({
-          slug: channel.slug,
+          Id: channel.id.toString(),
+          Slug: channel.slug,
           channelType: channel.channelType,
         }))}
       />

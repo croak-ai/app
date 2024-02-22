@@ -1,5 +1,3 @@
-"use client";
-
 import { Button } from "@acme/ui/components/ui/button";
 import { Hash, Mic2 } from "lucide-react";
 import { zChannelTypes } from "@acme/db/enum";
@@ -20,11 +18,11 @@ const ChannelIcon = ({ channelType }: { channelType: string }) => {
 export default function ChannelList({
   workspaceChannels,
 }: {
-  workspaceChannels: { slug: string; channelType: string }[];
+  workspaceChannels: { Id: string; Slug: string; channelType: string }[];
 }) {
   const params = useParams({ strict: false }) as {
     workspaceSlug: string;
-    channelSlug?: string;
+    channelId?: string;
   };
 
   return (
@@ -32,22 +30,22 @@ export default function ChannelList({
       <main className="flex flex-col gap-2 p-4">
         <h2 className="text-lg font-medium">Channels</h2>
         {workspaceChannels.map((channel) => (
-          <div key={channel.slug}>
+          <div key={channel.Id}>
             <Link
-              to={`/workspace/$workspaceSlug/channel/$channelSlug`}
+              to={`/workspace/$workspaceSlug/channel/$channelId`}
               params={{
-                channelSlug: channel.slug,
+                channelId: channel.Id,
                 workspaceSlug: params.workspaceSlug,
               }}
             >
               <Button
                 className="flex h-8 w-full justify-start p-1"
                 variant={
-                  params.channelSlug === channel.slug ? "secondary" : "ghost"
+                  params.channelId === channel.Id ? "secondary" : "ghost"
                 }
               >
                 <ChannelIcon channelType={channel.channelType} />
-                {channel.slug}
+                {channel.Slug}
               </Button>
             </Link>
           </div>

@@ -8,7 +8,7 @@ import { getWorkspacePermission } from "../../functions/workspace";
 import { userHasRole } from "../../../functions/clerk";
 
 export const zCreateMessage = z.object({
-  channelSlug: z.string().min(2).max(256),
+  channelId: z.string().min(1).max(256),
   workspaceSlug: z.string().min(2).max(256),
   messageContent: z.string().min(2).max(60000),
 });
@@ -49,48 +49,20 @@ export const createMessage = router({
       }
 
       ////////////////////////////////////////////////////////
-      // Get the channel
-      const foundChannels = await ctx.db
-        .select({
-          id: channel.id,
-          slug: channel.slug,
-          workspaceId: channel.workspaceId,
-        })
-        .from(channel)
-        .where(
-          and(
-            eq(channel.slug, input.channelSlug),
-            eq(channel.workspaceId, workspace.foundWorkspace.workspace.id),
-          ),
-        );
-
-      if (foundChannels.length !== 1 || !foundChannels || !foundChannels[0]) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Channel not found",
-        });
-      }
-
-      const foundChannel = foundChannels[0];
-
-      ////////////////////////////////////////////////////////
       // Create the message
 
+      const currentTime = Date.now();
+
       const statement = sql`
-      INSERT INTO message (userId, message, channelId, messageInChannelNumber, createdAt, updatedAt)
+      INSERT INTO message (userId, message, channelId, createdAt, updatedAt)
       VALUES (
           ${ctx.auth.userId},
           ${input.messageContent},
-          ${foundChannel.id},
-          (
-              SELECT COALESCE(MAX(messageInChannelNumber) + 1, 1)
-              FROM message
-              WHERE channelId = ${foundChannel.id}
-          ),
-          CURRENT_TIMESTAMP,
-          CURRENT_TIMESTAMP
+          ${input.channelId},
+          ${currentTime},
+          ${currentTime}
       )
-      RETURNING id, message, channelId, messageInChannelNumber;
+      RETURNING id, message, channelId;
     `;
 
       const result = await ctx.db.run(statement);
@@ -102,6 +74,6 @@ export const createMessage = router({
         });
       }
 
-      return "success";
+      return result.rows[0];
     }),
 });
