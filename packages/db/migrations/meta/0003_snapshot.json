@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "871e6c3d-5cfc-4f4f-b666-8cb74ac3413c",
-  "prevId": "e00d730d-39ea-4e6c-ac5a-82d887e8e4db",
+  "id": "5bbe341e-2536-4250-a788-9a8165577777",
+  "prevId": "927cc294-a679-450f-b8b6-577524bc473b",
   "tables": {
     "channel": {
       "name": "channel",
@@ -176,7 +176,7 @@
           "type": "integer",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "channelId": {
           "name": "channelId",
@@ -194,6 +194,36 @@
         },
         "endDate": {
           "name": "endDate",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "conversationMessages": {
+      "name": "conversationMessages",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "messageId": {
+          "name": "messageId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "conversationId": {
+          "name": "conversationId",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
@@ -339,13 +369,6 @@
           "notNull": true,
           "autoincrement": false
         },
-        "conversationId": {
-          "name": "conversationId",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
         "userId": {
           "name": "userId",
           "type": "text",
@@ -356,13 +379,6 @@
         "message": {
           "name": "message",
           "type": "text(60000)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "messageInChannelNumber": {
-          "name": "messageInChannelNumber",
-          "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -389,16 +405,7 @@
           "autoincrement": false
         }
       },
-      "indexes": {
-        "message_messageInChannelNumber_channelId_unique": {
-          "name": "message_messageInChannelNumber_channelId_unique",
-          "columns": [
-            "messageInChannelNumber",
-            "channelId"
-          ],
-          "isUnique": true
-        }
-      },
+      "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
