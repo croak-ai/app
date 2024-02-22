@@ -23,7 +23,7 @@
     "@daily-co/daily-js": "^0.56.0",
     "@daily-co/daily-react": "^0.16.0",
     "@radix-ui/react-slot": "^1.0.2",
-    "@tanstack/react-query": "^4.16.1",
+    "@tanstack/react-query": "^5.17.19",
     "@trpc/client": "^10.43.1",
     "@trpc/next": "^10.43.1",
     "@trpc/react-query": "^10.44.1",

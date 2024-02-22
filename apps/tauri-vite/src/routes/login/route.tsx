@@ -4,6 +4,7 @@ import { useTheme } from "@/theme"; // If you're using Context
 import { dark } from "@clerk/themes";
 import { BackgroundBeams } from "@acme/ui/components/aceternity/background-beams";
 import { z } from "zod";
+import { useMemo } from "react";
 
 const urlRedirectSchema = z.object({
   redirect: z.string().url().optional(),
@@ -17,10 +18,11 @@ export const Route = createFileRoute("/login")({
 function SignInPage() {
   const { theme } = useTheme(); // If you're using Context
   const { redirect } = Route.useSearch();
+  const MemoizedBackgroundBeams = useMemo(() => <BackgroundBeams />, []);
 
   return (
     <div>
-      <BackgroundBeams />
+      {MemoizedBackgroundBeams}
       <div className="flex min-h-screen flex-col items-center justify-center px-4">
         <div className="flex flex-row pb-6">
           <div className={" mb-4 ml-4 text-center"}>

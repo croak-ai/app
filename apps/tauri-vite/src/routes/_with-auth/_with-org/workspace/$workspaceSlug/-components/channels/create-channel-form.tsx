@@ -1,5 +1,3 @@
-"use client";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 
@@ -98,9 +96,9 @@ export default function CreateChannelForm({
 
       if (newChannel) {
         navigate({
-          to: "/workspace/$workspaceSlug/channel/$channelSlug",
+          to: "/workspace/$workspaceSlug/channel/$channelId",
           params: {
-            channelSlug: newChannel.slug,
+            channelId: newChannel.insertedId.toString(),
             workspaceSlug: workspaceSlug,
           },
         });

@@ -43,6 +43,13 @@
       "when": 1708625738172,
       "tag": "0006_talented_doctor_faustus",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1708313312694,
+      "tag": "0002_flat_doctor_faustus",
+      "breakpoints": true
     }
   ]
 }

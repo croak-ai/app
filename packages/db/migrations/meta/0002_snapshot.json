@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "e00d730d-39ea-4e6c-ac5a-82d887e8e4db",
-  "prevId": "aa0cef2d-63ef-462d-913a-217270c0bc3a",
+  "id": "ffbc4d73-e27c-4076-98c4-26d396ebda87",
+  "prevId": "738d44aa-c463-4a8c-88ef-0cb18f461e06",
   "tables": {
     "channel": {
       "name": "channel",
@@ -90,10 +90,7 @@
       "indexes": {
         "channel_workspaceId_slug_unique": {
           "name": "channel_workspaceId_slug_unique",
-          "columns": [
-            "workspaceId",
-            "slug"
-          ],
+          "columns": ["workspaceId", "slug"],
           "isUnique": true
         }
       },
@@ -168,36 +165,6 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "conversation": {
-      "name": "conversation",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": true
-        },
-        "startDate": {
-          "name": "startDate",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "endDate": {
-          "name": "endDate",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
     "dekEncryptionKey": {
       "name": "dekEncryptionKey",
       "columns": {
@@ -254,9 +221,7 @@
       "indexes": {
         "dekEncryptionKey_key_unique": {
           "name": "dekEncryptionKey_key_unique",
-          "columns": [
-            "key"
-          ],
+          "columns": ["key"],
           "isUnique": true
         }
       },
@@ -332,13 +297,6 @@
           "notNull": true,
           "autoincrement": false
         },
-        "conversationId": {
-          "name": "conversationId",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
         "userId": {
           "name": "userId",
           "type": "text",
@@ -349,13 +307,6 @@
         "message": {
           "name": "message",
           "type": "text(60000)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "messageInChannelNumber": {
-          "name": "messageInChannelNumber",
-          "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -382,16 +333,7 @@
           "autoincrement": false
         }
       },
-      "indexes": {
-        "message_messageInChannelNumber_channelId_unique": {
-          "name": "message_messageInChannelNumber_channelId_unique",
-          "columns": [
-            "messageInChannelNumber",
-            "channelId"
-          ],
-          "isUnique": true
-        }
-      },
+      "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
@@ -466,9 +408,7 @@
       "indexes": {
         "user_email_unique": {
           "name": "user_email_unique",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "isUnique": true
         }
       },
@@ -539,16 +479,12 @@
       "indexes": {
         "workspace_slug_unique": {
           "name": "workspace_slug_unique",
-          "columns": [
-            "slug"
-          ],
+          "columns": ["slug"],
           "isUnique": true
         },
         "slug_idx": {
           "name": "slug_idx",
-          "columns": [
-            "slug"
-          ],
+          "columns": ["slug"],
           "isUnique": false
         }
       },
@@ -635,9 +571,7 @@
   "enums": {},
   "_meta": {
     "schemas": {},
-    "tables": {
-      "\"conversations\"": "\"conversation\""
-    },
+    "tables": {},
     "columns": {}
   }
 }
