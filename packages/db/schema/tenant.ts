@@ -88,7 +88,6 @@ export const message = sqliteTable(
   {
     id: integer("id").primaryKey(),
     channelId: integer("channelId").notNull(),
-    conversationId: integer("conversationId").notNull(),
     userId: text("userId").notNull(),
     message: text("message", { length: 60000 }).notNull(),
     messageInChannelNumber: integer("messageInChannelNumber").notNull(),
@@ -102,10 +101,16 @@ export const message = sqliteTable(
 );
 
 export const conversation = sqliteTable("conversation", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+  id: integer("id").primaryKey(),
   channelId: integer("channelId").notNull(),
   startDate: integer("startDate").notNull(),
   endDate: integer("endDate").notNull(),
+});
+
+export const conversationMessages = sqliteTable("conversationMessages", {
+  id: integer("id").primaryKey(),
+  messageId: integer("messageId").notNull(),
+  conversationId: integer("conversationId").notNull(),
 });
 
 /*
