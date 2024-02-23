@@ -25,16 +25,21 @@ function Channel() {
   const { workspaceSlug, channelId } = Route.useParams();
   const { newestMessage } = Route.useLoaderData();
 
-  if (!newestMessage) {
-    return <Spinner />;
-  }
-
-  const initialCursor: Cursor = {
-    id: newestMessage.message.message.id.toString(),
-    createdAt: newestMessage.message.message.createdAt,
-    direction: "older",
+  let initialCursor: Cursor = {
+    id: "0",
+    createdAt: 0,
+    direction: "newer",
     includeCursorInResult: true,
   };
+
+  if (newestMessage) {
+    initialCursor = {
+      id: newestMessage.message.message.id.toString(),
+      createdAt: newestMessage.message.message.createdAt,
+      direction: "older",
+      includeCursorInResult: true,
+    };
+  }
 
   return (
     <ChatBoxProvider>
