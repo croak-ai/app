@@ -1,0 +1,1 @@
+ALTER TABLE `conversationMessages` RENAME TO `conversationMessage`;
