@@ -1,3 +1,7 @@
+/*
+Functionality for adding messages to conversations
+ */
+
 import { conversation } from "@acme/db/schema/tenant";
 import { protectedProcedureWithOrgDB, router } from "../../config/trpc";
 import { z } from "zod";
