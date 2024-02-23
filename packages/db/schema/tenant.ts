@@ -5,6 +5,9 @@ import {
   index,
   unique,
 } from "drizzle-orm/sqlite-core";
+import { createId } from "@paralleldrive/cuid2";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { z } from "zod";
 
 export const user = sqliteTable("user", {
   userId: text("userId", { length: 256 }).primaryKey(),
@@ -92,6 +95,60 @@ export const message = sqliteTable("message", {
   updatedAt: integer("updatedAt").notNull(),
   deletedAt: integer("deletedAt"),
 });
+
+export const meeting = sqliteTable("meeting", {
+  id: text("id").$defaultFn(() => createId()),
+  recurringMeetingId: integer("recurringMeetingId"),
+  scheduledAt: integer("scheduledAt").notNull(),
+  startedAt: integer("startedAt"),
+  endedAt: integer("endedAt"),
+  createdAt: integer("createdAt").notNull(),
+  updatedAt: integer("updatedAt").notNull(),
+  deletedAt: integer("deletedAt"),
+});
+
+export const recurringMeeting = sqliteTable("recurringMeeting", {
+  id: integer("id").primaryKey(),
+  frequency: text("frequency", { length: 256 }).notNull(),
+  interval: integer("interval").notNull(),
+  count: integer("count"),
+  until: integer("until"),
+  createdAt: integer("createdAt").notNull(),
+  updatedAt: integer("updatedAt").notNull(),
+  deletedAt: integer("deletedAt"),
+});
+
+export const meetingParticipant = sqliteTable("meetingParticipant", {
+  id: integer("id").primaryKey(),
+  meetingId: text("meetingId").notNull(),
+  userId: text("userId").notNull(),
+  createdAt: integer("createdAt").notNull(),
+  updatedAt: integer("updatedAt").notNull(),
+  deletedAt: integer("deletedAt"),
+});
+
+export const meetingMessage = sqliteTable("meetingMessage", {
+  id: integer("id").primaryKey(),
+  meetingId: text("meetingId").notNull(),
+  userId: text("userId").notNull(),
+  message: text("message", { length: 60000 }).notNull(),
+  createdAt: integer("createdAt").notNull(),
+  updatedAt: integer("updatedAt").notNull(),
+  deletedAt: integer("deletedAt"),
+});
+
+export const meetingTranscriptedMessage = sqliteTable(
+  "meetingTranscriptedMessage",
+  {
+    id: integer("id").primaryKey(),
+    meetingId: text("meetingId").notNull(),
+    userId: text("userId").notNull(),
+    message: text("message", { length: 60000 }).notNull(),
+    createdAt: integer("createdAt").notNull(),
+    updatedAt: integer("updatedAt").notNull(),
+    deletedAt: integer("deletedAt"),
+  },
+);
 
 /*
  *
