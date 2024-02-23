@@ -22,7 +22,6 @@
     "openai": "^4.23.0"
   },
   "devDependencies": {
-    "eslint": "^8.28.0",
     "typescript": "^5.3.3"
   },
   "engines": {

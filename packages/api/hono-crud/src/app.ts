@@ -7,6 +7,10 @@ import { trpc } from "./hono-middleware/trpc";
 import { HTTPException } from "hono/http-exception";
 import { clerkWebhook } from "./hono-routes/webhook/clerkWebhook";
 
+/* 
+Cors origin set to any for now because of weird enviornment specific issues.
+Should be localhost:3000 and localhost:1420 
+*/
 const app = new Hono<HonoConfig>()
   .get("/", (c) => {
     return c.text("Hello world");
@@ -14,7 +18,7 @@ const app = new Hono<HonoConfig>()
   .use(
     "*",
     cors({
-      origin: ["http://localhost:3000", "http://localhost:1420"],
+      origin: "*",
     }),
   )
   .use("*", clerk)

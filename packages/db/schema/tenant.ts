@@ -93,6 +93,29 @@ export const message = sqliteTable("message", {
   deletedAt: integer("deletedAt"),
 });
 
+export const nonGroupedMessage = sqliteTable("nonGroupedMessage", {
+  id: integer("id").primaryKey(),
+  channelId: integer("channelId").notNull(),
+  userId: text("userId").notNull(),
+  message: text("message", { length: 60000 }).notNull(),
+  createdAt: integer("createdAt").notNull(),
+  updatedAt: integer("updatedAt").notNull(),
+  deletedAt: integer("deletedAt"),
+});
+
+export const conversation = sqliteTable("conversation", {
+  id: integer("id").primaryKey(),
+  channelId: integer("channelId").notNull(),
+  createdAt: integer("createdAt").notNull(),
+  updatedAt: integer("updatedAt").notNull(),
+});
+
+export const conversationMessage = sqliteTable("conversationMessage", {
+  id: integer("id").primaryKey(),
+  messageId: integer("messageId").notNull(),
+  conversationId: integer("conversationId").notNull(),
+});
+
 /*
  *
  * This table is used to store the encryption keys for messages.

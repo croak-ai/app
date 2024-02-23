@@ -53,7 +53,7 @@ export const createMessage = router({
 
       const currentTime = Date.now();
 
-      const statement = sql`
+      const messageStatement = sql`
       INSERT INTO message (userId, message, channelId, createdAt, updatedAt)
       VALUES (
           ${ctx.auth.userId},
@@ -65,15 +65,46 @@ export const createMessage = router({
       RETURNING id, message, channelId;
     `;
 
-      const result = await ctx.db.run(statement);
+      const messageResult = await ctx.db.run(messageStatement);
 
-      if (result.rowsAffected !== 1 || !result.rows || !result.rows[0]) {
+      if (
+        messageResult.rowsAffected !== 1 ||
+        !messageResult.rows ||
+        !messageResult.rows[0]
+      ) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to create new message",
         });
       }
 
-      return result.rows[0];
+      const nonGroupedMessagestatement = sql`
+      INSERT INTO nonGroupedMessage (userId, message, channelId, createdAt, updatedAt)
+      VALUES (
+          ${ctx.auth.userId},
+          ${input.messageContent},
+          ${input.channelId},
+          ${currentTime},
+          ${currentTime}
+      )
+      RETURNING id, message, channelId;
+    `;
+
+      const nonGroupedMessageresult = await ctx.db.run(
+        nonGroupedMessagestatement,
+      );
+
+      if (
+        nonGroupedMessageresult.rowsAffected !== 1 ||
+        !nonGroupedMessageresult.rows ||
+        !nonGroupedMessageresult.rows[0]
+      ) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create new nonGroupedMessage",
+        });
+      }
+
+      return messageResult.rows[0];
     }),
 });

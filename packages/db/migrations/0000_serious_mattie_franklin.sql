@@ -23,6 +23,19 @@ CREATE TABLE `channelAccess` (
 	`deletedAt` integer
 );
 --> statement-breakpoint
+CREATE TABLE `conversation` (
+	`id` integer PRIMARY KEY NOT NULL,
+	`channelId` integer NOT NULL,
+	`createdAt` integer NOT NULL,
+	`updatedAt` integer NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE `conversationMessages` (
+	`id` integer PRIMARY KEY NOT NULL,
+	`messageId` integer NOT NULL,
+	`conversationId` integer NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE `dekEncryptionKey` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`key` text(256) NOT NULL,
