@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1707285083137,
-      "tag": "0000_far_sleepwalker",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1707886761543,
-      "tag": "0001_wise_gauntlet",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1708313312694,
-      "tag": "0002_flat_doctor_faustus",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1708643536666,
-      "tag": "0003_parched_goliath",
+      "when": 1708757001570,
+      "tag": "0000_sparkling_silver_sable",
       "breakpoints": true
     }
   ]

@@ -6,8 +6,6 @@ import {
   unique,
 } from "drizzle-orm/sqlite-core";
 import { createId } from "@paralleldrive/cuid2";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { z } from "zod";
 
 export const user = sqliteTable("user", {
   userId: text("userId", { length: 256 }).primaryKey(),
@@ -15,8 +13,7 @@ export const user = sqliteTable("user", {
   firstName: text("firstName", { length: 256 }),
   lastName: text("lastName", { length: 256 }),
   email: text("email", { length: 256 }).notNull().unique(),
-  imageUrl: text("imageUrl", { length: 512 }),
-  profileImageUrl: text("profileImageUrl", { length: 512 }),
+  imageUrl: text("imageUrl", { length: 10000 }),
   createdAt: integer("createdAt").notNull(),
   updatedAt: integer("updatedAt").notNull(),
 });
