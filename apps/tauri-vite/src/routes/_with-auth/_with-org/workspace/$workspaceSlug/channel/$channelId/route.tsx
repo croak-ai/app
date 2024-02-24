@@ -28,7 +28,7 @@ function Channel() {
   let initialCursor: Cursor = {
     id: "0",
     createdAt: 0,
-    direction: "newer",
+    direction: "older",
     includeCursorInResult: true,
   };
 
