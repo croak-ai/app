@@ -8,7 +8,7 @@ interface Message {
   userId: string;
   firstName?: string | null;
   lastName?: string | null;
-  profileImageUrl?: string | null;
+  imageUrl?: string | null;
   createdAt: number;
   message: string;
 }
@@ -22,7 +22,7 @@ export default function Message({ message, previousMessage }: MessageProps) {
     userId,
     firstName,
     lastName,
-    profileImageUrl,
+    imageUrl,
     createdAt,
     message: content,
   } = message;
@@ -30,7 +30,7 @@ export default function Message({ message, previousMessage }: MessageProps) {
   const effectiveDisplayName =
     `${firstName || ""} ${lastName || ""}`.trim() || userId;
 
-  const effectiveAvatarSrc = profileImageUrl || "";
+  const effectiveAvatarSrc = imageUrl || "";
 
   const effectiveFallback = firstName ? firstName[0] : "?";
 

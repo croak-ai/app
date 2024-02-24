@@ -40,6 +40,6 @@ app.onError((err, c) => {
 export default {
   fetch: app.fetch,
   scheduled: async (event: ScheduledEvent, env: any, ctx: ExecutionContext) => {
-    ctx.waitUntil(Promise.resolve(clerkSync({ apiKey: env.CLERK_SECRET_KEY })));
+    ctx.waitUntil(Promise.resolve(console.log("Hello")));
   },
 };

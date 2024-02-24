@@ -4,6 +4,7 @@ import {
   getTursoDbNameFromClerkOrgId,
   getEmptyDatabaseName,
 } from "@acme/shared-functions";
+import { clerkSync } from "../../../functions/cron/clerk-sync";
 
 const zInput = z.object({ group: z.string() });
 
@@ -94,7 +95,12 @@ export const createNewTursoDB = router({
           );
         }
 
-        return "Created new database";
+        const { totalInsertedRows } = await clerkSync({
+          organizationId: orgId,
+          env: ctx.env,
+        });
+
+        return `Created new database with ${totalInsertedRows} members synced.`;
       } catch (error) {
         console.error(error);
         throw error;

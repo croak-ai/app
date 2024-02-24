@@ -200,7 +200,7 @@ export default function Messages({
                   .map((message, messageIndex, arr) => (
                     <div key={message.message.id} data-key={message.message.id}>
                       <Message
-                        message={message.message}
+                        message={{ ...message.message, ...message.user }}
                         previousMessage={arr[messageIndex - 1]?.message}
                       />
                     </div>

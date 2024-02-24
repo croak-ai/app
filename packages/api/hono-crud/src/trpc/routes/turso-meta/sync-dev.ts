@@ -6,8 +6,16 @@ export const syncDev = router({
     if (ctx.env.DB_ENVIORNMENT_LEVEL !== "dev") {
       throw new Error("This endpoint is only available in dev env");
     }
-    const result = clerkSync({ apiKey: ctx.env.CLERK_SECRET_KEY });
 
-    return result;
+    if (!ctx.auth.orgId) {
+      throw new Error("No organization");
+    }
+
+    const { totalInsertedRows } = await clerkSync({
+      organizationId: ctx.auth.orgId,
+      env: ctx.env,
+    });
+
+    return `${totalInsertedRows} rows affected`;
   }),
 });
