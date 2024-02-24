@@ -197,6 +197,7 @@ export default function ChatBox({
           channelId={channelId}
           height={messagesHeight}
           initialCursor={initialCursor}
+          isInitialCursorAtBottom={true}
         />
 
         {devModeEnabled && MemoizedDevMessageBoxTools}

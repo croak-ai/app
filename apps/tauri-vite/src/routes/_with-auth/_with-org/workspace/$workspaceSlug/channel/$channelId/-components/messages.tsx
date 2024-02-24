@@ -11,10 +11,12 @@ export default function Messages({
   channelId,
   height,
   initialCursor,
+  isInitialCursorAtBottom,
 }: {
   channelId: string;
   height: number;
   initialCursor: RouterInput["getMessages"]["getMessages"]["cursor"];
+  isInitialCursorAtBottom: boolean;
 }) {
   const {
     data,
@@ -33,6 +35,26 @@ export default function Messages({
       getNextPageParam: (lastPage) => lastPage.olderCursor,
       getPreviousPageParam: (firstPage, pages, page) => firstPage.newerCursor,
       initialCursor: initialCursor,
+
+      // If the intitial cursor is at the bottom, we can assume that the "newerCursor" will be empty
+      // so we can provide the initialData to the useInfiniteQuery to avoid an extra fetch.
+      initialData: isInitialCursorAtBottom
+        ? {
+            pages: [
+              {
+                messages: [],
+                olderCursor: initialCursor,
+              },
+            ],
+            pageParams: [
+              {
+                createdAt: initialCursor.createdAt,
+                id: initialCursor.id,
+                direction: "newer",
+              },
+            ],
+          }
+        : undefined,
       maxPages: 3,
     },
   );
@@ -215,7 +237,6 @@ export default function Messages({
           )}
         </>
       </div>
-      {/* <Button onClick={() => fetchPreviousPage()}>Previous</Button> */}
     </div>
   );
 }
