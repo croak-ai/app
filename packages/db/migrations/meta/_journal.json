@@ -5,27 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-<<<<<<< HEAD
-      "when": 1708633902824,
-      "tag": "0000_serious_mattie_franklin",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1708708555425,
-      "tag": "0001_dear_spirit",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1708708584244,
-      "tag": "0002_woozy_living_mummy",
-=======
-      "when": 1708757001570,
-      "tag": "0000_sparkling_silver_sable",
->>>>>>> meetings-part1
+      "when": 1708765140108,
+      "tag": "0000_quick_serpent_society",
       "breakpoints": true
     }
   ]
