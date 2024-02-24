@@ -6,6 +6,11 @@ import { clerk } from "./hono-middleware/clerk";
 import { trpc } from "./hono-middleware/trpc";
 import { HTTPException } from "hono/http-exception";
 import { clerkWebhook } from "./hono-routes/webhook/clerkWebhook";
+import type {
+  ScheduledEvent,
+  ExecutionContext,
+} from "@cloudflare/workers-types";
+import { clerkSync } from "./functions/cron/clerk-sync";
 
 const app = new Hono<HonoConfig>()
   .get("/", (c) => {
@@ -32,4 +37,9 @@ app.onError((err, c) => {
   return c.text(`Internal Server error ${err}`, 500);
 });
 
-export { app };
+export default {
+  fetch: app.fetch,
+  scheduled: async (event: ScheduledEvent, env: any, ctx: ExecutionContext) => {
+    ctx.waitUntil(Promise.resolve(clerkSync({ apiKey: env.CLERK_SECRET_KEY })));
+  },
+};

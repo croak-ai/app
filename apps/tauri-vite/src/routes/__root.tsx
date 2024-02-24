@@ -4,7 +4,6 @@ import { useAuth } from "@clerk/clerk-react";
 import { createRootRouteWithContext } from "@tanstack/react-router";
 import { apiUtilsType } from "@/utils/trpc";
 import type { UserResource } from "@clerk/types";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 const TanStackRouterDevtools =
   process.env.NODE_ENV === "production"

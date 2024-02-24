@@ -12,6 +12,7 @@ import { createMessage } from "./message/create-message";
 import { getAvailableGroups } from "./turso-meta/get-available-groups";
 import { getMessages } from "./message/get-messages";
 import { getNewestMessage } from "./message/get-newest-message";
+import { syncDev } from "./turso-meta/sync-dev";
 
 export const appRouter = router({
   createNewTursoDB,
@@ -26,6 +27,7 @@ export const appRouter = router({
   getAvailableGroups,
   getMessages,
   getNewestMessage,
+  syncDev,
 });
 
 // export type definition of API

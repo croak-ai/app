@@ -8,6 +8,7 @@ import { Inbox, TextQuote, BellDot } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import { dark } from "@clerk/themes";
 import { useTheme } from "@/theme";
+import ClerkResyncButton from "./resync-clerk-button";
 
 export function OrgLayout({ children }: { children: React.ReactNode }) {
   const collapsibleLayoutValues = localStorage.getItem(
@@ -99,6 +100,7 @@ export function OrgLayout({ children }: { children: React.ReactNode }) {
               icon={BellDot}
             />
             <ThemeToggle />
+            <ClerkResyncButton />
           </div>
           <div className="mx-4 justify-self-end">
             <AIButton />

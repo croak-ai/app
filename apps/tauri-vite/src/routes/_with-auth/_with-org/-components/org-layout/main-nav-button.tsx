@@ -31,6 +31,7 @@ export function Nav(props: NavProps) {
     <Tooltip delayDuration={0}>
       <TooltipTrigger asChild>
         <Link
+          // @ts-ignore
           to={props.to}
           className={cn(
             buttonVariants({ variant: getVariant(), size: "icon" }),

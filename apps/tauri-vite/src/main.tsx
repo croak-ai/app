@@ -7,6 +7,7 @@ import { createTRPCQueryUtils } from "@trpc/react-query";
 import superjson from "superjson";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import { trpc } from "./utils/trpc";
+import { Toaster } from "@acme/ui/components/ui/toaster";
 
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 
@@ -88,6 +89,7 @@ function InnerApp() {
           router={router}
           context={{ apiUtils, auth, user: user ?? undefined }}
         />
+        <Toaster />
       </QueryClientProvider>
     </trpc.Provider>
   );
