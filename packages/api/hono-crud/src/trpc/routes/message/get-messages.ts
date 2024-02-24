@@ -31,22 +31,24 @@ export const getMessages = router({
       let queryBuilder = ctx.db
         .select()
         .from(message)
-        .leftJoin(user, eq(user.userId, message.userId))
-        .where(eq(message.channelId, parseInt(channelId, 10)));
+        .leftJoin(user, eq(user.userId, message.userId));
 
       const { createdAt, id, direction, includeCursorInResult } = cursor;
       if (direction === "older") {
         queryBuilder = queryBuilder
           .where(
-            or(
-              lt(message.createdAt, createdAt),
-              and(
-                lte(message.createdAt, createdAt),
-                lt(message.id, parseInt(id, 10)),
+            and(
+              eq(message.channelId, parseInt(channelId, 10)),
+              or(
+                lt(message.createdAt, createdAt),
+                and(
+                  lte(message.createdAt, createdAt),
+                  lt(message.id, parseInt(id, 10)),
+                ),
+                includeCursorInResult
+                  ? eq(message.id, parseInt(id, 10))
+                  : undefined,
               ),
-              includeCursorInResult
-                ? eq(message.id, parseInt(id, 10))
-                : undefined,
             ),
           )
           .orderBy(desc(message.createdAt), desc(message.id));
@@ -55,15 +57,18 @@ export const getMessages = router({
       if (direction === "newer") {
         queryBuilder = queryBuilder
           .where(
-            or(
-              gt(message.createdAt, createdAt),
-              and(
-                gte(message.createdAt, createdAt),
-                gt(message.id, parseInt(id, 10)),
+            and(
+              eq(message.channelId, parseInt(channelId, 10)),
+              or(
+                gt(message.createdAt, createdAt),
+                and(
+                  gte(message.createdAt, createdAt),
+                  gt(message.id, parseInt(id, 10)),
+                ),
+                includeCursorInResult
+                  ? eq(message.id, parseInt(id, 10))
+                  : undefined,
               ),
-              includeCursorInResult
-                ? eq(message.id, parseInt(id, 10))
-                : undefined,
             ),
           )
           .orderBy(asc(message.createdAt), asc(message.id));

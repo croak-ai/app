@@ -54,7 +54,10 @@ clerkWebhook.post("/organizationMembership", async (c) => {
       event.data.organization.public_metadata?.main_database_turso_org_name;
 
     const url = `libsql://${tursoDbName}-${tursoOrgName}.turso.io`;
-    const token = getDbAuthToken({ c, groupName: tursoGroupName as string });
+    const token = getDbAuthToken({
+      env: c.env,
+      groupName: tursoGroupName as string,
+    });
 
     const db = createDbClient(url, token);
 

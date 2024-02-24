@@ -8,6 +8,7 @@ import { Inbox, TextQuote, BellDot } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import { dark } from "@clerk/themes";
 import { useTheme } from "@/theme";
+import ClerkResyncButton from "./resync-clerk-button";
 
 export function OrgLayout({ children }: { children: React.ReactNode }) {
   const collapsibleLayoutValues = localStorage.getItem(
@@ -92,13 +93,14 @@ export function OrgLayout({ children }: { children: React.ReactNode }) {
           </span>
           <div className="flex space-x-4 justify-self-center">
             <Nav title="Workspace" to={`/workspace`} icon={TextQuote} />
-            <Nav title="Inbox" to={`/create-workspace`} icon={Inbox} />
+            <Nav title="Meetings" to={`/meetings`} icon={Inbox} />
             <Nav
               title="Notifications"
               to={`/create-workspace`}
               icon={BellDot}
             />
             <ThemeToggle />
+            <ClerkResyncButton />
           </div>
           <div className="mx-4 justify-self-end">
             <AIButton />

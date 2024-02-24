@@ -18,8 +18,10 @@ import { Route as WithAuthOrganizationSelectorRouteImport } from './routes/_with
 import { Route as WithAuthOnboardNewOrgRouteImport } from './routes/_with-auth/onboard-new-org/route'
 import { Route as WithAuthWithOrgRouteImport } from './routes/_with-auth/_with-org/route'
 import { Route as WithAuthWithOrgWorkspaceRouteImport } from './routes/_with-auth/_with-org/workspace/route'
+import { Route as WithAuthWithOrgMeetingsRouteImport } from './routes/_with-auth/_with-org/meetings/route'
 import { Route as WithAuthWithOrgCreateWorkspaceRouteImport } from './routes/_with-auth/_with-org/create-workspace/route'
 import { Route as WithAuthWithOrgWorkspaceIndexImport } from './routes/_with-auth/_with-org/workspace/index'
+import { Route as WithAuthWithOrgMeetingsIndexImport } from './routes/_with-auth/_with-org/meetings/index'
 import { Route as WithAuthWithOrgWorkspaceWorkspaceSlugRouteImport } from './routes/_with-auth/_with-org/workspace/$workspaceSlug/route'
 import { Route as WithAuthWithOrgWorkspaceWorkspaceSlugIndexImport } from './routes/_with-auth/_with-org/workspace/$workspaceSlug/index'
 import { Route as WithAuthWithOrgWorkspaceWorkspaceSlugChannelChannelIdRouteImport } from './routes/_with-auth/_with-org/workspace/$workspaceSlug/channel/$channelId/route'
@@ -65,6 +67,16 @@ const WithAuthWithOrgWorkspaceRouteRoute =
     getParentRoute: () => WithAuthWithOrgRouteRoute,
   } as any)
 
+const WithAuthWithOrgMeetingsRouteRoute =
+  WithAuthWithOrgMeetingsRouteImport.update({
+    path: '/meetings',
+    getParentRoute: () => WithAuthWithOrgRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_with-auth/_with-org/meetings/route.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
 const WithAuthWithOrgCreateWorkspaceRouteRoute =
   WithAuthWithOrgCreateWorkspaceRouteImport.update({
     path: '/create-workspace',
@@ -75,6 +87,12 @@ const WithAuthWithOrgWorkspaceIndexRoute =
   WithAuthWithOrgWorkspaceIndexImport.update({
     path: '/',
     getParentRoute: () => WithAuthWithOrgWorkspaceRouteRoute,
+  } as any)
+
+const WithAuthWithOrgMeetingsIndexRoute =
+  WithAuthWithOrgMeetingsIndexImport.update({
+    path: '/',
+    getParentRoute: () => WithAuthWithOrgMeetingsRouteRoute,
   } as any)
 
 const WithAuthWithOrgWorkspaceWorkspaceSlugRouteRoute =
@@ -131,6 +149,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WithAuthWithOrgCreateWorkspaceRouteImport
       parentRoute: typeof WithAuthWithOrgRouteImport
     }
+    '/_with-auth/_with-org/meetings': {
+      preLoaderRoute: typeof WithAuthWithOrgMeetingsRouteImport
+      parentRoute: typeof WithAuthWithOrgRouteImport
+    }
     '/_with-auth/_with-org/workspace': {
       preLoaderRoute: typeof WithAuthWithOrgWorkspaceRouteImport
       parentRoute: typeof WithAuthWithOrgRouteImport
@@ -138,6 +160,10 @@ declare module '@tanstack/react-router' {
     '/_with-auth/_with-org/workspace/$workspaceSlug': {
       preLoaderRoute: typeof WithAuthWithOrgWorkspaceWorkspaceSlugRouteImport
       parentRoute: typeof WithAuthWithOrgWorkspaceRouteImport
+    }
+    '/_with-auth/_with-org/meetings/': {
+      preLoaderRoute: typeof WithAuthWithOrgMeetingsIndexImport
+      parentRoute: typeof WithAuthWithOrgMeetingsRouteImport
     }
     '/_with-auth/_with-org/workspace/': {
       preLoaderRoute: typeof WithAuthWithOrgWorkspaceIndexImport
@@ -161,6 +187,9 @@ export const routeTree = rootRoute.addChildren([
   WithAuthRouteRoute.addChildren([
     WithAuthWithOrgRouteRoute.addChildren([
       WithAuthWithOrgCreateWorkspaceRouteRoute,
+      WithAuthWithOrgMeetingsRouteRoute.addChildren([
+        WithAuthWithOrgMeetingsIndexRoute,
+      ]),
       WithAuthWithOrgWorkspaceRouteRoute.addChildren([
         WithAuthWithOrgWorkspaceWorkspaceSlugRouteRoute.addChildren([
           WithAuthWithOrgWorkspaceWorkspaceSlugIndexRoute,
