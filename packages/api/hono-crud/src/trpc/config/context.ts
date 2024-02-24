@@ -35,7 +35,10 @@ export function createTRPCContextFromHonoContext(c: HonoContext) {
     const { tursoDbName, tursoGroupName, tursoOrgName } = clerkInfo;
 
     const url = `libsql://${tursoDbName}-${tursoOrgName}.turso.io`;
-    const token = getDbAuthToken({ c, groupName: tursoGroupName as string });
+    const token = getDbAuthToken({
+      env: c.env,
+      groupName: tursoGroupName,
+    });
 
     const db = createDbClient(url, token);
 

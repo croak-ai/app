@@ -1,21 +1,20 @@
-import { HonoContext } from "../config";
-
+// env is an any because we want to allow both Hono and Cloudflare environment variables to work.
 export const getDbAuthToken = ({
-  c,
+  env,
   groupName,
 }: {
-  c: HonoContext;
+  env: any;
   groupName: string;
 }) => {
-  const env = c.env.DB_ENVIORNMENT_LEVEL;
+  const enviornmentLevel = env.DB_ENVIORNMENT_LEVEL;
 
-  if (!groupName.startsWith(env)) {
+  if (!groupName.startsWith(enviornmentLevel)) {
     throw new Error(
       "You are trying to access a database that is not in your environment",
     );
   }
 
-  const location = groupName.slice(env.length + 1).toUpperCase();
+  const location = groupName.slice(enviornmentLevel.length + 1).toUpperCase();
 
-  return c.env[`${location}_SECRET` as keyof typeof c.env];
+  return env[`${location}_SECRET`];
 };
