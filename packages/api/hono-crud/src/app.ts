@@ -44,6 +44,16 @@ app.onError((err, c) => {
 export default {
   fetch: app.fetch,
   scheduled: async (event: ScheduledEvent, env: any, ctx: ExecutionContext) => {
+    switch (event.cron) {
+      case "* * * * *":
+        console.log("Cron every minute");
+        break;
+      case "*/5 * * * *":
+        // Every five minutes
+        console.log("Cron every 5 minutes");
+        break;
+    }
+    console.log("cron processed");
     ctx.waitUntil(Promise.resolve(console.log("Hello")));
   },
 };
