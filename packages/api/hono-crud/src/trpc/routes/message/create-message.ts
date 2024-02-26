@@ -104,7 +104,42 @@ export const createMessage = router({
           message: "Failed to create new nonGroupedMessage",
         });
       }
+      triggerGroupingProcess(ctx.db);
+
+      await new Promise((resolve) => setTimeout(resolve, 60000));
+      console.log("end of timeout");
 
       return messageResult.rows[0];
     }),
 });
+
+// Function to trigger the conversation grouping process
+const triggerGroupingProcess = async (db: any) => {
+  try {
+    // Make the function wait for 20 seconds
+    console.log("HITTTT");
+
+    // After waiting for 20 seconds, proceed with the rest of the logic
+    // Make an API request to OpenAI to group the message into conversations
+    // const openAIResponse = await makeOpenAIRequest(messageData);
+
+    const nonGroupedMessagestatement = sql`
+      INSERT INTO nonGroupedMessage (userId, message, channelId, createdAt, updatedAt)
+      VALUES (
+          ${1},
+          ${"Added after 10 seconds"},
+          ${1},
+          ${1},
+          ${1}
+      )
+      RETURNING id, message, channelId;
+    `;
+
+    await db.run(nonGroupedMessagestatement);
+
+    // Process the OpenAI response and update conversation data in your database
+    // This step may take some time, depending on the complexity of the grouping process
+  } catch (error) {
+    // Handle errors
+  }
+};
