@@ -1,4 +1,9 @@
-import { channel, conversationMessage, message } from "@acme/db/schema/tenant";
+import {
+  channel,
+  conversation,
+  conversationMessage,
+  message,
+} from "@acme/db/schema/tenant";
 import { protectedProcedureWithOrgDB, router } from "../../config/trpc";
 import { z } from "zod";
 import { eq, sql, desc } from "drizzle-orm";
@@ -7,6 +12,7 @@ import { DBClientType } from "packages/db";
 import { TRPCError } from "@trpc/server";
 import { getWorkspacePermission } from "../../functions/workspace";
 import { userHasRole } from "../../../functions/clerk";
+import openai from "../../../ai/client";
 
 export const zCreateMessage = z.object({
   channelId: z.string().min(1).max(256),
@@ -68,7 +74,12 @@ export const createMessage = router({
 
       const result = await ctx.db.run(statement);
 
-      if (result.rowsAffected !== 1 || !result.rows || !result.rows[0]) {
+      if (
+        result.rowsAffected !== 1 ||
+        !result.rows ||
+        !result.rows[0] ||
+        !result.lastInsertRowid
+      ) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to create new message",
@@ -80,6 +91,7 @@ export const createMessage = router({
         input.messageContent,
         ctx.auth.userId,
         input.channelId,
+        result.lastInsertRowid.toString(),
       );
 
       return result.rows[0];
@@ -87,12 +99,13 @@ export const createMessage = router({
 });
 
 // Function to trigger the conversation grouping process
-const groupMessage = async (
+async function groupMessage(
   db: DBClientType,
   messageContent: string,
   messageAuthor: string,
   channelId: string,
-) => {
+  messageId: string,
+) {
   try {
     /* !! We need to change some DB types from ints to 
     strings if we are eventually going to use UUIDs !! 
@@ -103,6 +116,7 @@ const groupMessage = async (
     Then feed this mapped data into AI context and ask it to group
     the message
     */
+
     const tempChannelId = parseInt(channelId);
 
     /* Pulls 100 most recent conversation linked messages in channel */
@@ -121,6 +135,44 @@ const groupMessage = async (
       .orderBy(desc(message.createdAt))
       .limit(100);
 
+    if (recentMessages.length === 0) {
+      await createConversation(db, parseInt(messageId), tempChannelId);
+      return;
+    }
+    // Convert recentMessages to JSON
+    const recentMessagesJson = JSON.stringify(recentMessages);
+    const singularMessageJson = JSON.stringify({
+      userId: messageAuthor,
+      message: messageContent,
+      conversationId: null,
+    });
+
+    // Use recentMessagesJson in the AI context
+    const completion = await openai.chat.completions.create({
+      messages: [
+        {
+          role: "system",
+          content: `You are a categorization bot. You will receive a group of messages
+        in JSON format followed by a singular message in json format. each message
+        in the group will have a userId, message, and conversationId. Your task is
+        to categorize the singular message into the correct conversationId based on
+        the content within the group of messages. If the singular message does not fit 
+        into the context of any conversations in the group you need to specify that a
+        new conversation should be created. If the singular message fits into the
+        context of a conversation you should specify ONLY the conversationId the
+        message belongs to.
+        
+        If the message seems like it can fit in multiple conversations you should choose
+        the conversation that the message fits into the best.
+        
+        Group of messages: ${recentMessagesJson}
+        
+        Singular message: ${singularMessageJson}`,
+        },
+      ],
+      model: "gpt-3.5",
+    });
+
     console.log("RECENTS: ", recentMessages[0]);
     console.log(recentMessages.length);
 
@@ -128,4 +180,45 @@ const groupMessage = async (
   } catch (error) {
     // Handle errors
   }
-};
+}
+
+/* Creates a new conversation and new conversationMessage */
+async function createConversation(
+  db: DBClientType,
+  messageId: number,
+  channelId: number,
+) {
+  const currentTime = Date.now();
+  const conversationResult = await db
+    .insert(conversation)
+    .values({ channelId, createdAt: currentTime, updatedAt: currentTime });
+
+  if (
+    conversationResult.rowsAffected !== 1 ||
+    !conversationResult.rows ||
+    !conversationResult.rows[0] ||
+    !conversationResult.lastInsertRowid
+  ) {
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Failed to create new conversation",
+    });
+  }
+
+  const conversationId = Number(conversationResult.lastInsertRowid);
+
+  const conversationMessageResult = await db
+    .insert(conversationMessage)
+    .values({ messageId, conversationId });
+
+  if (
+    conversationMessageResult.rowsAffected !== 1 ||
+    !conversationMessageResult.rows ||
+    !conversationMessageResult.rows[0]
+  ) {
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Failed to link message to conversation",
+    });
+  }
+}
