@@ -1,4 +1,4 @@
-import { channel, message } from "@acme/db/schema/tenant";
+import { channel, conversationMessage, message } from "@acme/db/schema/tenant";
 import { protectedProcedureWithOrgDB, router } from "../../config/trpc";
 import { z } from "zod";
 import { eq, and, sql } from "drizzle-orm";
@@ -75,6 +75,8 @@ export const createMessage = router({
         });
       }
 
+      const grouping = await groupMessage(ctx.db);
+
       return result.rows[0];
     }),
 });
@@ -89,13 +91,25 @@ const groupMessage = async (db: any) => {
     the message
     */
 
-    const last100Messages = await db.query(
-      sql`
-      SELECT * FROM message
-      ORDER BY createdAt DESC
-      LIMIT 100;
-    `,
-    );
+    /* Pulls 100 most recent conversation linked messages in channel */
+    const recentMessages = await db
+      .select({
+        userId: message.userId,
+        message: message.message,
+        conversationId: conversationMessage.conversationId,
+      })
+      .from(message)
+      .innerJoin(
+        conversationMessage,
+        eq(message.id, conversationMessage.messageId),
+      )
+      .orderBy(message.createdAt, "desc")
+      .limit(100);
+
+    console.log("RECENTS: ", recentMessages[0]);
+    console.log(recentMessages.length);
+
+    return recentMessages;
   } catch (error) {
     // Handle errors
   }
