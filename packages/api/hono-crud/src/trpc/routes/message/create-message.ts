@@ -6,6 +6,7 @@ import { eq, and, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { getWorkspacePermission } from "../../functions/workspace";
 import { userHasRole } from "../../../functions/clerk";
+import { createTextChangeRange } from "typescript";
 
 export const zCreateMessage = z.object({
   channelId: z.string().min(1).max(256),
@@ -53,7 +54,7 @@ export const createMessage = router({
 
       const currentTime = Date.now();
 
-      const messageStatement = sql`
+      const statement = sql`
       INSERT INTO message (userId, message, channelId, createdAt, updatedAt)
       VALUES (
           ${ctx.auth.userId},
@@ -65,80 +66,36 @@ export const createMessage = router({
       RETURNING id, message, channelId;
     `;
 
-      const messageResult = await ctx.db.run(messageStatement);
+      const result = await ctx.db.run(statement);
 
-      if (
-        messageResult.rowsAffected !== 1 ||
-        !messageResult.rows ||
-        !messageResult.rows[0]
-      ) {
+      if (result.rowsAffected !== 1 || !result.rows || !result.rows[0]) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to create new message",
         });
       }
 
-      const nonGroupedMessagestatement = sql`
-      INSERT INTO nonGroupedMessage (userId, message, channelId, createdAt, updatedAt)
-      VALUES (
-          ${ctx.auth.userId},
-          ${input.messageContent},
-          ${input.channelId},
-          ${currentTime},
-          ${currentTime}
-      )
-      RETURNING id, message, channelId;
-    `;
-
-      const nonGroupedMessageresult = await ctx.db.run(
-        nonGroupedMessagestatement,
-      );
-
-      if (
-        nonGroupedMessageresult.rowsAffected !== 1 ||
-        !nonGroupedMessageresult.rows ||
-        !nonGroupedMessageresult.rows[0]
-      ) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to create new nonGroupedMessage",
-        });
-      }
-      triggerGroupingProcess(ctx.db);
-
-      await new Promise((resolve) => setTimeout(resolve, 60000));
-      console.log("end of timeout");
-
-      return messageResult.rows[0];
+      return result.rows[0];
     }),
 });
 
 // Function to trigger the conversation grouping process
-const triggerGroupingProcess = async (db: any) => {
+const groupMessage = async (db: any) => {
   try {
-    // Make the function wait for 20 seconds
-    console.log("HITTTT");
+    /* 
+    We need to pull last 100 messages from this channel 
+    Use some SQL query to map messages with their conversations
+    Then feed this mapped data into AI context and ask it to group
+    the message
+    */
 
-    // After waiting for 20 seconds, proceed with the rest of the logic
-    // Make an API request to OpenAI to group the message into conversations
-    // const openAIResponse = await makeOpenAIRequest(messageData);
-
-    const nonGroupedMessagestatement = sql`
-      INSERT INTO nonGroupedMessage (userId, message, channelId, createdAt, updatedAt)
-      VALUES (
-          ${1},
-          ${"Added after 10 seconds"},
-          ${1},
-          ${1},
-          ${1}
-      )
-      RETURNING id, message, channelId;
-    `;
-
-    await db.run(nonGroupedMessagestatement);
-
-    // Process the OpenAI response and update conversation data in your database
-    // This step may take some time, depending on the complexity of the grouping process
+    const last100Messages = await db.query(
+      sql`
+      SELECT * FROM message
+      ORDER BY createdAt DESC
+      LIMIT 100;
+    `,
+    );
   } catch (error) {
     // Handle errors
   }
