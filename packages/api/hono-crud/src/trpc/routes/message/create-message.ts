@@ -1,12 +1,12 @@
 import { channel, conversationMessage, message } from "@acme/db/schema/tenant";
 import { protectedProcedureWithOrgDB, router } from "../../config/trpc";
 import { z } from "zod";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, sql, desc } from "drizzle-orm";
+import { DBClientType } from "packages/db";
 
 import { TRPCError } from "@trpc/server";
 import { getWorkspacePermission } from "../../functions/workspace";
 import { userHasRole } from "../../../functions/clerk";
-import { createTextChangeRange } from "typescript";
 
 export const zCreateMessage = z.object({
   channelId: z.string().min(1).max(256),
@@ -75,21 +75,35 @@ export const createMessage = router({
         });
       }
 
-      const grouping = await groupMessage(ctx.db);
+      const grouping = await groupMessage(
+        ctx.db,
+        input.messageContent,
+        ctx.auth.userId,
+        input.channelId,
+      );
 
       return result.rows[0];
     }),
 });
 
 // Function to trigger the conversation grouping process
-const groupMessage = async (db: any) => {
+const groupMessage = async (
+  db: DBClientType,
+  messageContent: string,
+  messageAuthor: string,
+  channelId: string,
+) => {
   try {
+    /* !! We need to change some DB types from ints to 
+    strings if we are eventually going to use UUIDs !! 
+    */
     /* 
     We need to pull last 100 messages from this channel 
     Use some SQL query to map messages with their conversations
     Then feed this mapped data into AI context and ask it to group
     the message
     */
+    const tempChannelId = parseInt(channelId);
 
     /* Pulls 100 most recent conversation linked messages in channel */
     const recentMessages = await db
@@ -99,11 +113,12 @@ const groupMessage = async (db: any) => {
         conversationId: conversationMessage.conversationId,
       })
       .from(message)
+      .where(eq(message.channelId, tempChannelId))
       .innerJoin(
         conversationMessage,
         eq(message.id, conversationMessage.messageId),
       )
-      .orderBy(message.createdAt, "desc")
+      .orderBy(desc(message.createdAt))
       .limit(100);
 
     console.log("RECENTS: ", recentMessages[0]);

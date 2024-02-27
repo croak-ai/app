@@ -15,3 +15,6 @@ export function createDbClient(url: string, authToken: string) {
 
   return drizzle(client, { schema });
 }
+
+// DB client type
+export type DBClientType = ReturnType<typeof createDbClient>;

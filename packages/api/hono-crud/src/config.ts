@@ -7,6 +7,7 @@ import type {
 import type { Context, Input } from "hono";
 
 export type Bindings = {
+  OPENAI_API_KEY: string;
   CLERK_SECRET_KEY: string;
   CLERK_PUBLISHABLE_KEY: string;
   CLERK_ORG_WEBHOOK_SECRET_KEY: string;
