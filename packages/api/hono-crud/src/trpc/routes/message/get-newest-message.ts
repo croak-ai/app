@@ -17,7 +17,7 @@ export const getNewestMessage = router({
         .select()
         .from(message)
         .leftJoin(user, eq(user.userId, message.userId))
-        .where(eq(message.channelId, parseInt(channelId, 10)))
+        .where(eq(message.channelId, channelId))
         .orderBy(desc(message.createdAt), desc(message.id))
         .limit(1)
         .execute();

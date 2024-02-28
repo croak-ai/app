@@ -68,10 +68,10 @@ export default function Messages({
   });
 
   const scrollBoxRef = useRef<HTMLDivElement>(null);
-  const nextPageTargetElement = useRef<number | null>(null);
-  const previousPageTargetElement = useRef<number | null>(null);
+  const nextPageTargetElement = useRef<string | null>(null);
+  const previousPageTargetElement = useRef<string | null>(null);
 
-  const scrollToMessageById = (messageId: number) => {
+  const scrollToMessageById = (messageId: string) => {
     const messageElement = scrollBoxRef.current?.querySelector(
       `[data-key='${messageId}']`,
     );
@@ -87,7 +87,7 @@ export default function Messages({
       }
     }
   };
-  const messageInList = (messageId: number) => {
+  const messageInList = (messageId: string) => {
     return Boolean(
       data?.pages.some((page) =>
         page.messages.some((message) => message.message.id === messageId),
