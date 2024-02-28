@@ -14,12 +14,24 @@ import { TRPCError } from "@trpc/server";
 import { getWorkspacePermission } from "../../functions/workspace";
 import { userHasRole } from "../../../functions/clerk";
 import openai from "../../../ai/client";
+import { z } from "zod";
 
 export const zCreateMessage = z.object({
   channelId: z.string().min(1).max(256),
   workspaceSlug: z.string().min(2).max(256),
   messageContent: z.string().min(2).max(60000),
 });
+
+export const DBMessage = z.object({
+  id: z.string(),
+  userId: z.string(),
+  message: z.string(),
+  channelId: z.string(),
+  createdAt: z.number(),
+  updatedAt: z.number(),
+});
+
+export type DBMessage = z.infer<typeof DBMessage>;
 
 export const createMessage = router({
   createMessage: protectedProcedureWithOrgDB
@@ -61,53 +73,33 @@ export const createMessage = router({
 
       const currentTime = Date.now();
 
-      const statement = sql`
-      INSERT INTO message (userId, message, channelId, createdAt, updatedAt)
-      VALUES (
-          ${createId()},
-          ${ctx.auth.userId},
-          ${input.messageContent},
-          ${input.channelId},
-          ${currentTime},
-          ${currentTime}
-      )
-      RETURNING id, message, channelId;
-    `;
+      const [newMessage] = await ctx.db
+        .insert(message)
+        .values({
+          id: createId(),
+          userId: ctx.auth.userId,
+          message: input.messageContent,
+          channelId: input.channelId,
+          createdAt: currentTime,
+          updatedAt: currentTime,
+        })
+        .returning();
 
-      const result = await ctx.db.run(statement);
-
-      if (
-        result.rowsAffected !== 1 ||
-        !result.rows ||
-        !result.rows[0] ||
-        !result.lastInsertRowid
-      ) {
+      if (!newMessage) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to create new message",
         });
       }
+      /* Group message into conversation */
+      const grouping = await groupMessage(ctx.db, newMessage);
 
-      const grouping = await groupMessage(
-        ctx.db,
-        input.messageContent,
-        ctx.auth.userId,
-        input.channelId,
-        result.lastInsertRowid.toString(),
-      );
-
-      return result.rows[0];
+      return newMessage;
     }),
 });
 
 // Function to trigger the conversation grouping process
-async function groupMessage(
-  db: DBClientType,
-  messageContent: string,
-  messageAuthor: string,
-  channelId: string,
-  messageId: string,
-) {
+async function groupMessage(db: DBClientType, newMessage: DBMessage) {
   try {
     /* !! We need to change some DB types from ints to 
     strings if we are eventually going to use UUIDs !! 
@@ -118,8 +110,6 @@ async function groupMessage(
     Then feed this mapped data into AI context and ask it to group
     the message
     */
-
-    const tempChannelId = parseInt(channelId);
 
     /* Pulls 100 most recent conversation linked messages in channel */
     const recentMessages = await db
