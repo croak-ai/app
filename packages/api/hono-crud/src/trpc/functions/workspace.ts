@@ -1,9 +1,5 @@
 import { and, createDbClient, eq } from "@acme/db";
-import {
-  dekEncryptionKey,
-  workspace,
-  workspaceMember,
-} from "@acme/db/schema/tenant";
+import { workspace, workspaceMember } from "@acme/db/schema/tenant";
 
 interface WorkspacePermissionParams {
   bCanManageChannels?: boolean;

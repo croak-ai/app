@@ -1,13 +1,7 @@
-import {
-  dekEncryptionKey,
-  dekEncryptionKeyUserAccess,
-  workspace,
-  workspaceMember,
-} from "@acme/db/schema/tenant";
+import { workspace, workspaceMember } from "@acme/db/schema/tenant";
 import { protectedProcedureWithOrgDB, router } from "../../config/trpc";
 import { z } from "zod";
 type newWorkspaceType = typeof workspace.$inferInsert;
-type newDEKEncryptionKeyType = typeof dekEncryptionKey.$inferInsert;
 import { TRPCError } from "@trpc/server";
 import { userHasRole } from "../../../functions/clerk";
 
@@ -32,43 +26,12 @@ export const createWorkspace = router({
           message: "You do not have permission to create a workspace",
         });
       }
-
-      const key = crypto.getRandomValues(new Uint8Array(16)); // 16 bytes * 8 = 128 bits
-      const keyHex = Array.from(key)
-        .map((b) => b.toString(16).padStart(2, "0"))
-        .join("");
-
-      const newDEKEncryptionKey: newDEKEncryptionKeyType = {
-        dek: keyHex,
-        kekType: "plaintext",
-        kekId: "",
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      };
-
-      const newDekEncryptionKeyRes = await ctx.db
-        ?.insert(dekEncryptionKey)
-        .values(newDEKEncryptionKey)
-        .returning({ insertedId: dekEncryptionKey.id });
-
-      if (
-        newDekEncryptionKeyRes.length !== 1 ||
-        !newDekEncryptionKeyRes ||
-        !newDekEncryptionKeyRes[0]
-      ) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to create new DEK encryption key",
-        });
-      }
-
       const newWorkspace: newWorkspaceType = {
         name: input.zName,
         description: input.zDescription,
         slug: input.zSlug,
         createdAt: Date.now(),
         updatedAt: Date.now(),
-        publicChannelEncryptionId: newDekEncryptionKeyRes[0].insertedId,
       };
 
       const newWorkspaceRes = await ctx.db
@@ -94,15 +57,6 @@ export const createWorkspace = router({
         bCanManageChannels: 1,
         bCanManageWorkspaceMembers: 1,
         bCanManageWorkspaceSettings: 1,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      });
-
-      const newDekEncryptionKey = newDekEncryptionKeyRes[0];
-
-      await ctx.db?.insert(dekEncryptionKeyUserAccess).values({
-        dekId: newDekEncryptionKey.insertedId,
-        userId: ctx.auth.userId,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       });

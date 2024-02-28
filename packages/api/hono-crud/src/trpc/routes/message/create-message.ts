@@ -7,6 +7,7 @@ import {
 import { protectedProcedureWithOrgDB, router } from "../../config/trpc";
 import { z } from "zod";
 import { eq, sql, desc } from "drizzle-orm";
+import { createId } from "@paralleldrive/cuid2";
 import { DBClientType } from "packages/db";
 
 import { TRPCError } from "@trpc/server";
@@ -63,6 +64,7 @@ export const createMessage = router({
       const statement = sql`
       INSERT INTO message (userId, message, channelId, createdAt, updatedAt)
       VALUES (
+          ${createId()},
           ${ctx.auth.userId},
           ${input.messageContent},
           ${input.channelId},

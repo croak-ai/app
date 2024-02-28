@@ -7,6 +7,8 @@ export const schema = { ...tenant };
 
 export * from "drizzle-orm";
 
+export type DbClientType = ReturnType<typeof createDbClient>;
+
 export function createDbClient(url: string, authToken: string) {
   const client = createClient({
     url,
