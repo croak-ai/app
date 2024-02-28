@@ -12,7 +12,8 @@ import { createId } from "@paralleldrive/cuid2";
 import { TRPCError } from "@trpc/server";
 import { getWorkspacePermission } from "../../functions/workspace";
 import { userHasRole } from "../../../functions/clerk";
-// import openai from "../../../ai/client";
+import OpenAI from "openai";
+import { createTextChangeRange } from "typescript";
 
 export const zCreateMessage = z.object({
   channelId: z.string().min(1).max(256),
@@ -74,7 +75,6 @@ export const createMessage = router({
       const [newMessage] = await ctx.db
         .insert(message)
         .values({
-          id: createId(),
           userId: ctx.auth.userId,
           message: input.messageContent,
           channelId: input.channelId,
@@ -89,15 +89,30 @@ export const createMessage = router({
           message: "Failed to create new message",
         });
       }
+
+      const openAI = new OpenAI({ apiKey: ctx.env.OPENAI_API_KEY });
       /* Group message into conversation */
-      await groupMessage(ctx.db, newMessage);
+      await groupMessage(ctx.db, openAI, newMessage);
+
+      /* 
+        Summarize messages function here. Pull last x UNSUMMARIZED 
+        conversations from channel and their messages AND unsummarized 
+        messages. We don't want to pull a convo if they don't have a 
+        message in the unsummarized messages table. Then we want to 
+        loop through each conversation and summarize ALL conversation 
+        messages.
+      */
 
       return newMessage;
     }),
 });
 
 /* Triggers the conversation grouping process */
-async function groupMessage(db: DBClientType, newMessage: DBMessage) {
+async function groupMessage(
+  db: DBClientType,
+  openAI: OpenAI,
+  newMessage: DBMessage,
+) {
   try {
     /* !! We need to change some DB types from ints to 
     strings if we are eventually going to use UUIDs !! 
@@ -137,46 +152,55 @@ async function groupMessage(db: DBClientType, newMessage: DBMessage) {
       conversationId: null,
     });
 
-    /* Create process to retry openAI query 3 times
-    
-    Rearrange DB maybe add switch to messages to show which ones havent been grouped.
-    Then we have a process that runs once per day to scan for these messages and if they are ungrouped we should
-    
-    1. Pull last 100 messages from channelId of ungrouped message by date
-    2. Run them through AI and insert into conversationMessages as if nothing happened
+    /* 
+    Create process to retry openAI query 3 times. Rearrange DB maybe add switch 
+    to messages to show which ones haven't been grouped. Then we have a process 
+    that runs once per day to scan for these messages and if they are ungrouped 
+    we should do the following:
 
-    Race condition problem. What happens when this is stil running. Message isnt grouped. Other message is sent in
-    in response and doesnt have this grouped message in the context.
+    1. Pull last 100 messages from channelId of ungrouped message by date.
+    2. Run them through AI and insert into conversationMessages as if nothing happened.
+
+    Note: There's a potential race condition. What happens when this is still 
+    running, a message isn't grouped, another message is sent in response and 
+    doesn't have this grouped message in the context.
     */
 
-    // Use recentMessagesJson in the AI context
-    // const completion = await openai.chat.completions.create({
-    //   messages: [
-    //     {
-    //       role: "system",
-    //       content: `You are a categorization bot. You will receive a group of messages
-    //     in JSON format followed by a singular message in json format. each message
-    //     in the group will have a userId, message, and conversationId. Your task is
-    //     to categorize the singular message into the correct conversationId based on
-    //     the content within the group of messages. If the singular message does not fit
-    //     into the context of any conversations in the group you need to specify that a
-    //     new conversation should be created. If the singular message fits into the
-    //     context of a conversation you should specify ONLY the conversationId the
-    //     message belongs to.
+    /* 
+    Pass x recent messages and new message into AI
+    Determine what conversation it should go into 
+    */
+    console.log("RecentMessagesJson: ", recentMessagesJson);
+    console.log("SingularMessageJson: ", singularMessageJson);
 
-    //     If the message seems like it can fit in multiple conversations you should choose
-    //     the conversation that the message fits into the best.
+    /* Talk to Ben about how we should handle these OpenAI clients being created */
 
-    //     Group of messages: ${recentMessagesJson}
+    const completion = await openAI.chat.completions.create({
+      messages: [
+        {
+          role: "system",
+          content: `You are a categorization bot. You will receive a group of messages
+        in JSON format followed by a singular message in json format. each message
+        in the group will have a userId, message, and conversationId. Your task is
+        to categorize the singular message into the correct conversationId based on
+        the content within the group of messages. If the singular message does not fit
+        into the context of any conversations in the group you need to specify that a
+        new conversation should be created. If the singular message fits into the
+        context of a conversation you should specify ONLY the conversationId the
+        message belongs to.
 
-    //     Singular message: ${singularMessageJson}`,
-    //     },
-    //   ],
-    //   model: "gpt-3.5",
-    // });
+        If the message seems like it can fit in multiple conversations you should choose
+        the conversation that the message fits into the best.
 
-    // console.log("RECENTS: ", recentMessages[0]);
-    // console.log(recentMessages.length);
+        Group of messages: ${recentMessagesJson}
+
+        Singular message: ${singularMessageJson}`,
+        },
+      ],
+      model: "gpt-3.5",
+    });
+
+    console.log("Completion: ", completion);
 
     return recentMessages;
   } catch (error) {
