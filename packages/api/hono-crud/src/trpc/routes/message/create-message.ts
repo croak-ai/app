@@ -14,7 +14,6 @@ import { TRPCError } from "@trpc/server";
 import { getWorkspacePermission } from "../../functions/workspace";
 import { userHasRole } from "../../../functions/clerk";
 import openai from "../../../ai/client";
-import { z } from "zod";
 
 export const zCreateMessage = z.object({
   channelId: z.string().min(1).max(256),
@@ -119,7 +118,7 @@ async function groupMessage(db: DBClientType, newMessage: DBMessage) {
         conversationId: conversationMessage.conversationId,
       })
       .from(message)
-      .where(eq(message.channelId, tempChannelId))
+      .where(eq(message.channelId, newMessage.channelId))
       .innerJoin(
         conversationMessage,
         eq(message.id, conversationMessage.messageId),
@@ -128,14 +127,14 @@ async function groupMessage(db: DBClientType, newMessage: DBMessage) {
       .limit(100);
 
     if (recentMessages.length === 0) {
-      await createConversation(db, parseInt(messageId), tempChannelId);
+      await createConversation(db, newMessage);
       return;
     }
     // Convert recentMessages to JSON
     const recentMessagesJson = JSON.stringify(recentMessages);
     const singularMessageJson = JSON.stringify({
-      userId: messageAuthor,
-      message: messageContent,
+      userId: newMessage.userId,
+      message: newMessage.message,
       conversationId: null,
     });
 
@@ -187,39 +186,30 @@ async function groupMessage(db: DBClientType, newMessage: DBMessage) {
 }
 
 /* Creates a new conversation and new conversationMessage */
-async function createConversation(
-  db: DBClientType,
-  messageId: number,
-  channelId: number,
-) {
+async function createConversation(db: DBClientType, newMessage: DBMessage) {
   const currentTime = Date.now();
-  const conversationResult = await db
+  const [conversationResult] = await db
     .insert(conversation)
-    .values({ channelId, createdAt: currentTime, updatedAt: currentTime });
+    .values({
+      channelId: newMessage.channelId,
+      createdAt: currentTime,
+      updatedAt: currentTime,
+    })
+    .returning();
 
-  if (
-    conversationResult.rowsAffected !== 1 ||
-    !conversationResult.rows ||
-    !conversationResult.rows[0] ||
-    !conversationResult.lastInsertRowid
-  ) {
+  if (!conversationResult) {
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
       message: "Failed to create new conversation",
     });
   }
 
-  const conversationId = Number(conversationResult.lastInsertRowid);
-
-  const conversationMessageResult = await db
+  const [conversationMessageResult] = await db
     .insert(conversationMessage)
-    .values({ messageId, conversationId });
+    .values({ messageId: newMessage.id, conversationId: conversationResult.id })
+    .returning();
 
-  if (
-    conversationMessageResult.rowsAffected !== 1 ||
-    !conversationMessageResult.rows ||
-    !conversationMessageResult.rows[0]
-  ) {
+  if (!conversationMessageResult) {
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
       message: "Failed to link message to conversation",
