@@ -1,19 +1,18 @@
 import {
-  channel,
   conversation,
   conversationMessage,
   message,
 } from "@acme/db/schema/tenant";
+import { DBClientType } from "packages/db";
+import { eq, desc } from "drizzle-orm";
 import { protectedProcedureWithOrgDB, router } from "../../config/trpc";
 import { z } from "zod";
-import { eq, sql, desc } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
-import { DBClientType } from "packages/db";
 
 import { TRPCError } from "@trpc/server";
 import { getWorkspacePermission } from "../../functions/workspace";
 import { userHasRole } from "../../../functions/clerk";
-import openai from "../../../ai/client";
+// import openai from "../../../ai/client";
 
 export const zCreateMessage = z.object({
   channelId: z.string().min(1).max(256),
@@ -91,13 +90,13 @@ export const createMessage = router({
         });
       }
       /* Group message into conversation */
-      const grouping = await groupMessage(ctx.db, newMessage);
+      await groupMessage(ctx.db, newMessage);
 
       return newMessage;
     }),
 });
 
-// Function to trigger the conversation grouping process
+/* Triggers the conversation grouping process */
 async function groupMessage(db: DBClientType, newMessage: DBMessage) {
   try {
     /* !! We need to change some DB types from ints to 
@@ -151,33 +150,33 @@ async function groupMessage(db: DBClientType, newMessage: DBMessage) {
     */
 
     // Use recentMessagesJson in the AI context
-    const completion = await openai.chat.completions.create({
-      messages: [
-        {
-          role: "system",
-          content: `You are a categorization bot. You will receive a group of messages
-        in JSON format followed by a singular message in json format. each message
-        in the group will have a userId, message, and conversationId. Your task is
-        to categorize the singular message into the correct conversationId based on
-        the content within the group of messages. If the singular message does not fit 
-        into the context of any conversations in the group you need to specify that a
-        new conversation should be created. If the singular message fits into the
-        context of a conversation you should specify ONLY the conversationId the
-        message belongs to.
-        
-        If the message seems like it can fit in multiple conversations you should choose
-        the conversation that the message fits into the best.
-        
-        Group of messages: ${recentMessagesJson}
-        
-        Singular message: ${singularMessageJson}`,
-        },
-      ],
-      model: "gpt-3.5",
-    });
+    // const completion = await openai.chat.completions.create({
+    //   messages: [
+    //     {
+    //       role: "system",
+    //       content: `You are a categorization bot. You will receive a group of messages
+    //     in JSON format followed by a singular message in json format. each message
+    //     in the group will have a userId, message, and conversationId. Your task is
+    //     to categorize the singular message into the correct conversationId based on
+    //     the content within the group of messages. If the singular message does not fit
+    //     into the context of any conversations in the group you need to specify that a
+    //     new conversation should be created. If the singular message fits into the
+    //     context of a conversation you should specify ONLY the conversationId the
+    //     message belongs to.
 
-    console.log("RECENTS: ", recentMessages[0]);
-    console.log(recentMessages.length);
+    //     If the message seems like it can fit in multiple conversations you should choose
+    //     the conversation that the message fits into the best.
+
+    //     Group of messages: ${recentMessagesJson}
+
+    //     Singular message: ${singularMessageJson}`,
+    //     },
+    //   ],
+    //   model: "gpt-3.5",
+    // });
+
+    // console.log("RECENTS: ", recentMessages[0]);
+    // console.log(recentMessages.length);
 
     return recentMessages;
   } catch (error) {
@@ -187,13 +186,13 @@ async function groupMessage(db: DBClientType, newMessage: DBMessage) {
 
 /* Creates a new conversation and new conversationMessage */
 async function createConversation(db: DBClientType, newMessage: DBMessage) {
-  const currentTime = Date.now();
   const [conversationResult] = await db
     .insert(conversation)
     .values({
+      id: createId(),
       channelId: newMessage.channelId,
-      createdAt: currentTime,
-      updatedAt: currentTime,
+      createdAt: newMessage.createdAt,
+      updatedAt: newMessage.updatedAt,
     })
     .returning();
 
@@ -206,7 +205,11 @@ async function createConversation(db: DBClientType, newMessage: DBMessage) {
 
   const [conversationMessageResult] = await db
     .insert(conversationMessage)
-    .values({ messageId: newMessage.id, conversationId: conversationResult.id })
+    .values({
+      id: createId(),
+      messageId: newMessage.id,
+      conversationId: conversationResult.id,
+    })
     .returning();
 
   if (!conversationMessageResult) {
