@@ -147,6 +147,18 @@ async function groupMessage(
       conversationId: null,
     });
 
+    /* Create process to retry openAI query 3 times
+    
+    Rearrange DB maybe add switch to messages to show which ones havent been grouped.
+    Then we have a process that runs once per day to scan for these messages and if they are ungrouped we should
+    
+    1. Pull last 100 messages from channelId of ungrouped message by date
+    2. Run them through AI and insert into conversationMessages as if nothing happened
+
+    Race condition problem. What happens when this is stil running. Message isnt grouped. Other message is sent in
+    in response and doesnt have this grouped message in the context.
+    */
+
     // Use recentMessagesJson in the AI context
     const completion = await openai.chat.completions.create({
       messages: [
