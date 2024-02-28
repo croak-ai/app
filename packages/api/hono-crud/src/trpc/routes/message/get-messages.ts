@@ -38,16 +38,11 @@ export const getMessages = router({
         queryBuilder = queryBuilder
           .where(
             and(
-              eq(message.channelId, parseInt(channelId, 10)),
+              eq(message.channelId, channelId),
               or(
                 lt(message.createdAt, createdAt),
-                and(
-                  lte(message.createdAt, createdAt),
-                  lt(message.id, parseInt(id, 10)),
-                ),
-                includeCursorInResult
-                  ? eq(message.id, parseInt(id, 10))
-                  : undefined,
+                and(lte(message.createdAt, createdAt), lt(message.id, id)),
+                includeCursorInResult ? eq(message.id, id) : undefined,
               ),
             ),
           )
@@ -58,16 +53,11 @@ export const getMessages = router({
         queryBuilder = queryBuilder
           .where(
             and(
-              eq(message.channelId, parseInt(channelId, 10)),
+              eq(message.channelId, channelId),
               or(
                 gt(message.createdAt, createdAt),
-                and(
-                  gte(message.createdAt, createdAt),
-                  gt(message.id, parseInt(id, 10)),
-                ),
-                includeCursorInResult
-                  ? eq(message.id, parseInt(id, 10))
-                  : undefined,
+                and(gte(message.createdAt, createdAt), gt(message.id, id)),
+                includeCursorInResult ? eq(message.id, id) : undefined,
               ),
             ),
           )
@@ -79,9 +69,12 @@ export const getMessages = router({
       if (cursor.direction === "newer") {
         messagesQuery.sort((a, b) => {
           if (a.message.createdAt === b.message.createdAt) {
-            return b.message.id - a.message.id;
+            return b.message.id.localeCompare(a.message.id);
           }
-          return b.message.createdAt - a.message.createdAt;
+          return (
+            new Date(b.message.createdAt).getTime() -
+            new Date(a.message.createdAt).getTime()
+          );
         });
       }
 

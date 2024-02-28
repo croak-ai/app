@@ -1,8 +1,4 @@
-import {
-  dekEncryptionKey,
-  workspace,
-  workspaceMember,
-} from "@acme/db/schema/tenant";
+import { workspace, workspaceMember } from "@acme/db/schema/tenant";
 import { protectedProcedureWithOrgDB, router } from "../../config/trpc";
 import { z } from "zod";
 

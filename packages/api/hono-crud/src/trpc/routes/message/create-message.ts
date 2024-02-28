@@ -2,6 +2,7 @@ import { channel, message } from "@acme/db/schema/tenant";
 import { protectedProcedureWithOrgDB, router } from "../../config/trpc";
 import { z } from "zod";
 import { eq, and, sql } from "drizzle-orm";
+import { createId } from "@paralleldrive/cuid2";
 
 import { TRPCError } from "@trpc/server";
 import { getWorkspacePermission } from "../../functions/workspace";
@@ -54,8 +55,9 @@ export const createMessage = router({
       const currentTime = Date.now();
 
       const messageStatement = sql`
-      INSERT INTO message (userId, message, channelId, createdAt, updatedAt)
+      INSERT INTO message (id, userId, message, channelId, createdAt, updatedAt)
       VALUES (
+          ${createId()},
           ${ctx.auth.userId},
           ${input.messageContent},
           ${input.channelId},
@@ -79,8 +81,9 @@ export const createMessage = router({
       }
 
       const nonGroupedMessagestatement = sql`
-      INSERT INTO nonGroupedMessage (userId, message, channelId, createdAt, updatedAt)
+      INSERT INTO nonGroupedMessage (id, userId, message, channelId, createdAt, updatedAt)
       VALUES (
+          ${createId()},
           ${ctx.auth.userId},
           ${input.messageContent},
           ${input.channelId},

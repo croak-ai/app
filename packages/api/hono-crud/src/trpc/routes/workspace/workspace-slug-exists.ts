@@ -1,9 +1,6 @@
-import { dekEncryptionKey, workspace } from "@acme/db/schema/tenant";
+import { workspace } from "@acme/db/schema/tenant";
 import { protectedProcedureWithOrgDB, router } from "../../config/trpc";
 import { z } from "zod";
-type newWorkspaceType = typeof workspace.$inferInsert;
-type newDEKEncryptionKeyType = typeof dekEncryptionKey.$inferInsert;
-import crypto from "crypto";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 
