@@ -12,7 +12,7 @@ import { Plus } from "lucide-react";
 
 import { Button } from "@acme/ui/components/ui/button";
 
-export const CreateNewMeetingSheet = () => {
+export const CreateNewMeetingSheetButton = () => {
   return (
     <Sheet>
       <SheetTrigger>
@@ -25,4 +25,4 @@ export const CreateNewMeetingSheet = () => {
   );
 };
 
-export default CreateNewMeetingSheet;
+export default CreateNewMeetingSheetButton;

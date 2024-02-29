@@ -4,7 +4,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@acme/ui/components/ui/resizable";
-import CreateNewMeetingSheet from "./-components/create-new-meeting-sheet";
+import CreateNewMeetingSheetButton from "./-components/create-new-meeting-sheet";
 
 export const Route = createLazyFileRoute("/_with-auth/_with-org/meetings")({
   component: MeetingsLayout,
@@ -35,7 +35,7 @@ function MeetingsLayout() {
           minSize={15}
         >
           <div className="flex w-full flex-col items-end p-2">
-            <CreateNewMeetingSheet />
+            <CreateNewMeetingSheetButton />
           </div>
           <div className="flex h-full w-full flex-col ">Channels...</div>
         </ResizablePanel>
