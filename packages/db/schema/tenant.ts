@@ -78,12 +78,7 @@ export const message = sqliteTable("message", {
 
 export const unSummarizedMessage = sqliteTable("unSummarizedMessage", {
   id: text("id").$defaultFn(createId).primaryKey(),
-  channelId: text("channelId").notNull(),
-  userId: text("userId").notNull(),
-  message: text("message", { length: 60000 }).notNull(),
-  createdAt: integer("createdAt").notNull(),
-  updatedAt: integer("updatedAt").notNull(),
-  deletedAt: integer("deletedAt"),
+  messageId: text("messageId").notNull(),
 });
 
 export const conversation = sqliteTable("conversation", {

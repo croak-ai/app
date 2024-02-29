@@ -1,4 +1,4 @@
-import { message } from "@acme/db/schema/tenant";
+import { message, unSummarizedMessage } from "@acme/db/schema/tenant";
 import { protectedProcedureWithOrgDB, router } from "../../config/trpc";
 import { z } from "zod";
 
@@ -63,7 +63,7 @@ export const createMessage = router({
 
       const currentTime = Date.now();
 
-      const [newMessage] = await ctx.db
+      const [newMessageResult] = await ctx.db
         .insert(message)
         .values({
           userId: ctx.auth.userId,
@@ -74,7 +74,14 @@ export const createMessage = router({
         })
         .returning();
 
-      if (!newMessage) {
+      const [unSummarizedMessageResult] = await ctx.db
+        .insert(unSummarizedMessage)
+        .values({
+          messageId: newMessageResult.id,
+        })
+        .returning();
+
+      if (!newMessageResult) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to create new message",
@@ -90,7 +97,7 @@ export const createMessage = router({
       */
 
       /* Group message into conversation */
-      await groupMessage(ctx.db, openAI, newMessage);
+      await groupMessage(ctx.db, openAI, newMessageResult);
 
       /* 
         Summarize messages function here. Pull last x UNSUMMARIZED 
@@ -101,6 +108,6 @@ export const createMessage = router({
         messages.
       */
 
-      return newMessage;
+      return newMessageResult;
     }),
 });
