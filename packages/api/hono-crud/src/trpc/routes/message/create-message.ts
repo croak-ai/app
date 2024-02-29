@@ -1,10 +1,4 @@
-import {
-  conversation,
-  conversationMessage,
-  message,
-} from "@acme/db/schema/tenant";
-import { DBClientType } from "packages/db";
-import { eq, desc } from "drizzle-orm";
+import { message } from "@acme/db/schema/tenant";
 import { protectedProcedureWithOrgDB, router } from "../../config/trpc";
 import { z } from "zod";
 
