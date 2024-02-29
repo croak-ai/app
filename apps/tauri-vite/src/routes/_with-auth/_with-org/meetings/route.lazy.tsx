@@ -34,8 +34,8 @@ function MeetingsLayout() {
           maxSize={25}
           minSize={15}
         >
-          <CreateNewMeetingSheet />
-          <div className="flex h-full w-full flex-col ">Channels...</div>
+          {/* <CreateNewMeetingSheet />
+          <div className="flex h-full w-full flex-col ">Channels...</div> */}
         </ResizablePanel>
         <ResizableHandle />
         <ResizablePanel defaultSize={defaultMeetingsLayoutValues[1]}>
