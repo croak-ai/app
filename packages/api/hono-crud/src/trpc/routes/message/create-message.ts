@@ -1,18 +1,33 @@
-import { channel, message } from "@acme/db/schema/tenant";
+import {
+  conversation,
+  conversationMessage,
+  message,
+} from "@acme/db/schema/tenant";
+import { DBClientType } from "packages/db";
+import { eq, desc } from "drizzle-orm";
 import { protectedProcedureWithOrgDB, router } from "../../config/trpc";
 import { z } from "zod";
-import { eq, and, sql } from "drizzle-orm";
-import { createId } from "@paralleldrive/cuid2";
 
 import { TRPCError } from "@trpc/server";
 import { getWorkspacePermission } from "../../functions/workspace";
 import { userHasRole } from "../../../functions/clerk";
+import OpenAI from "openai";
+import { groupMessage } from "../../functions/groupMessage";
 
 export const zCreateMessage = z.object({
   channelId: z.string().min(1).max(256),
   workspaceSlug: z.string().min(2).max(256),
   messageContent: z.string().min(2).max(60000),
 });
+
+export type DBMessage = {
+  id: string;
+  userId: string;
+  message: string;
+  channelId: string;
+  createdAt: number;
+  updatedAt: number;
+};
 
 export const createMessage = router({
   createMessage: protectedProcedureWithOrgDB
@@ -54,60 +69,37 @@ export const createMessage = router({
 
       const currentTime = Date.now();
 
-      const messageStatement = sql`
-      INSERT INTO message (id, userId, message, channelId, createdAt, updatedAt)
-      VALUES (
-          ${createId()},
-          ${ctx.auth.userId},
-          ${input.messageContent},
-          ${input.channelId},
-          ${currentTime},
-          ${currentTime}
-      )
-      RETURNING id, message, channelId;
-    `;
+      const [newMessage] = await ctx.db
+        .insert(message)
+        .values({
+          userId: ctx.auth.userId,
+          message: input.messageContent,
+          channelId: input.channelId,
+          createdAt: currentTime,
+          updatedAt: currentTime,
+        })
+        .returning();
 
-      const messageResult = await ctx.db.run(messageStatement);
-
-      if (
-        messageResult.rowsAffected !== 1 ||
-        !messageResult.rows ||
-        !messageResult.rows[0]
-      ) {
+      if (!newMessage) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to create new message",
         });
       }
 
-      const nonGroupedMessagestatement = sql`
-      INSERT INTO nonGroupedMessage (id, userId, message, channelId, createdAt, updatedAt)
-      VALUES (
-          ${createId()},
-          ${ctx.auth.userId},
-          ${input.messageContent},
-          ${input.channelId},
-          ${currentTime},
-          ${currentTime}
-      )
-      RETURNING id, message, channelId;
-    `;
+      const openAI = new OpenAI({ apiKey: ctx.env.OPENAI_API_KEY });
+      /* Group message into conversation */
+      await groupMessage(ctx.db, openAI, newMessage);
 
-      const nonGroupedMessageresult = await ctx.db.run(
-        nonGroupedMessagestatement,
-      );
+      /* 
+        Summarize messages function here. Pull last x UNSUMMARIZED 
+        conversations from channel and their messages AND unsummarized 
+        messages. We don't want to pull a convo if they don't have a 
+        message in the unsummarized messages table. Then we want to 
+        loop through each conversation and summarize ALL conversation 
+        messages.
+      */
 
-      if (
-        nonGroupedMessageresult.rowsAffected !== 1 ||
-        !nonGroupedMessageresult.rows ||
-        !nonGroupedMessageresult.rows[0]
-      ) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to create new nonGroupedMessage",
-        });
-      }
-
-      return messageResult.rows[0];
+      return newMessage;
     }),
 });
