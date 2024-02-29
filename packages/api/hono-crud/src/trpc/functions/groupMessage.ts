@@ -7,10 +7,18 @@ import {
   conversationMessage,
   message,
 } from "packages/db/schema/tenant";
+import { z } from "zod";
 
 const zAIGroupingResponse = z.object({
   conversationId: z.string(),
 });
+
+/* 
+We need to pull last 100 messages from this channel 
+Use some SQL query to map messages with their conversations
+Then feed this mapped data into AI context and ask it to group
+the message
+*/
 
 /* Triggers the conversation grouping process */
 export async function groupMessage(
@@ -19,16 +27,6 @@ export async function groupMessage(
   newMessage: DBMessage,
 ) {
   try {
-    /* !! We need to change some DB types from ints to 
-      strings if we are eventually going to use UUIDs !! 
-      */
-    /* 
-      We need to pull last 100 messages from this channel 
-      Use some SQL query to map messages with their conversations
-      Then feed this mapped data into AI context and ask it to group
-      the message
-      */
-
     /* Pulls 100 most recent conversation linked messages in channel */
     const recentMessages = await db
       .select({
@@ -58,27 +56,23 @@ export async function groupMessage(
     });
 
     /* 
-      Create process to retry openAI query 3 times. Rearrange DB maybe add switch 
-      to messages to show which ones haven't been grouped. Then we have a process 
-      that runs once per day to scan for these messages and if they are ungrouped 
-      we should do the following:
-  
-      1. Pull last 100 messages from channelId of ungrouped message by date.
-      2. Run them through AI and insert into conversationMessages as if nothing happened.
-  
-      Note: There's a potential race condition. What happens when this is still 
-      running, a message isn't grouped, another message is sent in response and 
-      doesn't have this grouped message in the context.
-      */
+    Create process to retry openAI query 3 times. Rearrange DB maybe add switch 
+    to messages to show which ones haven't been grouped. Then we have a process 
+    that runs once per day to scan for these messages and if they are ungrouped 
+    we should do the following:
 
-    /* 
-      Pass x recent messages and new message into AI
-      Determine what conversation it should go into 
-      */
+    1. Pull last 100 messages from channelId of ungrouped message by date.
+    2. Run them through AI and insert into conversationMessages as if nothing happened.
+
+    Note: There's a potential race condition. What happens when this is still 
+    running, a message isn't grouped, another message is sent in response and 
+    doesn't have this grouped message in the context.
+    */
+
     console.log("RecentMessagesJson: ", recentMessagesJson);
     console.log("SingularMessageJson: ", singularMessageJson);
 
-    /* Talk to Ben about how we should handle these OpenAI clients being created */
+    /* !!!Talk to Ben about how we should handle these OpenAI clients being created!!! */
 
     const completion = await openAI.chat.completions.create({
       messages: [
@@ -130,34 +124,15 @@ export async function groupMessage(
     }
 
     const AIResponseObject = validatedResponse.data;
+    console.log("AIResponseObject: ", AIResponseObject);
 
     /* Check if we should make a new conversation or add to an existing one */
     if (AIResponseObject.conversationId === "new") {
-      const conversationResult = await db
-        .insert(conversation)
-        .values({
-          channelId: newMessage.channelId,
-          createdAt: newMessage.createdAt,
-          updatedAt: newMessage.updatedAt,
-        })
-        .returning();
-
-      if (!conversationResult) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to create new conversation from AI response",
-        });
-      }
-
-      // Create a new conversationMessage linked to the new conversation
-      await db.table("conversationMessages").insert({
-        conversationId: newConversation.id,
-        messageId: newMessage.id,
-      });
+      /* If new conversation is added create it and add new message */
+      await createConversation(db, newMessage);
     } else {
-      // If the conversationId is not "new", it means the message belongs to an existing conversation
-      // So, we just create a new conversationMessage linked to the existing conversation
-      await db.table("conversationMessages").insert({
+      /* If existing conversation is found add new message */
+      await db.insert(conversationMessage).values({
         conversationId: AIResponseObject.conversationId,
         messageId: newMessage.id,
       });
@@ -165,7 +140,10 @@ export async function groupMessage(
 
     return recentMessages;
   } catch (error) {
-    // Handle errors
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Something went wrong while grouping message",
+    });
   }
 }
 
