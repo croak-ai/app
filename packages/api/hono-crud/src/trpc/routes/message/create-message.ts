@@ -74,6 +74,13 @@ export const createMessage = router({
         })
         .returning();
 
+      if (!newMessageResult) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create new message",
+        });
+      }
+
       const [unSummarizedMessageResult] = await ctx.db
         .insert(unSummarizedMessage)
         .values({
@@ -81,10 +88,10 @@ export const createMessage = router({
         })
         .returning();
 
-      if (!newMessageResult) {
+      if (!unSummarizedMessageResult) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to create new message",
+          message: "Failed to add new message to unSummarizedMessage table",
         });
       }
 
