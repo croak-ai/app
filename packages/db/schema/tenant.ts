@@ -76,7 +76,7 @@ export const message = sqliteTable("message", {
   deletedAt: integer("deletedAt"),
 });
 
-export const nonGroupedMessage = sqliteTable("nonGroupedMessage", {
+export const unSummarizedMessage = sqliteTable("unSummarizedMessage", {
   id: text("id").$defaultFn(createId).primaryKey(),
   channelId: text("channelId").notNull(),
   userId: text("userId").notNull(),

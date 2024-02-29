@@ -82,6 +82,13 @@ export const createMessage = router({
       }
 
       const openAI = new OpenAI({ apiKey: ctx.env.OPENAI_API_KEY });
+      /* 
+      In both of these functions the token count of the messages
+      we are throwing into the AI matter.
+      In the future we will need to find some way to make sure the
+      content of the messages we are pulling does not exceed the count
+      */
+
       /* Group message into conversation */
       await groupMessage(ctx.db, openAI, newMessage);
 

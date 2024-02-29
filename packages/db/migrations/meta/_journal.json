@@ -8,6 +8,20 @@
       "when": 1709091961554,
       "tag": "0000_complete_skaar",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1709229664091,
+      "tag": "0002_nifty_nebula",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1709229782821,
+      "tag": "0003_cynical_proteus",
+      "breakpoints": true
     }
   ]
 }
