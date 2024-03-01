@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "13a1e1bd-dc34-4660-8e0e-5423ed7f1353",
+  "id": "b3cd5347-1034-408c-a53d-4e3144c193d8",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "channel": {
@@ -30,7 +30,7 @@
         },
         "workspaceId": {
           "name": "workspaceId",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -90,7 +90,7 @@
         },
         "channelId": {
           "name": "channelId",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -127,14 +127,14 @@
         },
         "messageId": {
           "name": "messageId",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
         "conversationId": {
           "name": "conversationId",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -155,15 +155,36 @@
           "notNull": true,
           "autoincrement": false
         },
+        "name": {
+          "name": "name",
+          "type": "text(256)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text(512)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
         "recurringMeetingId": {
           "name": "recurringMeetingId",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "scheduledAt": {
-          "name": "scheduledAt",
+        "scheduledStartAt": {
+          "name": "scheduledStartAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "scheduledEndAt": {
+          "name": "scheduledEndAt",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
@@ -205,13 +226,79 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "meeting_name_unique": {
+          "name": "meeting_name_unique",
+          "columns": [
+            "name"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
     "meetingMessage": {
       "name": "meetingMessage",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "meetingId": {
+          "name": "meetingId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "userId": {
+          "name": "userId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "message": {
+          "name": "message",
+          "type": "text(60000)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "deletedAt": {
+          "name": "deletedAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "meetingTranscriptedMessage": {
+      "name": "meetingTranscriptedMessage",
       "columns": {
         "id": {
           "name": "id",
@@ -319,64 +406,6 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "meetingTranscriptedMessage": {
-      "name": "meetingTranscriptedMessage",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "meetingId": {
-          "name": "meetingId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "userId": {
-          "name": "userId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "message": {
-          "name": "message",
-          "type": "text(60000)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "deletedAt": {
-          "name": "deletedAt",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
     "message": {
       "name": "message",
       "columns": {
@@ -389,7 +418,7 @@
         },
         "channelId": {
           "name": "channelId",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -447,7 +476,7 @@
         },
         "channelId": {
           "name": "channelId",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -503,25 +532,32 @@
           "notNull": true,
           "autoincrement": false
         },
-        "frequency": {
-          "name": "frequency",
+        "name": {
+          "name": "name",
           "type": "text(256)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "interval": {
-          "name": "interval",
-          "type": "integer",
+        "daysOfWeek": {
+          "name": "daysOfWeek",
+          "type": "text",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false
         },
-        "count": {
-          "name": "count",
+        "timeOfDay": {
+          "name": "timeOfDay",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
+          "autoincrement": false
+        },
+        "durationInMinutes": {
+          "name": "durationInMinutes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
           "autoincrement": false
         },
         "until": {
@@ -553,7 +589,15 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "recurringMeeting_name_unique": {
+          "name": "recurringMeeting_name_unique",
+          "columns": [
+            "name"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
@@ -716,7 +760,7 @@
         },
         "workspaceId": {
           "name": "workspaceId",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false

@@ -6,6 +6,7 @@ import {
   unique,
 } from "drizzle-orm/sqlite-core";
 import { createId } from "@paralleldrive/cuid2";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 export const user = sqliteTable("user", {
   userId: text("userId", { length: 256 }).primaryKey(),
@@ -101,8 +102,11 @@ export const conversationMessage = sqliteTable("conversationMessage", {
 
 export const meeting = sqliteTable("meeting", {
   id: text("id").$defaultFn(createId).primaryKey(),
+  name: text("name", { length: 256 }).notNull().unique(),
+  description: text("description", { length: 512 }).notNull(),
   recurringMeetingId: text("recurringMeetingId"),
-  scheduledAt: integer("scheduledAt").notNull(),
+  scheduledStart: integer("scheduledStartAt").notNull(),
+  scheduledEnd: integer("scheduledEndAt").notNull(),
   startedAt: integer("startedAt"),
   endedAt: integer("endedAt"),
   createdAt: integer("createdAt").notNull(),
@@ -112,16 +116,17 @@ export const meeting = sqliteTable("meeting", {
 
 export const recurringMeeting = sqliteTable("recurringMeeting", {
   id: text("id").$defaultFn(createId).primaryKey(),
-  frequency: text("frequency", { length: 256 }).notNull(),
-  interval: integer("interval").notNull(),
-  count: integer("count"),
-  until: integer("until"),
+  name: text("name", { length: 256 }).notNull().unique(),
+  daysOfWeek: text("daysOfWeek"), // "MONDAY", "TUESDAY", "WEDNESDAY", etc., applicable if weekly. Comma-separated for multiple days.
+  scheduledStart: integer("timeOfDay"), // integer from 0 to 2359, applicable if daily
+  scheduledDurationInMinutes: integer("durationInMinutes").notNull(),
+  until: integer("until"), // Unix timestamp indicating when the recurrence should end
   createdAt: integer("createdAt").notNull(),
   updatedAt: integer("updatedAt").notNull(),
   deletedAt: integer("deletedAt"),
 });
 
-export const meetingParticipant = sqliteTable("meetingParticipant", {
+export const meetingUserParticipant = sqliteTable("meetingParticipant", {
   id: text("id").$defaultFn(createId).primaryKey(),
   meetingId: text("meetingId").notNull(),
   userId: text("userId").notNull(),
@@ -151,4 +156,9 @@ export const meetingTranscriptedMessage = sqliteTable(
     updatedAt: integer("updatedAt").notNull(),
     deletedAt: integer("deletedAt"),
   },
+);
+
+export const insertRecurringMeetingSchema = createInsertSchema(
+  recurringMeeting,
+  {},
 );

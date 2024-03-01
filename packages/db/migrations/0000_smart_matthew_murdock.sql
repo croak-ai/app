@@ -2,7 +2,7 @@ CREATE TABLE `channel` (
 	`id` text PRIMARY KEY NOT NULL,
 	`slug` text(256) NOT NULL,
 	`description` text(512) NOT NULL,
-	`workspaceId` integer NOT NULL,
+	`workspaceId` text NOT NULL,
 	`channelType` text(256) NOT NULL,
 	`createdAt` integer NOT NULL,
 	`updatedAt` integer NOT NULL,
@@ -11,21 +11,24 @@ CREATE TABLE `channel` (
 --> statement-breakpoint
 CREATE TABLE `conversation` (
 	`id` text PRIMARY KEY NOT NULL,
-	`channelId` integer NOT NULL,
+	`channelId` text NOT NULL,
 	`createdAt` integer NOT NULL,
 	`updatedAt` integer NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE `conversationMessage` (
 	`id` text PRIMARY KEY NOT NULL,
-	`messageId` integer NOT NULL,
-	`conversationId` integer NOT NULL
+	`messageId` text NOT NULL,
+	`conversationId` text NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE `meeting` (
 	`id` text PRIMARY KEY NOT NULL,
-	`recurringMeetingId` integer,
-	`scheduledAt` integer NOT NULL,
+	`name` text(256) NOT NULL,
+	`description` text(512) NOT NULL,
+	`recurringMeetingId` text,
+	`scheduledStartAt` integer NOT NULL,
+	`scheduledEndAt` integer NOT NULL,
 	`startedAt` integer,
 	`endedAt` integer,
 	`createdAt` integer NOT NULL,
@@ -34,6 +37,16 @@ CREATE TABLE `meeting` (
 );
 --> statement-breakpoint
 CREATE TABLE `meetingMessage` (
+	`id` text PRIMARY KEY NOT NULL,
+	`meetingId` text NOT NULL,
+	`userId` text NOT NULL,
+	`message` text(60000) NOT NULL,
+	`createdAt` integer NOT NULL,
+	`updatedAt` integer NOT NULL,
+	`deletedAt` integer
+);
+--> statement-breakpoint
+CREATE TABLE `meetingTranscriptedMessage` (
 	`id` text PRIMARY KEY NOT NULL,
 	`meetingId` text NOT NULL,
 	`userId` text NOT NULL,
@@ -52,19 +65,9 @@ CREATE TABLE `meetingParticipant` (
 	`deletedAt` integer
 );
 --> statement-breakpoint
-CREATE TABLE `meetingTranscriptedMessage` (
-	`id` text PRIMARY KEY NOT NULL,
-	`meetingId` text NOT NULL,
-	`userId` text NOT NULL,
-	`message` text(60000) NOT NULL,
-	`createdAt` integer NOT NULL,
-	`updatedAt` integer NOT NULL,
-	`deletedAt` integer
-);
---> statement-breakpoint
 CREATE TABLE `message` (
 	`id` text PRIMARY KEY NOT NULL,
-	`channelId` integer NOT NULL,
+	`channelId` text NOT NULL,
 	`userId` text NOT NULL,
 	`message` text(60000) NOT NULL,
 	`createdAt` integer NOT NULL,
@@ -74,7 +77,7 @@ CREATE TABLE `message` (
 --> statement-breakpoint
 CREATE TABLE `nonGroupedMessage` (
 	`id` text PRIMARY KEY NOT NULL,
-	`channelId` integer NOT NULL,
+	`channelId` text NOT NULL,
 	`userId` text NOT NULL,
 	`message` text(60000) NOT NULL,
 	`createdAt` integer NOT NULL,
@@ -84,9 +87,10 @@ CREATE TABLE `nonGroupedMessage` (
 --> statement-breakpoint
 CREATE TABLE `recurringMeeting` (
 	`id` text PRIMARY KEY NOT NULL,
-	`frequency` text(256) NOT NULL,
-	`interval` integer NOT NULL,
-	`count` integer,
+	`name` text(256) NOT NULL,
+	`daysOfWeek` text,
+	`timeOfDay` integer,
+	`durationInMinutes` integer NOT NULL,
 	`until` integer,
 	`createdAt` integer NOT NULL,
 	`updatedAt` integer NOT NULL,
@@ -116,7 +120,7 @@ CREATE TABLE `workspace` (
 --> statement-breakpoint
 CREATE TABLE `workspaceMember` (
 	`id` text PRIMARY KEY NOT NULL,
-	`workspaceId` integer NOT NULL,
+	`workspaceId` text NOT NULL,
 	`userId` text NOT NULL,
 	`bCanManageChannels` integer DEFAULT 0,
 	`bCanManageWorkspaceMembers` integer DEFAULT 0,
@@ -127,6 +131,8 @@ CREATE TABLE `workspaceMember` (
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `channel_workspaceId_slug_unique` ON `channel` (`workspaceId`,`slug`);--> statement-breakpoint
+CREATE UNIQUE INDEX `meeting_name_unique` ON `meeting` (`name`);--> statement-breakpoint
+CREATE UNIQUE INDEX `recurringMeeting_name_unique` ON `recurringMeeting` (`name`);--> statement-breakpoint
 CREATE UNIQUE INDEX `user_email_unique` ON `user` (`email`);--> statement-breakpoint
 CREATE UNIQUE INDEX `workspace_slug_unique` ON `workspace` (`slug`);--> statement-breakpoint
 CREATE INDEX `slug_idx` ON `workspace` (`slug`);

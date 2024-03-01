@@ -11,6 +11,7 @@ import {
 import { Plus } from "lucide-react";
 
 import { Button } from "@acme/ui/components/ui/button";
+import CreateMeetingForm from "./create-new-meeting-form";
 
 export const CreateNewMeetingSheetButton = () => {
   return (
@@ -20,7 +21,9 @@ export const CreateNewMeetingSheetButton = () => {
           <Plus className="mr-2 h-4 w-4" /> Create New Meeting
         </Button>
       </SheetTrigger>
-      <SheetContent side={"left"}>sadf</SheetContent>
+      <SheetContent side={"left"}>
+        <CreateMeetingForm />
+      </SheetContent>
     </Sheet>
   );
 };
