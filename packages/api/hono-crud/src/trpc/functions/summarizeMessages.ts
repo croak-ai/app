@@ -1,4 +1,4 @@
-import { DBClientType, desc, eq } from "packages/db";
+import { DBClientType, desc, exists, eq, and } from "packages/db";
 import { DBMessage } from "../routes/message/create-message";
 import OpenAI from "openai";
 import { TRPCError } from "@trpc/server";
@@ -30,28 +30,39 @@ export async function summarizeMessages(
   channelId: string,
 ) {
   try {
-    // Fetch all unsummarized messages from the same channel, sorted by date
+    /* 
+    Returns unSummarizedMessages from conversationId in outer query
+    If no unSummarizedMessages match an existing message in conversation
+    WE DONT WANT THAT CONVERSATION 
+    */
+    const unSumConvoSQ = db
+      .select()
+      .from(conversationMessage)
+      .where(eq(conversationMessage.conversationId, conversation.id))
+      .innerJoin(message, eq(message.id, conversationMessage.messageId))
+      .innerJoin(
+        unSummarizedMessage,
+        eq(unSummarizedMessage.messageId, message.id),
+      )
+      .as("sq");
+
+    /* 
+    Will grab all conversation messages in a specific channel ONLY 
+    if the conversation has atleast ONE unsummarized message
+    */
     const unSummarizedMessages = await db
       .select({
         userId: message.userId,
         message: message.message,
+        conversationId: conversation.id,
       })
-      .from(unSummarizedMessage)
-      .innerJoin(message, eq(message.id, unSummarizedMessage.messageId))
-      .where(eq())
-      .join(
-        "conversationMessage",
-        "conversationMessage.messageId",
-        "message.id",
+      .from(conversation)
+      .where(and(eq(conversation.channelId, channelId), exists(unSumConvoSQ)))
+      .innerJoin(
+        conversationMessage,
+        eq(conversationMessage.conversationId, conversation.id),
       )
-      .join(
-        "conversation",
-        "conversation.id",
-        "conversationMessage.conversationId",
-      )
-      .select("message.*", "conversation.*")
-      .orderBy("message.createdAt", "desc");
-
+      .innerJoin(message, eq(message.id, conversationMessage.messageId));
     // Loop through each unsummarized message and summarize
     for (const msg of unSummarizedMessages) {
       // Summarize the message here
