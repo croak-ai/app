@@ -7,6 +7,7 @@ import { getWorkspacePermission } from "../../functions/workspace";
 import { userHasRole } from "../../../functions/clerk";
 import OpenAI from "openai";
 import { groupMessage } from "../../functions/groupMessage";
+import { summarizeMessages } from "../../functions/summarizeMessages";
 
 export const zCreateMessage = z.object({
   channelId: z.string().min(1).max(256),
@@ -104,7 +105,8 @@ export const createMessage = router({
       */
 
       /* Group message into conversation */
-      await groupMessage(ctx.db, openAI, newMessageResult);
+      //await groupMessage(ctx.db, openAI, newMessageResult);
+      await summarizeMessages(ctx.db, openAI, input.channelId);
 
       /* 
         Summarize messages function here. Pull last x UNSUMMARIZED 

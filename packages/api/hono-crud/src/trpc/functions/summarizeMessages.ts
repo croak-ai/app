@@ -35,6 +35,35 @@ export async function summarizeMessages(
     If no unSummarizedMessages match an existing message in conversation
     WE DONT WANT THAT CONVERSATION 
     */
+    /* 
+    This query is looking crazy. Maybe we can add the channelId to the unsummarizedMessage
+   table. Then we can grab unsummarizedMessages by channelId
+   
+   But maybe lets build a working query. analyze performance, and then optimize
+   */
+    /* try this as well
+  
+  const conversationsWithMessages = await db
+  .select({
+    conversationId: conversation.id,
+    channelId: conversation.channelId,
+    createdAt: conversation.createdAt,
+    updatedAt: conversation.updatedAt,
+    messageId: message.id,
+    userId: message.userId,
+    message: message.message,
+    createdAt: message.createdAt,
+    updatedAt: message.updatedAt,
+    deletedAt: message.deletedAt
+  })
+  .from(conversation)
+  .innerJoin(conversationMessage, eq(conversation.id, conversationMessage.conversationId))
+  .innerJoin(message, eq(conversationMessage.messageId, message.id))
+  .leftJoin(unSummarizedMessage, eq(message.id, unSummarizedMessage.messageId))
+  .where(eq(conversation.channelId, channelId))
+  .groupBy(conversation.id)
+  .having(isNotNull(unSummarizedMessage.id));*/
+
     const unSumConvoSQ = db
       .select()
       .from(conversationMessage)
@@ -63,18 +92,14 @@ export async function summarizeMessages(
         eq(conversationMessage.conversationId, conversation.id),
       )
       .innerJoin(message, eq(message.id, conversationMessage.messageId));
-    // Loop through each unsummarized message and summarize
-    for (const msg of unSummarizedMessages) {
-      // Summarize the message here
-      // You can use the OpenAI instance to summarize the message
-      // For example: const summary = await openAI.summarize(msg.message);
-      // Then, you can update the message in the database or do whatever you need with the summary
-    }
+
+    console.log("UNSUMMARIZED: ", unSummarizedMessages);
+
     return;
   } catch (error) {
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
-      message: "Something went wrong while summarizing message",
+      message: `Something went wrong while summarizing message. ${error}`,
     });
   }
 }
