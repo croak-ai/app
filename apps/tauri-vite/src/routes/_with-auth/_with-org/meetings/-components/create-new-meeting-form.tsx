@@ -23,7 +23,11 @@ import { Icons } from "@acme/ui/components/bonus/icons";
 import { trpc } from "@/utils/trpc";
 import { useNavigate } from "@tanstack/react-router";
 
-export default function CreateMeetingForm() {
+export default function CreateMeetingForm({
+  onCreated,
+}: {
+  onCreated?: () => void;
+}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [meetingName, setMeetingName] = useState<string>("");
@@ -92,7 +96,7 @@ export default function CreateMeetingForm() {
   }, [meetingNameAvailable.data, form]);
 
   const MeetingNameIcon = () => {
-    if (meetingName?.length < 2 || timeoutId) {
+    if (timeoutId) {
       return <div className="h-6 w-6" />;
     }
     if (meetingNameAvailable.isFetching) {
@@ -105,6 +109,8 @@ export default function CreateMeetingForm() {
     if (meetingNameAvailable.data === true) {
       return <Icons.checkCircled className="h-6 w-6 text-primary" />;
     }
+
+    return <div className="h-6 w-6" />;
   };
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
@@ -118,6 +124,8 @@ export default function CreateMeetingForm() {
         zScheduledEnd: new Date(),
       });
 
+      onCreated?.();
+
       //   utils.getMeetings.getMeetings.invalidate();
 
       //   navigate({ to: "/meetings" });
@@ -128,6 +136,7 @@ export default function CreateMeetingForm() {
 
   return (
     <>
+      Standup
       <div className="space-y-6 pb-6">
         <div>
           <h3 className="text-lg font-medium">Create a New Meeting.</h3>
