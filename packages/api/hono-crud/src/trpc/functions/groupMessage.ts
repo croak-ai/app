@@ -44,8 +44,7 @@ export async function groupMessage(
       .limit(100);
 
     if (recentMessages.length === 0) {
-      await createConversation(db, newMessage);
-      return;
+      return await createConversation(db, newMessage);
     }
     // Convert recentMessages to JSON
     const recentMessagesJson = JSON.stringify(recentMessages);
@@ -129,16 +128,15 @@ export async function groupMessage(
     /* Check if we should make a new conversation or add to an existing one */
     if (AIResponseObject.conversationId === "new") {
       /* If new conversation is added create it and add new message */
-      await createConversation(db, newMessage);
+      return await createConversation(db, newMessage);
     } else {
       /* If existing conversation is found add new message */
       await db.insert(conversationMessage).values({
         conversationId: AIResponseObject.conversationId,
         messageId: newMessage.id,
       });
+      return AIResponseObject.conversationId;
     }
-
-    return recentMessages;
   } catch (error) {
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
@@ -179,4 +177,5 @@ async function createConversation(db: DBClientType, newMessage: DBMessage) {
       message: "Failed to link message to conversation",
     });
   }
+  return conversationResult.id;
 }

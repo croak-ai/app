@@ -105,8 +105,13 @@ export const createMessage = router({
       */
 
       /* Group message into conversation */
-      //await groupMessage(ctx.db, openAI, newMessageResult);
-      await summarizeMessages(ctx.db, openAI, input.channelId);
+      const conversationId = await groupMessage(
+        ctx.db,
+        openAI,
+        newMessageResult,
+      );
+
+      await summarizeMessages(ctx.db, openAI, conversationId);
 
       /* 
         Summarize messages function here. Pull last x UNSUMMARIZED 
