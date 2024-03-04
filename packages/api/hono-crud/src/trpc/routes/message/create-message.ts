@@ -8,6 +8,7 @@ import { userHasRole } from "../../../functions/clerk";
 import OpenAI from "openai";
 import { groupMessage } from "../../functions/groupMessage";
 import { summarizeMessages } from "../../functions/summarizeMessages";
+import { Ai } from "@cloudflare/ai";
 
 export const zCreateMessage = z.object({
   channelId: z.string().min(1).max(256),
@@ -96,6 +97,7 @@ export const createMessage = router({
         });
       }
 
+      const cloudflareAI = new Ai(ctx.env.cloudflareAI);
       const openAI = new OpenAI({ apiKey: ctx.env.OPENAI_API_KEY });
       /* 
       In both of these functions the token count of the messages
@@ -111,7 +113,7 @@ export const createMessage = router({
         newMessageResult,
       );
 
-      await summarizeMessages(ctx.db, openAI, conversationId);
+      await summarizeMessages(ctx.db, openAI, cloudflareAI, conversationId);
 
       /* 
         Summarize messages function here. Pull last x UNSUMMARIZED 

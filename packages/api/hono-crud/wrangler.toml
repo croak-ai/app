@@ -7,3 +7,6 @@ main = 'src/worker.ts'
 
 [triggers]
 crons = ["* * * * *"]
+
+[ai]
+binding = "cloudflareAI"

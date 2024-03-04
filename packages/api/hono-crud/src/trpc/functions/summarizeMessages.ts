@@ -9,6 +9,7 @@ import {
   unSummarizedMessage,
 } from "packages/db/schema/tenant";
 import { z } from "zod";
+import { Ai as cloudflareAI } from "@cloudflare/ai";
 
 const zAIGroupingResponse = z.object({
   conversationId: z.string(),
@@ -27,6 +28,7 @@ messages.
 export async function summarizeMessages(
   db: DBClientType,
   openAI: OpenAI,
+  cloudflareAI: cloudflareAI,
   conversationId: string,
 ) {
   try {
@@ -47,12 +49,9 @@ export async function summarizeMessages(
       .where(eq(conversationMessage.conversationId, conversationId))
       .orderBy(desc(message.createdAt));
 
-    console.log("WHOLE OBJ: ", conversationMessages);
-    console.log("UNSUMMARIZED1: ", conversationMessages[0]);
-    console.log("UNSUMMARIZED2: ", conversationMessages[1]);
-
     const conversationMessagesJSON = JSON.stringify(conversationMessages);
 
+    /* Load messages into AI for summarization */
     const completion = await openAI.chat.completions.create({
       messages: [
         {
@@ -81,9 +80,26 @@ export async function summarizeMessages(
     }
 
     /* Parse and validate response */
-    const AIResponse = completion.choices[0].message.content;
+    const AISummary = completion.choices[0].message.content;
 
-    console.log(AIResponse);
+    console.log(AISummary);
+
+    /* Generate embedding for summary (BGE small 384 dimensions)*/
+    const embeddingObj = await cloudflareAI.run<"@cf/baai/bge-small-en-v1.5">(
+      "@cf/baai/bge-small-en-v1.5",
+      {
+        text: AISummary,
+      },
+    );
+
+    /* Insert summary into vector tables using embedding */
+    /* We need to perform some manipulation here to convert this 64-bit array
+    into uint8array for efficient storage */
+
+    console.log("shape: ", embeddingObj.shape);
+    console.log("Data: ", embeddingObj.data[0]);
+
+    const vectorSQL = ``;
 
     // Generate embedding and add to vector DB
 

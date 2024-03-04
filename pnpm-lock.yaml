@@ -663,6 +663,9 @@ importers:
       '@clerk/backend':
         specifier: ^0.30.*
         version: 0.30.3(react@18.2.0)
+      '@cloudflare/ai':
+        specifier: ^1.0.53
+        version: 1.0.53
       '@hono/clerk-auth':
         specifier: ^1.0.0
         version: 1.0.1(@clerk/backend@0.30.3)(hono@3.12.12)
@@ -2541,6 +2544,10 @@ packages:
     engines: {node: '>=14'}
     dependencies:
       csstype: 3.1.1
+    dev: false
+
+  /@cloudflare/ai@1.0.53:
+    resolution: {integrity: sha512-bVuvvm+LU/EoZ5mehL0uakOld1gvrOEQpnRqXbkNIjypHlxTLPLe3LDU3RZdaSTTUI+dK5beLI5qcmAu8h1/iQ==}
     dev: false
 
   /@cloudflare/kv-asset-handler@0.3.1:
@@ -9538,6 +9545,7 @@ packages:
       loose-envify: 1.4.0
       object-assign: 4.1.1
     dev: false
+    bundledDependencies: false
 
   /create-require@1.1.1:
     resolution: {integrity: sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==}
