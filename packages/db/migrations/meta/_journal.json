@@ -36,6 +36,13 @@
       "when": 1709512302446,
       "tag": "0005_cool_lizard",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1709577289451,
+      "tag": "0006_kind_daimon_hellstrom",
+      "breakpoints": true
     }
   ]
 }

@@ -7,6 +7,7 @@ import {
   conversationMessage,
   message,
   unSummarizedMessage,
+  conversationSummary,
 } from "packages/db/schema/tenant";
 import { z } from "zod";
 import { Ai as cloudflareAI } from "@cloudflare/ai";
@@ -98,6 +99,15 @@ export async function summarizeMessages(
 
     console.log("shape: ", embeddingObj.shape);
     console.log("Data: ", embeddingObj.data[0]);
+
+    const float32VectorArray = new Float32Array(embeddingObj.data[0]);
+    const bitVectorArray = new Uint8Array(float32VectorArray.buffer);
+
+    const [conversationSummaryResult] = await db
+      .insert(conversationSummary)
+      .values({});
+
+    /* rows in vss_summaries and conversationSummary need to share the same ID */
 
     const vectorSQL = ``;
 

@@ -4,6 +4,7 @@ import {
   sqliteTable,
   index,
   unique,
+  blob,
 } from "drizzle-orm/sqlite-core";
 import { createId } from "@paralleldrive/cuid2";
 
@@ -86,7 +87,7 @@ export const conversationSummary = sqliteTable("conversationSummary", {
   channelId: text("channelId").notNull(),
   conversationId: text("conversationId").notNull(),
   summaryText: text("summaryText", { length: 500 }).notNull(),
-  summaryEmbedding: text("summaryEmbedding").notNull(),
+  summaryEmbedding: blob("summaryEmbedding").notNull(),
   createdAt: integer("createdAt").notNull(),
   updatedAt: integer("updatedAt").notNull(),
 });
