@@ -57,6 +57,13 @@
       "when": 1709581865722,
       "tag": "0009_pink_genesis",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1709678862970,
+      "tag": "0010_jazzy_cloak",
+      "breakpoints": true
     }
   ]
 }

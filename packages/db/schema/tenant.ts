@@ -92,6 +92,14 @@ export const conversationSummary = sqliteTable("conversationSummary", {
   updatedAt: integer("updatedAt").notNull(),
 });
 
+export const conversationSummaryRef = sqliteTable("conversationSummaryRef", {
+  id: text("id").$defaultFn(createId).primaryKey(),
+  userId: text("userId").notNull(),
+  conversationSummaryId: integer("conversationSummaryId").notNull(),
+  createdAt: integer("createdAt").notNull(),
+  updatedAt: integer("updatedAt").notNull(),
+});
+
 export const conversation = sqliteTable("conversation", {
   id: text("id").$defaultFn(createId).primaryKey(),
   channelId: text("channelId").notNull(),
