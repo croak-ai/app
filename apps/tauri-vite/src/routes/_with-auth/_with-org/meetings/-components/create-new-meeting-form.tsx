@@ -13,7 +13,7 @@ import {
 } from "@acme/ui/components/ui/form";
 import { Input } from "@acme/ui/components/ui/input";
 import { Textarea } from "@acme/ui/components/ui/textarea";
-
+import DateSelector from "@/components/calendar/date-scheduler";
 import { useForm } from "react-hook-form";
 import Loading from "@acme/ui/components/bonus/loading";
 import { useState } from "react";
@@ -62,11 +62,21 @@ export default function CreateMeetingForm({
       .max(256)
       .trim(),
     meetingDescription: z.string().min(2).max(512).trim(),
+    meetingTime: z.object({
+      from: z.date(),
+      to: z.date(),
+    }),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     mode: "onChange",
+    defaultValues: {
+      meetingTime: {
+        from: new Date(),
+        to: new Date(new Date().getTime() + 30 * 60000),
+      },
+    },
   });
 
   useEffect(() => {
@@ -120,8 +130,8 @@ export default function CreateMeetingForm({
       await createMeeting.mutateAsync({
         zName: data.meetingName,
         zDescription: data.meetingDescription,
-        zScheduledStart: new Date(),
-        zScheduledEnd: new Date(),
+        zScheduledStart: data.meetingTime.from,
+        zScheduledEnd: data.meetingTime.to,
       });
 
       onCreated?.();
@@ -186,6 +196,26 @@ export default function CreateMeetingForm({
                     Describe what this meeting is about.
                   </FormDescription>
                   <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="meetingTime"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Meeting Time</FormLabel>
+                  <FormControl>
+                    <DateSelector
+                      value={{ from: field.value.from, to: field.value.to }}
+                      onChange={(range) => field.onChange(range)}
+                      minuteInterval={30}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                  <FormDescription>
+                    Select the date and time range for the meeting.
+                  </FormDescription>
                 </FormItem>
               )}
             />
