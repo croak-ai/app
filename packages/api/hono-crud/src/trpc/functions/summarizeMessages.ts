@@ -1,4 +1,12 @@
-import { DBClientType, desc, exists, eq, and, isNotNull } from "packages/db";
+import {
+  DBClientType,
+  desc,
+  exists,
+  eq,
+  and,
+  isNotNull,
+  sql,
+} from "packages/db";
 import { DBMessage } from "../routes/message/create-message";
 import OpenAI from "openai";
 import { TRPCError } from "@trpc/server";
@@ -9,7 +17,7 @@ import {
   unSummarizedMessage,
   conversationSummary,
 } from "packages/db/schema/tenant";
-import { z } from "zod";
+import { string, z } from "zod";
 import { Ai as cloudflareAI } from "@cloudflare/ai";
 
 const zAIGroupingResponse = z.object({
@@ -31,6 +39,7 @@ export async function summarizeMessages(
   openAI: OpenAI,
   cloudflareAI: cloudflareAI,
   conversationId: string,
+  channelId: string,
 ) {
   try {
     /* 
@@ -100,18 +109,50 @@ export async function summarizeMessages(
     console.log("shape: ", embeddingObj.shape);
     console.log("Data: ", embeddingObj.data[0]);
 
-    const float32VectorArray = new Float32Array(embeddingObj.data[0]);
-    const bitVectorArray = new Uint8Array(float32VectorArray.buffer);
+    // const float32VectorArray = new Float32Array(embeddingObj.data[0]);
+    // const bitVectorArray = new Uint8Array(float32VectorArray.buffer);
+    // const blob = new Blob(embeddingObj.data[0]);
+    const stringEmbedding = JSON.stringify(embeddingObj.data[0]);
+
+    const currentTime = Date.now();
 
     const [conversationSummaryResult] = await db
       .insert(conversationSummary)
-      .values({});
+      .values({
+        channelId,
+        conversationId,
+        summaryText: AISummary,
+        summaryEmbedding: stringEmbedding,
+        createdAt: currentTime,
+        updatedAt: currentTime,
+      })
+      .returning();
+
+    console.log("HITTTTTTT1: ", conversationSummaryResult);
+
+    if (!conversationSummaryResult) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message:
+          "Failed to insert conversation summary into conversationSummary table",
+      });
+    }
 
     /* rows in vss_summaries and conversationSummary need to share the same ID */
+    //Now this query is failing for some unknown reason
 
-    const vectorSQL = ``;
+    const vectorSQL = sql`INSERT INTO vss_summaries(rowid, summary_embedding) 
+                      VALUES (${conversationSummaryResult.id}, ${stringEmbedding})`;
 
-    // Generate embedding and add to vector DB
+    const vss_summary_result = await db.run(vectorSQL);
+    console.log("Should be inserted");
+
+    if (!vss_summary_result) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to insert conversation summary into vector table",
+      });
+    }
 
     return;
   } catch (error) {

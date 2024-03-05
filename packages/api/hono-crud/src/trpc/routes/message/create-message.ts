@@ -113,7 +113,13 @@ export const createMessage = router({
         newMessageResult,
       );
 
-      await summarizeMessages(ctx.db, openAI, cloudflareAI, conversationId);
+      await summarizeMessages(
+        ctx.db,
+        openAI,
+        cloudflareAI,
+        conversationId,
+        input.channelId,
+      );
 
       /* 
         Summarize messages function here. Pull last x UNSUMMARIZED 

@@ -43,6 +43,20 @@
       "when": 1709577289451,
       "tag": "0006_kind_daimon_hellstrom",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1709581128999,
+      "tag": "0008_slimy_norrin_radd",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1709581865722,
+      "tag": "0009_pink_genesis",
+      "breakpoints": true
     }
   ]
 }

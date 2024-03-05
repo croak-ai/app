@@ -83,7 +83,7 @@ export const unSummarizedMessage = sqliteTable("unSummarizedMessage", {
 });
 
 export const conversationSummary = sqliteTable("conversationSummary", {
-  id: text("id").$defaultFn(createId).primaryKey(),
+  id: integer("id").primaryKey({ autoIncrement: true }),
   channelId: text("channelId").notNull(),
   conversationId: text("conversationId").notNull(),
   summaryText: text("summaryText", { length: 500 }).notNull(),
