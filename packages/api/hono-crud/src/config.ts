@@ -7,6 +7,7 @@ import type {
 import type { Context, Input } from "hono";
 
 export type Bindings = {
+  cloudflareAI: string;
   OPENAI_API_KEY: string;
   CLERK_SECRET_KEY: string;
   CLERK_PUBLISHABLE_KEY: string;

@@ -4,6 +4,7 @@ import {
   sqliteTable,
   index,
   unique,
+  blob,
 } from "drizzle-orm/sqlite-core";
 import { createId } from "@paralleldrive/cuid2";
 
@@ -76,14 +77,27 @@ export const message = sqliteTable("message", {
   deletedAt: integer("deletedAt"),
 });
 
-export const nonGroupedMessage = sqliteTable("nonGroupedMessage", {
+export const unSummarizedMessage = sqliteTable("unSummarizedMessage", {
   id: text("id").$defaultFn(createId).primaryKey(),
+  messageId: text("messageId").notNull(),
+});
+
+export const conversationSummary = sqliteTable("conversationSummary", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   channelId: text("channelId").notNull(),
-  userId: text("userId").notNull(),
-  message: text("message", { length: 60000 }).notNull(),
+  conversationId: text("conversationId").notNull(),
+  summaryText: text("summaryText", { length: 500 }).notNull(),
+  summaryEmbedding: blob("summaryEmbedding").notNull(),
   createdAt: integer("createdAt").notNull(),
   updatedAt: integer("updatedAt").notNull(),
-  deletedAt: integer("deletedAt"),
+});
+
+export const conversationSummaryRef = sqliteTable("conversationSummaryRef", {
+  id: text("id").$defaultFn(createId).primaryKey(),
+  userId: text("userId").notNull(),
+  conversationSummaryId: integer("conversationSummaryId").notNull(),
+  createdAt: integer("createdAt").notNull(),
+  updatedAt: integer("updatedAt").notNull(),
 });
 
 export const conversation = sqliteTable("conversation", {
@@ -97,6 +111,10 @@ export const conversationMessage = sqliteTable("conversationMessage", {
   id: text("id").$defaultFn(createId).primaryKey(),
   messageId: text("messageId").notNull(),
   conversationId: text("conversationId").notNull(),
+});
+
+export const testTable = sqliteTable("testTable", {
+  id: text("id").$defaultFn(createId).primaryKey(),
 });
 
 export const meeting = sqliteTable("meeting", {

@@ -1,10 +1,4 @@
-import {
-  conversation,
-  conversationMessage,
-  message,
-} from "@acme/db/schema/tenant";
-import { DBClientType } from "packages/db";
-import { eq, desc } from "drizzle-orm";
+import { message, unSummarizedMessage } from "@acme/db/schema/tenant";
 import { protectedProcedureWithOrgDB, router } from "../../config/trpc";
 import { z } from "zod";
 
@@ -13,6 +7,8 @@ import { getWorkspacePermission } from "../../functions/workspace";
 import { userHasRole } from "../../../functions/clerk";
 import OpenAI from "openai";
 import { groupMessage } from "../../functions/groupMessage";
+import { summarizeMessages } from "../../functions/summarizeMessages";
+import { Ai } from "@cloudflare/ai";
 
 export const zCreateMessage = z.object({
   channelId: z.string().min(1).max(256),
@@ -69,7 +65,7 @@ export const createMessage = router({
 
       const currentTime = Date.now();
 
-      const [newMessage] = await ctx.db
+      const [newMessageResult] = await ctx.db
         .insert(message)
         .values({
           userId: ctx.auth.userId,
@@ -80,16 +76,50 @@ export const createMessage = router({
         })
         .returning();
 
-      if (!newMessage) {
+      if (!newMessageResult) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to create new message",
         });
       }
 
+      const [unSummarizedMessageResult] = await ctx.db
+        .insert(unSummarizedMessage)
+        .values({
+          messageId: newMessageResult.id,
+        })
+        .returning();
+
+      if (!unSummarizedMessageResult) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to add new message to unSummarizedMessage table",
+        });
+      }
+
+      const cloudflareAI = new Ai(ctx.env.cloudflareAI);
       const openAI = new OpenAI({ apiKey: ctx.env.OPENAI_API_KEY });
+      /* 
+      In both of these functions the token count of the messages
+      we are throwing into the AI matter.
+      In the future we will need to find some way to make sure the
+      content of the messages we are pulling does not exceed the count
+      */
+
       /* Group message into conversation */
-      await groupMessage(ctx.db, openAI, newMessage);
+      const conversationId = await groupMessage(
+        ctx.db,
+        openAI,
+        newMessageResult,
+      );
+
+      await summarizeMessages(
+        ctx.db,
+        openAI,
+        cloudflareAI,
+        conversationId,
+        input.channelId,
+      );
 
       /* 
         Summarize messages function here. Pull last x UNSUMMARIZED 
@@ -100,6 +130,6 @@ export const createMessage = router({
         messages.
       */
 
-      return newMessage;
+      return newMessageResult;
     }),
 });
