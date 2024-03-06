@@ -16,6 +16,7 @@ import {
   message,
   unSummarizedMessage,
   conversationSummary,
+  conversationSummaryRef,
 } from "packages/db/schema/tenant";
 import { string, z } from "zod";
 import { Ai as cloudflareAI } from "@cloudflare/ai";
@@ -42,14 +43,8 @@ export async function summarizeMessages(
   channelId: string,
 ) {
   try {
-    /* 
-    OLD THOUGHT: Returns unSummarizedMessages from conversationId in outer query
-    If no unSummarizedMessages match an existing message in conversation
-    WE DONT WANT THAT CONVERSATION 
-    */
-
-    /* Pull all messages from specific conversation */
-    const conversationMessages = await db
+    /* Fetch all messages in conversation */
+    const fetchConversationMessages = db
       .select({
         userId: message.userId,
         message: message.message,
@@ -58,6 +53,20 @@ export async function summarizeMessages(
       .innerJoin(message, eq(message.id, conversationMessage.messageId))
       .where(eq(conversationMessage.conversationId, conversationId))
       .orderBy(desc(message.createdAt));
+
+    /* 
+    Fetch all participants in conversation
+    */
+    const fetchConversationParticipants = db
+      .selectDistinct({ userId: message.userId })
+      .from(conversationMessage)
+      .innerJoin(message, eq(message.id, conversationMessage.messageId))
+      .where(eq(conversationMessage.conversationId, conversationId));
+
+    const [conversationMessages, conversationParticipants] = await Promise.all([
+      fetchConversationMessages,
+      fetchConversationParticipants,
+    ]);
 
     const conversationMessagesJSON = JSON.stringify(conversationMessages);
 
@@ -92,7 +101,7 @@ export async function summarizeMessages(
     /* Parse and validate response */
     const AISummary = completion.choices[0].message.content;
 
-    console.log(AISummary);
+    //console.log(AISummary);
 
     /* Generate embedding for summary (BGE small 384 dimensions)*/
     const embeddingObj = await cloudflareAI.run<"@cf/baai/bge-small-en-v1.5">(
@@ -106,8 +115,8 @@ export async function summarizeMessages(
     /* We need to perform some manipulation here to convert this 64-bit array
     into uint8array for efficient storage */
 
-    console.log("shape: ", embeddingObj.shape);
-    console.log("Data: ", embeddingObj.data[0]);
+    //console.log("shape: ", embeddingObj.shape);
+    //console.log("Data: ", embeddingObj.data[0]);
 
     // const float32VectorArray = new Float32Array(embeddingObj.data[0]);
     // const bitVectorArray = new Uint8Array(float32VectorArray.buffer);
@@ -128,8 +137,6 @@ export async function summarizeMessages(
       })
       .returning();
 
-    console.log("HITTTTTTT1: ", conversationSummaryResult);
-
     if (!conversationSummaryResult) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
@@ -138,21 +145,33 @@ export async function summarizeMessages(
       });
     }
 
+    /* Build an array of participant data */
+    const participantData = conversationParticipants.map((participant) => ({
+      userId: participant.userId,
+      conversationSummaryId: conversationSummaryResult.id,
+      createdAt: currentTime,
+      updatedAt: currentTime,
+    }));
+
+    /* Insert all participants into conversationSummaryRef table */
+    /* Eventually we will need to lump this into a promise.all with query below */
+    await db.insert(conversationSummaryRef).values(participantData);
+
     /* rows in vss_summaries and conversationSummary need to share the same ID */
     //Now this query is failing for some unknown reason
 
-    const vectorSQL = sql`INSERT INTO vss_summaries(rowid, summary_embedding) 
-                      VALUES (${conversationSummaryResult.id}, ${stringEmbedding})`;
+    // const vectorSQL = sql`INSERT INTO vss_summaries(rowid, summary_embedding)
+    //                   VALUES (${conversationSummaryResult.id}, ${stringEmbedding})`;
 
-    const vss_summary_result = await db.run(vectorSQL);
-    console.log("Should be inserted");
+    // const vss_summary_result = await db.run(vectorSQL);
+    // //console.log("Should be inserted");
 
-    if (!vss_summary_result) {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to insert conversation summary into vector table",
-      });
-    }
+    // if (!vss_summary_result) {
+    //   throw new TRPCError({
+    //     code: "INTERNAL_SERVER_ERROR",
+    //     message: "Failed to insert conversation summary into vector table",
+    //   });
+    // }
 
     return;
   } catch (error) {

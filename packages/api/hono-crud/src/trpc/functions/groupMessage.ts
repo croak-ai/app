@@ -68,8 +68,8 @@ export async function groupMessage(
     doesn't have this grouped message in the context.
     */
 
-    console.log("RecentMessagesJson: ", recentMessagesJson);
-    console.log("SingularMessageJson: ", singularMessageJson);
+    //console.log("RecentMessagesJson: ", recentMessagesJson);
+    //console.log("SingularMessageJson: ", singularMessageJson);
 
     /* !!!Talk to Ben about how we should handle these OpenAI clients being created!!! */
 
