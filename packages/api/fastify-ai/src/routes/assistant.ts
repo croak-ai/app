@@ -16,12 +16,17 @@ export default async function assistant(fastify: FastifyInstance) {
       request: FastifyRequest<{ Body: AssistantBody }>,
       reply: FastifyReply,
     ) {
+      /* Could rebuild this to store assistant info in a single table instead of JSON */
       const assistant = await createOrRetrieveAssistant();
 
       const { message } = request.body;
       console.log("message: ", message);
 
       // Initialize a thread
+      /* 
+      We should be grabbing thread ID from request. If thread ID doesnt exist 
+      we create a new thread and store it in the DB here
+       */
       const thread = await openai.beta.threads.create();
 
       //Add message to thread
