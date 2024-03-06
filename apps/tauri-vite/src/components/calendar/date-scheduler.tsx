@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@acme/ui/components/ui/button";
 import { Calendar } from "@acme/ui/components/ui/calendar";
 import {
@@ -24,23 +24,70 @@ const DateScheduler: React.FC<DateSchedulerProps> = ({
   const [fromTimeOpen, setFromTimeOpen] = useState(false);
   const [toTimeOpen, setToTimeOpen] = useState(false);
 
-  const handleDateChange = (date: Date | undefined, type: "from" | "to") => {
-    if (date) {
+  const handleDateChange = (date: Date, type: "from" | "to") => {
+    const now = new Date();
+    if (date < now) return; // Prevent selecting dates before "now"
+    if (type === "from") {
+      const newToDate = new Date(date);
+      newToDate.setMinutes(date.getMinutes() + minuteInterval);
       onChange({
-        ...value,
-        [type]: date,
+        from: date,
+        to: newToDate,
       });
+    } else if (type === "to") {
+      if (date < value.from) {
+        // If the "to" date is before the "from" date, reset both
+        const newFromDate = new Date(date);
+        newFromDate.setMinutes(date.getMinutes() - minuteInterval);
+        onChange({
+          from: newFromDate,
+          to: date,
+        });
+      } else {
+        onChange({
+          ...value,
+          [type]: date,
+        });
+      }
     }
   };
 
   const handleTimeChange = (time: string, type: "from" | "to") => {
+    const now = new Date();
     const newTime = new Date(value[type]);
     const [hours, minutes] = time.split(":").map(Number);
     newTime.setHours(hours, minutes);
-    onChange({
-      ...value,
-      [type]: newTime,
-    });
+    if (newTime < now) return; // Prevent selecting times before "now"
+
+    if (type === "from") {
+      const potentialNewTo = new Date(newTime);
+      potentialNewTo.setMinutes(newTime.getMinutes() + minuteInterval);
+      if (potentialNewTo <= value.to) {
+        onChange({
+          ...value,
+          from: newTime,
+        });
+      } else {
+        onChange({
+          from: newTime,
+          to: potentialNewTo,
+        });
+      }
+    } else if (type === "to") {
+      if (newTime > value.from) {
+        onChange({
+          ...value,
+          to: newTime,
+        });
+      } else {
+        const newFrom = new Date(newTime);
+        newFrom.setMinutes(newTime.getMinutes() - minuteInterval);
+        onChange({
+          from: newFrom,
+          to: newTime,
+        });
+      }
+    }
   };
 
   const generateTimeOptions = (
@@ -53,7 +100,8 @@ const DateScheduler: React.FC<DateSchedulerProps> = ({
     const endDate = new Date(date).setHours(23, 59, 59, 999);
 
     while (date.getTime() <= endDate) {
-      if (timeEnabled(date)) {
+      if (timeEnabled(date) && date >= new Date()) {
+        // Ensure time is not before "now"
         times.push(new Date(date));
       }
       date.setMinutes(date.getMinutes() + minuteInterval);
@@ -73,7 +121,51 @@ const DateScheduler: React.FC<DateSchedulerProps> = ({
 
   return (
     <div>
-      <div className="my-2 flex justify-between">{/* Calendar Popovers */}</div>
+      <div className="my-2 flex justify-between">
+        {/* Calendar Popovers for 'from' date */}
+        <Popover
+          onOpenChange={() => setFromCalendarOpen(!fromCalendarOpen)}
+          open={fromCalendarOpen}
+        >
+          <PopoverTrigger asChild>
+            <Button
+              size="sm"
+              variant={fromCalendarOpen ? "default" : "outline"}
+            >
+              {value.from
+                ? value.from.toLocaleDateString()
+                : "Select Start Date"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent>
+            <Calendar
+              selected={value.from}
+              mode="single"
+              onSelect={(date) => date && handleDateChange(date, "from")}
+              disabled={(date) => date < new Date()} // Ensure calendar does not allow selecting dates before "now"
+            />
+          </PopoverContent>
+        </Popover>
+        {/* Calendar Popovers for 'to' date */}
+        <Popover
+          onOpenChange={() => setToCalendarOpen(!toCalendarOpen)}
+          open={toCalendarOpen}
+        >
+          <PopoverTrigger asChild>
+            <Button size="sm" variant={toCalendarOpen ? "default" : "outline"}>
+              {value.to ? value.to.toLocaleDateString() : "Select End Date"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent>
+            <Calendar
+              selected={value.to}
+              mode="single"
+              onSelect={(date) => date && handleDateChange(date, "to")}
+              disabled={(date) => date < value.from || date < new Date()} // Ensure calendar does not allow selecting dates before "now" or before the 'from' date
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
       <div className="mt-2 flex">
         {/* Time Selection for 'from' */}
         <Popover
