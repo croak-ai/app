@@ -67,6 +67,14 @@ export const workspaceMember = sqliteTable("workspaceMember", {
   deletedAt: integer("deletedAt"),
 });
 
+export const assistantThread = sqliteTable("assistantThread", {
+  id: text("id").$defaultFn(createId).primaryKey(),
+  userId: text("userId", { length: 256 }).notNull(),
+  threadId: text("threadId", { length: 256 }).notNull(),
+  createdAt: integer("createdAt").notNull(),
+  updatedAt: integer("updatedAt").notNull(),
+});
+
 export const message = sqliteTable("message", {
   id: text("id").$defaultFn(createId).primaryKey(),
   channelId: text("channelId").notNull(),
