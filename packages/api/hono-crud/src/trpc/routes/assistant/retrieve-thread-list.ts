@@ -5,8 +5,8 @@ import { protectedProcedureWithOrgDB, router } from "../../config/trpc";
 import { TRPCError } from "@trpc/server";
 import { eq } from "packages/db";
 
-export const retrieveThread = router({
-  retrieveThread: protectedProcedureWithOrgDB.query(async ({ ctx }) => {
+export const retrieveThreadList = router({
+  retrieveThreadList: protectedProcedureWithOrgDB.query(async ({ ctx }) => {
     ////////////////////////////////////////////////////////
     // Eventually check if user has permission to use assistant
 

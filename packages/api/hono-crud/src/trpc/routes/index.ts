@@ -14,7 +14,8 @@ import { getMessages } from "./message/get-messages";
 import { getNewestMessage } from "./message/get-newest-message";
 import { syncDev } from "./turso-meta/sync-dev";
 import { createThread } from "./assistant/create-thread";
-import { retrieveThread } from "./assistant/retrieve-thread-list";
+import { retrieveThreadList } from "./assistant/retrieve-thread-list";
+import { retrieveThreadMessages } from "./assistant/retrieve-thread-messages";
 
 export const appRouter = router({
   createNewTursoDB,
@@ -31,7 +32,8 @@ export const appRouter = router({
   getNewestMessage,
   syncDev,
   createThread,
-  retrieveThread,
+  retrieveThreadList,
+  retrieveThreadMessages,
 });
 
 // export type definition of API
