@@ -16,7 +16,6 @@ export default function Assistant() {
   return (
     <div className="flex h-full w-full flex-col items-center">
       <NavBar />
-
       <ChatBox />
     </div>
   );
