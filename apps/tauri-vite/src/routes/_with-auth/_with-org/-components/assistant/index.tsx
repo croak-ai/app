@@ -2,64 +2,12 @@
 import { cn } from "@acme/ui/lib/utils";
 import { Button } from "@acme/ui/components/ui/button";
 import { Input } from "@acme/ui/components/ui/input";
-import { useChat } from "ai/react";
-import SuperJSON from "superjson";
 import { useState } from "react";
 
-//Add these types to another file
-type AIMessage = {
-  id: string;
-  object: string;
-  created_at: number;
-  thread_id: string;
-  role: string;
-  content: {
-    type: string;
-    text: {
-      value: string;
-      annotations: string[];
-    };
-  }[];
-  file_ids: string[];
-  assistant_id: string;
-  run_id: string;
-  metadata: Record<string, string>;
-};
-
-type UserMessage = {
-  id: string;
-  role: string;
-  content: {
-    type: string;
-    text: {
-      value: string;
-      annotations: string[];
-    };
-  }[];
-};
-
-type Message = AIMessage | UserMessage;
-
-type Messages = Message[];
-
-export default function ChatBot() {
-  const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<Messages>([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  /* Store the users message in the state and return its content */
-  function handleUserMessage() {
-    const userMessage: Message = {
-      id: "1",
-      role: "user",
-      content: [{ type: "text", text: { value: input, annotations: [] } }],
-    };
-
-    setInput("");
-    setMessages((prevMessages) => [...prevMessages, userMessage]);
-    setIsLoading(true);
-    return userMessage.content[0]?.text.value;
-  }
+export default function Assistant() {
+  // const [input, setInput] = useState("");
+  // const [messages, setMessages] = useState<Messages>([]);
+  // const [isLoading, setIsLoading] = useState(false);
 
   /* Query Assistant with given user message, add Assistant response message to state */
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
