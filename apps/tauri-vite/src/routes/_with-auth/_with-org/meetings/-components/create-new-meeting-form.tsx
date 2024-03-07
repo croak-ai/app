@@ -68,13 +68,23 @@ export default function CreateMeetingForm({
     }),
   });
 
+  const interval = 30;
+
+  const initialFrom = new Date();
+  initialFrom.setMinutes(
+    Math.ceil(initialFrom.getMinutes() / interval) * interval,
+  );
+
+  const initialTo = new Date(initialFrom);
+  initialTo.setMinutes(initialTo.getMinutes() + interval);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     mode: "onChange",
     defaultValues: {
       meetingTime: {
-        from: new Date(),
-        to: new Date(new Date().getTime() + 30 * 60000),
+        from: initialFrom,
+        to: initialTo,
       },
     },
   });

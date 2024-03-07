@@ -6,8 +6,12 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@acme/ui/components/ui/popover";
-import { ScrollArea } from "@acme/ui/components/ui/scroll-area";
-
+import {
+  Command,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+} from "@acme/ui/components/ui/command";
 interface DateSchedulerProps {
   value: { from: Date; to: Date };
   onChange: (range: { from: Date; to: Date }) => void;
@@ -24,103 +28,79 @@ const DateScheduler: React.FC<DateSchedulerProps> = ({
   const [fromTimeOpen, setFromTimeOpen] = useState(false);
   const [toTimeOpen, setToTimeOpen] = useState(false);
 
-  const handleDateChange = (date: Date, type: "from" | "to") => {
+  useEffect(() => {
+    console.log(value);
+  }, [value]);
+
+  const handleFromDateChange = (newFromDate: Date) => {
     const now = new Date();
-    if (date < now) return; // Prevent selecting dates before "now"
-    if (type === "from") {
-      const newToDate = new Date(date);
-      newToDate.setMinutes(date.getMinutes() + minuteInterval);
-      onChange({
-        from: date,
-        to: newToDate,
-      });
-    } else if (type === "to") {
-      if (date < value.from) {
-        // If the "to" date is before the "from" date, reset both
-        const newFromDate = new Date(date);
-        newFromDate.setMinutes(date.getMinutes() - minuteInterval);
-        onChange({
-          from: newFromDate,
-          to: date,
-        });
-      } else {
-        onChange({
-          ...value,
-          [type]: date,
-        });
-      }
-    }
+    if (newFromDate < now) return; // Prevent selecting dates or times before "now"
+    const newToDate = new Date(newFromDate);
+    newToDate.setMinutes(newFromDate.getMinutes() + minuteInterval);
+    onChange({
+      from: newFromDate,
+      to: newToDate,
+    });
   };
 
-  const handleTimeChange = (time: string, type: "from" | "to") => {
+  const handleToDateChange = (newToDate: Date) => {
     const now = new Date();
-    const newTime = new Date(value[type]);
-    const [hours, minutes] = time.split(":").map(Number);
-    newTime.setHours(hours, minutes);
-    if (newTime < now) return; // Prevent selecting times before "now"
-
-    if (type === "from") {
-      const potentialNewTo = new Date(newTime);
-      potentialNewTo.setMinutes(newTime.getMinutes() + minuteInterval);
-      if (potentialNewTo <= value.to) {
-        onChange({
-          ...value,
-          from: newTime,
-        });
-      } else {
-        onChange({
-          from: newTime,
-          to: potentialNewTo,
-        });
-      }
-    } else if (type === "to") {
-      if (newTime > value.from) {
-        onChange({
-          ...value,
-          to: newTime,
-        });
-      } else {
-        const newFrom = new Date(newTime);
-        newFrom.setMinutes(newTime.getMinutes() - minuteInterval);
-        onChange({
-          from: newFrom,
-          to: newTime,
-        });
-      }
-    }
+    if (newToDate < now || newToDate < value.from) return; // Prevent selecting dates or times before "now" or before the 'from' date
+    onChange({
+      ...value,
+      to: newToDate,
+    });
   };
 
-  const generateTimeOptions = (
-    dateValue: Date,
-    timeEnabled: (time: Date) => boolean,
-  ) => {
+  const generateToTimeOptions = (dateToValue: Date, dateFromValue: Date) => {
     const times = [];
-    const date = new Date();
-    date.setHours(0, 0, 0, 0);
-    const endDate = new Date(date).setHours(23, 59, 59, 999);
+    // Create a new Date object for toDate without mutating dateToValue
+    const toDate = new Date(dateToValue);
+    toDate.setHours(0, 0, 0, 0); // Set to start of the day without mutating the original dateToValue
 
-    while (date.getTime() <= endDate) {
-      if (timeEnabled(date) && date >= new Date()) {
-        // Ensure time is not before "now"
-        times.push(new Date(date));
+    const fromDate = new Date(dateFromValue);
+
+    while (times.length < (60 / minuteInterval) * 24) {
+      if (toDate > fromDate) {
+        times.push(new Date(toDate));
       }
-      date.setMinutes(date.getMinutes() + minuteInterval);
+      toDate.setMinutes(toDate.getMinutes() + minuteInterval);
+    }
+
+    return times;
+  };
+  const generateFromTimeOptions = (dateFromValue: Date) => {
+    const times = [];
+    const now = new Date();
+    // Create a new Date object for startOfDay without mutating dateFromValue
+    const startOfDay = new Date(dateFromValue);
+    startOfDay.setHours(0, 0, 0, 0); // Set to start of the day without mutating the original dateFromValue
+
+    const endOfDay = new Date(startOfDay);
+    endOfDay.setHours(23, 59, 59, 999); // End of the selected day
+
+    while (startOfDay.getTime() <= endOfDay.getTime()) {
+      if (startOfDay >= now && startOfDay >= dateFromValue) {
+        times.push(new Date(startOfDay));
+      }
+      startOfDay.setMinutes(startOfDay.getMinutes() + minuteInterval);
     }
 
     return times;
   };
 
   const timeOptionsFrom = useMemo(
-    () => generateTimeOptions(value.from, (time) => time > new Date()),
+    () => generateFromTimeOptions(value.from),
     [value.from, minuteInterval],
   );
   const timeOptionsTo = useMemo(
-    () => generateTimeOptions(value.to, (time) => time > value.from),
+    () => generateToTimeOptions(value.to, value.from),
     [value.to, minuteInterval, value.from],
   );
 
   return (
-    <div>
+    <>
+      {JSON.stringify(value)}
       <div className="my-2 flex justify-between">
         {/* Calendar Popovers for 'from' date */}
         <Popover
@@ -141,7 +121,7 @@ const DateScheduler: React.FC<DateSchedulerProps> = ({
             <Calendar
               selected={value.from}
               mode="single"
-              onSelect={(date) => date && handleDateChange(date, "from")}
+              onSelect={(date) => date && handleFromDateChange(date)}
               disabled={(date) => date < new Date()} // Ensure calendar does not allow selecting dates before "now"
             />
           </PopoverContent>
@@ -160,7 +140,7 @@ const DateScheduler: React.FC<DateSchedulerProps> = ({
             <Calendar
               selected={value.to}
               mode="single"
-              onSelect={(date) => date && handleDateChange(date, "to")}
+              onSelect={(date) => date && handleToDateChange(date)}
               disabled={(date) => date < value.from || date < new Date()} // Ensure calendar does not allow selecting dates before "now" or before the 'from' date
             />
           </PopoverContent>
@@ -183,38 +163,29 @@ const DateScheduler: React.FC<DateSchedulerProps> = ({
                 : "Select Start Time"}
             </Button>
           </PopoverTrigger>
-          <PopoverContent>
-            <ScrollArea>
-              <div className="flex flex-col">
-                {timeOptionsFrom.map((time, index) => (
-                  <Button
-                    key={index}
-                    size="sm"
-                    variant={
-                      value.from && value.from.getTime() === time.getTime()
-                        ? "default"
-                        : "outline"
-                    }
-                    onClick={() =>
-                      handleTimeChange(
-                        time.toLocaleTimeString([], {
-                          hourCycle: "h23",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        }),
-                        "from",
-                      )
-                    }
-                  >
-                    {time.toLocaleTimeString([], {
-                      hourCycle: "h23",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </Button>
-                ))}
-              </div>
-            </ScrollArea>
+          <PopoverContent className="w-auto p-0 " align="start">
+            <Command>
+              <CommandList>
+                <CommandGroup>
+                  {timeOptionsFrom.map((time, index) => (
+                    <CommandItem
+                      key={index}
+                      onSelect={() => {
+                        handleFromDateChange(time);
+                        setFromTimeOpen(false);
+                      }}
+                      className="mx-2 pl-2 text-sm"
+                    >
+                      {time.toLocaleTimeString([], {
+                        hourCycle: "h23",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
           </PopoverContent>
         </Popover>
         {/* Time Selection for 'to' */}
@@ -233,42 +204,51 @@ const DateScheduler: React.FC<DateSchedulerProps> = ({
                 : "Select End Time"}
             </Button>
           </PopoverTrigger>
-          <PopoverContent>
-            <ScrollArea>
-              <div className="flex flex-col">
-                {timeOptionsTo.map((time, index) => (
-                  <Button
-                    key={index}
-                    size="sm"
-                    variant={
-                      value.to && value.to.getTime() === time.getTime()
-                        ? "default"
-                        : "outline"
-                    }
-                    onClick={() =>
-                      handleTimeChange(
-                        time.toLocaleTimeString([], {
-                          hourCycle: "h23",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        }),
-                        "to",
-                      )
-                    }
-                  >
-                    {time.toLocaleTimeString([], {
-                      hourCycle: "h23",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </Button>
-                ))}
-              </div>
-            </ScrollArea>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Command>
+              <CommandList>
+                <CommandGroup>
+                  {timeOptionsTo.map((time, index) => {
+                    const durationInMinutes = Math.floor(
+                      (time.getTime() - value.from.getTime()) / (1000 * 60),
+                    );
+                    const days = Math.floor(durationInMinutes / (60 * 24));
+                    const daysString = days > 0 ? `${days}d` : "";
+
+                    const hours = Math.floor(
+                      (durationInMinutes % (60 * 24)) / 60,
+                    );
+                    const hoursString = hours > 0 ? `${hours}h ` : "";
+
+                    const minutes = durationInMinutes % 60;
+                    const minutesString = minutes > 0 ? `${minutes}m` : "";
+
+                    return (
+                      <CommandItem
+                        key={index}
+                        onSelect={() => {
+                          handleToDateChange(time);
+                          setToTimeOpen(false);
+                        }}
+                        className="mx-2 pl-2 text-sm"
+                      >
+                        <span className="pr-4">
+                          {`${time.getHours()}:${time
+                            .getMinutes()
+                            .toString()
+                            .padStart(2, "0")}`}
+                        </span>
+                        <span className="text-xs font-semibold">{`(${daysString} ${hoursString} ${minutesString} )`}</span>
+                      </CommandItem>
+                    );
+                  })}
+                </CommandGroup>
+              </CommandList>
+            </Command>
           </PopoverContent>
         </Popover>
       </div>
-    </div>
+    </>
   );
 };
 
