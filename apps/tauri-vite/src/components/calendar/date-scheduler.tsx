@@ -33,8 +33,19 @@ const DateScheduler: React.FC<DateSchedulerProps> = ({
   }, [value]);
 
   const handleFromDateChange = (newFromDate: Date) => {
-    const now = new Date();
-    if (newFromDate < now) return; // Prevent selecting dates or times before "now"
+    const initalInterval = new Date();
+    initalInterval.setMinutes(
+      Math.ceil(initalInterval.getMinutes() / minuteInterval) * minuteInterval,
+    );
+
+    // Prevent selecting dates or times before "now"
+    if (newFromDate < initalInterval) {
+      onChange({
+        from: initalInterval,
+        to: new Date(initalInterval.getTime() + minuteInterval * 60 * 1000),
+      });
+      return;
+    }
     const newToDate = new Date(newFromDate);
     newToDate.setMinutes(newFromDate.getMinutes() + minuteInterval);
     onChange({
@@ -44,8 +55,16 @@ const DateScheduler: React.FC<DateSchedulerProps> = ({
   };
 
   const handleToDateChange = (newToDate: Date) => {
-    const now = new Date();
-    if (newToDate < now || newToDate < value.from) return; // Prevent selecting dates or times before "now" or before the 'from' date
+    if (newToDate <= value.from) {
+      const adjustedToDate = new Date(
+        value.from.getTime() + minuteInterval * 60 * 1000,
+      );
+      onChange({
+        ...value,
+        to: adjustedToDate,
+      });
+      return;
+    }
     onChange({
       ...value,
       to: newToDate,
@@ -89,10 +108,11 @@ const DateScheduler: React.FC<DateSchedulerProps> = ({
     return times;
   };
 
-  const timeOptionsFrom = useMemo(
-    () => generateFromTimeOptions(value.from),
-    [value.from, minuteInterval],
-  );
+  const timeOptionsFrom = useMemo(() => {
+    const fromWithFirstHour = new Date(value.from);
+    fromWithFirstHour.setHours(0, 0, 0, 0);
+    return generateFromTimeOptions(fromWithFirstHour);
+  }, [value.from, minuteInterval]);
   const timeOptionsTo = useMemo(
     () => generateToTimeOptions(value.to, value.from),
     [value.to, minuteInterval, value.from],
@@ -100,7 +120,6 @@ const DateScheduler: React.FC<DateSchedulerProps> = ({
 
   return (
     <>
-      {JSON.stringify(value)}
       <div className="my-2 flex justify-between">
         {/* Calendar Popovers for 'from' date */}
         <Popover
@@ -122,7 +141,9 @@ const DateScheduler: React.FC<DateSchedulerProps> = ({
               selected={value.from}
               mode="single"
               onSelect={(date) => date && handleFromDateChange(date)}
-              disabled={(date) => date < new Date()} // Ensure calendar does not allow selecting dates before "now"
+              disabled={(date) =>
+                date < new Date(new Date().setHours(0, 0, 0, 0))
+              }
             />
           </PopoverContent>
         </Popover>
@@ -141,7 +162,9 @@ const DateScheduler: React.FC<DateSchedulerProps> = ({
               selected={value.to}
               mode="single"
               onSelect={(date) => date && handleToDateChange(date)}
-              disabled={(date) => date < value.from || date < new Date()} // Ensure calendar does not allow selecting dates before "now" or before the 'from' date
+              disabled={(date) =>
+                date.setHours(0, 0, 0, 0) < value.from.setHours(0, 0, 0, 0)
+              }
             />
           </PopoverContent>
         </Popover>
@@ -238,7 +261,7 @@ const DateScheduler: React.FC<DateSchedulerProps> = ({
                             .toString()
                             .padStart(2, "0")}`}
                         </span>
-                        <span className="text-xs font-semibold">{`(${daysString} ${hoursString} ${minutesString} )`}</span>
+                        <span className="text-xs font-semibold">{`( ${daysString} ${hoursString} ${minutesString} )`}</span>
                       </CommandItem>
                     );
                   })}
