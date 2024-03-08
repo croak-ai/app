@@ -38,7 +38,6 @@ const DateScheduler: React.FC<DateSchedulerProps> = ({
       Math.ceil(initalInterval.getMinutes() / minuteInterval) * minuteInterval,
     );
 
-    // Prevent selecting dates or times before "now"
     if (newFromDate < initalInterval) {
       onChange({
         from: initalInterval,
@@ -73,13 +72,12 @@ const DateScheduler: React.FC<DateSchedulerProps> = ({
 
   const generateToTimeOptions = (dateToValue: Date, dateFromValue: Date) => {
     const times = [];
-    // Create a new Date object for toDate without mutating dateToValue
     const toDate = new Date(dateToValue);
-    toDate.setHours(0, 0, 0, 0); // Set to start of the day without mutating the original dateToValue
+    toDate.setHours(0, 0, 0, 0);
 
     const fromDate = new Date(dateFromValue);
 
-    while (times.length < (60 / minuteInterval) * 24) {
+    while (times.length < (60 / minuteInterval) * 24 - 1) {
       if (toDate > fromDate) {
         times.push(new Date(toDate));
       }
@@ -91,12 +89,11 @@ const DateScheduler: React.FC<DateSchedulerProps> = ({
   const generateFromTimeOptions = (dateFromValue: Date) => {
     const times = [];
     const now = new Date();
-    // Create a new Date object for startOfDay without mutating dateFromValue
     const startOfDay = new Date(dateFromValue);
-    startOfDay.setHours(0, 0, 0, 0); // Set to start of the day without mutating the original dateFromValue
+    startOfDay.setHours(0, 0, 0, 0);
 
     const endOfDay = new Date(startOfDay);
-    endOfDay.setHours(23, 59, 59, 999); // End of the selected day
+    endOfDay.setHours(23, 59, 59, 999);
 
     while (startOfDay.getTime() <= endOfDay.getTime()) {
       if (startOfDay >= now && startOfDay >= dateFromValue) {
@@ -144,6 +141,7 @@ const DateScheduler: React.FC<DateSchedulerProps> = ({
               disabled={(date) =>
                 date < new Date(new Date().setHours(0, 0, 0, 0))
               }
+              className="p-0" // for some reason the p-3 doesn't apply to the right of the calendar so we just disable it with tailwind merge
             />
           </PopoverContent>
         </Popover>
@@ -165,6 +163,7 @@ const DateScheduler: React.FC<DateSchedulerProps> = ({
               disabled={(date) =>
                 date.setHours(0, 0, 0, 0) < value.from.setHours(0, 0, 0, 0)
               }
+              className="p-0"
             />
           </PopoverContent>
         </Popover>
