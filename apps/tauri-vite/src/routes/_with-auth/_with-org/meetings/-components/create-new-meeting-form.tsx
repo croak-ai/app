@@ -13,7 +13,7 @@ import {
 } from "@acme/ui/components/ui/form";
 import { Input } from "@acme/ui/components/ui/input";
 import { Textarea } from "@acme/ui/components/ui/textarea";
-import DateSelector from "@/components/calendar/date-scheduler";
+import DateSelector from "@/routes/_with-auth/_with-org/meetings/-components/date-scheduler";
 import { useForm } from "react-hook-form";
 import Loading from "@acme/ui/components/bonus/loading";
 import { useState } from "react";
