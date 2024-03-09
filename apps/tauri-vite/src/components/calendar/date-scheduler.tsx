@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { Button } from "@acme/ui/components/ui/button";
 import { Calendar } from "@acme/ui/components/ui/calendar";
+import { CalendarClock } from "lucide-react";
 import {
   Popover,
   PopoverTrigger,
@@ -31,6 +32,19 @@ const DateScheduler: React.FC<DateSchedulerProps> = ({
   useEffect(() => {
     console.log(value);
   }, [value]);
+
+  const timeToString = (durationInMinutes: number) => {
+    const days = Math.floor(durationInMinutes / (60 * 24));
+    const daysString = days > 0 ? `${days}d` : "";
+
+    const hours = Math.floor((durationInMinutes % (60 * 24)) / 60);
+    const hoursString = hours > 0 ? `${hours}h ` : "";
+
+    const minutes = durationInMinutes % 60;
+    const minutesString = minutes > 0 ? `${minutes}m` : "";
+
+    return `${daysString} ${hoursString} ${minutesString}`.trim();
+  };
 
   const handleFromDateChange = (newFromDate: Date) => {
     const initalInterval = new Date();
@@ -117,7 +131,8 @@ const DateScheduler: React.FC<DateSchedulerProps> = ({
 
   return (
     <>
-      <div className="my-2 flex justify-between">
+      <div className="ml-2">From</div>
+      <div className="space-x-4">
         {/* Calendar Popovers for 'from' date */}
         <Popover
           onOpenChange={() => setFromCalendarOpen(!fromCalendarOpen)}
@@ -145,30 +160,6 @@ const DateScheduler: React.FC<DateSchedulerProps> = ({
             />
           </PopoverContent>
         </Popover>
-        {/* Calendar Popovers for 'to' date */}
-        <Popover
-          onOpenChange={() => setToCalendarOpen(!toCalendarOpen)}
-          open={toCalendarOpen}
-        >
-          <PopoverTrigger asChild>
-            <Button size="sm" variant={toCalendarOpen ? "default" : "outline"}>
-              {value.to ? value.to.toLocaleDateString() : "Select End Date"}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent>
-            <Calendar
-              selected={value.to}
-              mode="single"
-              onSelect={(date) => date && handleToDateChange(date)}
-              disabled={(date) =>
-                date.setHours(0, 0, 0, 0) < value.from.setHours(0, 0, 0, 0)
-              }
-              className="p-0"
-            />
-          </PopoverContent>
-        </Popover>
-      </div>
-      <div className="mt-2 flex">
         {/* Time Selection for 'from' */}
         <Popover
           onOpenChange={() => setFromTimeOpen(!fromTimeOpen)}
@@ -210,6 +201,33 @@ const DateScheduler: React.FC<DateSchedulerProps> = ({
             </Command>
           </PopoverContent>
         </Popover>
+      </div>
+      <div className="flex items-center">
+        <span className="ml-2">Until</span>
+      </div>
+      <div className="space-x-4">
+        {/* Calendar Popovers for 'to' date */}
+        <Popover
+          onOpenChange={() => setToCalendarOpen(!toCalendarOpen)}
+          open={toCalendarOpen}
+        >
+          <PopoverTrigger asChild>
+            <Button size="sm" variant={toCalendarOpen ? "default" : "outline"}>
+              {value.to ? value.to.toLocaleDateString() : "Select End Date"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent>
+            <Calendar
+              selected={value.to}
+              mode="single"
+              onSelect={(date) => date && handleToDateChange(date)}
+              disabled={(date) =>
+                date.setHours(0, 0, 0, 0) < value.from.setHours(0, 0, 0, 0)
+              }
+              className="p-0"
+            />
+          </PopoverContent>
+        </Popover>
         {/* Time Selection for 'to' */}
         <Popover
           onOpenChange={() => setToTimeOpen(!toTimeOpen)}
@@ -234,16 +252,7 @@ const DateScheduler: React.FC<DateSchedulerProps> = ({
                     const durationInMinutes = Math.floor(
                       (time.getTime() - value.from.getTime()) / (1000 * 60),
                     );
-                    const days = Math.floor(durationInMinutes / (60 * 24));
-                    const daysString = days > 0 ? `${days}d` : "";
-
-                    const hours = Math.floor(
-                      (durationInMinutes % (60 * 24)) / 60,
-                    );
-                    const hoursString = hours > 0 ? `${hours}h ` : "";
-
-                    const minutes = durationInMinutes % 60;
-                    const minutesString = minutes > 0 ? `${minutes}m` : "";
+                    const timeString = timeToString(durationInMinutes);
 
                     return (
                       <CommandItem
@@ -260,7 +269,7 @@ const DateScheduler: React.FC<DateSchedulerProps> = ({
                             .toString()
                             .padStart(2, "0")}`}
                         </span>
-                        <span className="text-xs font-semibold">{`( ${daysString} ${hoursString} ${minutesString} )`}</span>
+                        <span className="text-xs font-semibold">{`(${timeString})`}</span>
                       </CommandItem>
                     );
                   })}
@@ -269,6 +278,17 @@ const DateScheduler: React.FC<DateSchedulerProps> = ({
             </Command>
           </PopoverContent>
         </Popover>
+      </div>
+      <div className="items-cente ml-2 flex">
+        <CalendarClock className="mr-2 h-4 w-4" />
+        <span className="text-xs font-semibold">
+          {timeToString(
+            Math.floor(
+              (value.to.getTime() - value.from.getTime()) / (1000 * 60),
+            ),
+          )}{" "}
+          long
+        </span>
       </div>
     </>
   );
