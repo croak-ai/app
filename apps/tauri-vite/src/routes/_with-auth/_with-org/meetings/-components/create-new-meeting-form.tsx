@@ -14,7 +14,7 @@ import {
 import { Input } from "@acme/ui/components/ui/input";
 import { Textarea } from "@acme/ui/components/ui/textarea";
 import DateSelector from "@/routes/_with-auth/_with-org/meetings/-components/date-scheduler";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import Loading from "@acme/ui/components/bonus/loading";
 import { useState } from "react";
 import { useEffect } from "react";
@@ -22,6 +22,8 @@ import { Separator } from "@acme/ui/components/ui/separator";
 import { Icons } from "@acme/ui/components/bonus/icons";
 import { trpc } from "@/utils/trpc";
 import { useNavigate } from "@tanstack/react-router";
+import MeetingMemberList from "./meeting-member-list";
+import { useUser } from "@clerk/clerk-react";
 
 export default function CreateMeetingForm({
   onCreated,
@@ -32,6 +34,13 @@ export default function CreateMeetingForm({
   const [error, setError] = useState<Error | null>(null);
   const [meetingName, setMeetingName] = useState<string>("");
   const [timeoutId, setTimeoutId] = useState<number | null>(null);
+
+  const { user } = useUser();
+
+  if (!user) {
+    return <></>;
+  }
+
   const navigate = useNavigate({ from: "/create-meeting" });
 
   const utils = trpc.useUtils();
@@ -66,6 +75,15 @@ export default function CreateMeetingForm({
       from: z.date(),
       to: z.date(),
     }),
+    meetingMembers: z.array(
+      z.object({
+        zFullName: z.string().optional(),
+        zImageUrl: z.string().optional(),
+        zUserId: z.string(),
+        zRequired: z.boolean(),
+        zHost: z.boolean(),
+      }),
+    ),
   });
 
   const interval = 30;
@@ -86,7 +104,21 @@ export default function CreateMeetingForm({
         from: initialFrom,
         to: initialTo,
       },
+      meetingMembers: [
+        {
+          zUserId: user.id,
+          zFullName: user.fullName ?? "Name Not Available",
+          zImageUrl: user.imageUrl ?? "",
+          zRequired: true,
+          zHost: true,
+        },
+      ],
     },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "meetingMembers",
   });
 
   useEffect(() => {
@@ -140,6 +172,7 @@ export default function CreateMeetingForm({
       await createMeeting.mutateAsync({
         zName: data.meetingName,
         zDescription: data.meetingDescription,
+        zMeetingMembers: data.meetingMembers,
         zScheduledStart: data.meetingTime.from,
         zScheduledEnd: data.meetingTime.to,
       });
@@ -227,6 +260,24 @@ export default function CreateMeetingForm({
                     Select the date and time range for the meeting.
                   </FormDescription>
                 </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="meetingMembers"
+              render={({ field }) => (
+                <FormControl>
+                  <MeetingMemberList
+                    members={field.value}
+                    onRemoveMember={(zUserId) =>
+                      remove(
+                        field.value.findIndex(
+                          (member) => member.zUserId === zUserId,
+                        ),
+                      )
+                    }
+                  />
+                </FormControl>
               )}
             />
           </form>

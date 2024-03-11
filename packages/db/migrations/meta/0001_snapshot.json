@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "732f38a7-7768-49a2-9bf1-5f9b11b5ade3",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "7aa38d11-40e7-4d7f-9c4c-d93ebbd39e7d",
+  "prevId": "732f38a7-7768-49a2-9bf1-5f9b11b5ade3",
   "tables": {
     "channel": {
       "name": "channel",
@@ -391,57 +391,6 @@
         "message": {
           "name": "message",
           "type": "text(60000)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "deletedAt": {
-          "name": "deletedAt",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "meetingParticipant": {
-      "name": "meetingParticipant",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "meetingId": {
-          "name": "meetingId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "userId": {
-          "name": "userId",
-          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false

@@ -8,16 +8,26 @@ import {
 import { createId } from "@paralleldrive/cuid2";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
-export const user = sqliteTable("user", {
-  userId: text("userId", { length: 256 }).primaryKey(),
-  role: text("role", { length: 256 }).notNull(),
-  firstName: text("firstName", { length: 256 }),
-  lastName: text("lastName", { length: 256 }),
-  email: text("email", { length: 256 }).notNull().unique(),
-  imageUrl: text("imageUrl", { length: 10000 }),
-  createdAt: integer("createdAt").notNull(),
-  updatedAt: integer("updatedAt").notNull(),
-});
+export const user = sqliteTable(
+  "user",
+  {
+    internalId: integer("internalId").primaryKey(),
+    userId: text("userId", { length: 256 }).unique(),
+    role: text("role", { length: 256 }).notNull(),
+    firstName: text("firstName", { length: 256 }),
+    lastName: text("lastName", { length: 256 }),
+    email: text("email", { length: 256 }).notNull().unique(),
+    imageUrl: text("imageUrl", { length: 10000 }),
+    createdAt: integer("createdAt").notNull(),
+    updatedAt: integer("updatedAt").notNull(),
+  },
+  (table) => {
+    return {
+      emailIdx: index("email_idx").on(table.email),
+      userIdIdx: index("userId_idx").on(table.userId),
+    };
+  },
+);
 
 export const workspace = sqliteTable(
   "workspace",
@@ -126,15 +136,6 @@ export const recurringMeeting = sqliteTable("recurringMeeting", {
   deletedAt: integer("deletedAt"),
 });
 
-export const meetingUserParticipant = sqliteTable("meetingParticipant", {
-  id: text("id").$defaultFn(createId).primaryKey(),
-  meetingId: text("meetingId").notNull(),
-  userId: text("userId").notNull(),
-  createdAt: integer("createdAt").notNull(),
-  updatedAt: integer("updatedAt").notNull(),
-  deletedAt: integer("deletedAt"),
-});
-
 export const meetingMessage = sqliteTable("meetingMessage", {
   id: text("id").$defaultFn(createId).primaryKey(),
   meetingId: text("meetingId").notNull(),
@@ -157,6 +158,17 @@ export const meetingTranscriptedMessage = sqliteTable(
     deletedAt: integer("deletedAt"),
   },
 );
+
+export const meetingMember = sqliteTable("meetingMember", {
+  id: text("id").$defaultFn(createId).primaryKey(),
+  bIsHost: integer("bIsHost").notNull().default(0),
+  bIsRequiredToAttend: integer("bIsRequiredToAttend").notNull().default(1),
+  meetingId: text("meetingId").notNull(),
+  userId: text("userId").notNull(),
+  createdAt: integer("createdAt").notNull(),
+  updatedAt: integer("updatedAt").notNull(),
+  deletedAt: integer("deletedAt"),
+});
 
 export const insertRecurringMeetingSchema = createInsertSchema(
   recurringMeeting,

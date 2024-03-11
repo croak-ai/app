@@ -15,6 +15,7 @@ import { getNewestMessage } from "./message/get-newest-message";
 import { syncDev } from "./turso-meta/sync-dev";
 import { meetingNameAvailable } from "./meeting/meeting-name-available";
 import { createMeeting } from "./meeting/create-meeting";
+import { getUserMeetings } from "./meeting/get-user-meetings";
 
 export const appRouter = router({
   createNewTursoDB,
@@ -32,6 +33,7 @@ export const appRouter = router({
   syncDev,
   meetingNameAvailable,
   createMeeting,
+  getUserMeetings,
 });
 
 // export type definition of API
