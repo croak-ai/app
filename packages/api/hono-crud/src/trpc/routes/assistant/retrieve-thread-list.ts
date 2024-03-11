@@ -13,6 +13,7 @@ export const retrieveThreadList = router({
     /* Pull list of user threads */
     const threadListResult = await ctx.db
       .select({
+        id: assistantThread.id,
         threadId: assistantThread.threadId,
       })
       .from(assistantThread)

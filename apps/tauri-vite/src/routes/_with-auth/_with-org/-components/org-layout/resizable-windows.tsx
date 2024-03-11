@@ -17,7 +17,6 @@ interface MailProps {
 
 const ResizableWindows: React.FC<MailProps> = ({
   defaultLayout,
-
   isAICollapsed,
   setAICollapsed,
   children,

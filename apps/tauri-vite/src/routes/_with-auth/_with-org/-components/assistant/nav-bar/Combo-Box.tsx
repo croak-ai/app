@@ -17,6 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@acme/ui/components/ui/popover";
+import { trpc } from "@/utils/trpc";
 
 const frameworks = [
   {
@@ -45,6 +46,10 @@ export default function ComboBox() {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
 
+  const threads = trpc.retrieveThreadList.retrieveThreadList.useQuery();
+  if (!threads.data) return null;
+  const empty = threads.data.length === 0;
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -54,31 +59,34 @@ export default function ComboBox() {
           aria-expanded={open}
           className="w-full"
         >
-          {value
-            ? frameworks.find((framework) => framework.value === value)?.label
-            : "Select framework..."}
+          {empty
+            ? "No threads found"
+            : value
+            ? threads.data.find((thread) => thread.threadId === value)?.threadId
+            : "Select thread..."}
           <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="popover-content-width-same-as-its-trigger p-0">
         <Command>
           <CommandInput placeholder="Search framework..." className="h-9" />
-          <CommandEmpty>No framework found.</CommandEmpty>
+          <CommandEmpty>No thread found.</CommandEmpty>
           <CommandGroup>
-            {frameworks.map((framework) => (
+            {threads.data.map((thread) => (
               <CommandItem
-                key={framework.value}
-                value={framework.value}
+                key={thread.id}
+                value={thread.threadId}
                 onSelect={(currentValue) => {
+                  console.log("currentValue", currentValue);
                   setValue(currentValue === value ? "" : currentValue);
                   setOpen(false);
                 }}
               >
-                {framework.label}
+                {thread.threadId}
                 <CheckIcon
                   className={cn(
                     "ml-auto h-4 w-4",
-                    value === framework.value ? "opacity-100" : "opacity-0",
+                    value === thread.threadId ? "opacity-100" : "opacity-0",
                   )}
                 />
               </CommandItem>
