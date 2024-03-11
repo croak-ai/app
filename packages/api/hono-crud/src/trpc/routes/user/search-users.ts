@@ -8,27 +8,31 @@ export const zSearchUserInput = z.object({
 
 export const searchUsers = router({
   searchUsers: protectedProcedureWithOrgDB
+
     .input(zSearchUserInput)
     .query(async ({ ctx, input }) => {
+      const formattedSearchInput = `"${input.zSearch}"*`;
+      console.log(formattedSearchInput);
       const foundUsers = sql`
-      SELECT rowid, firstName, lastName, email 
-      FROM user_fts 
-      WHERE user_fts MATCH ${input.zSearch}
+      SELECT user.userId, user.firstName, user.lastName, user.email, user.imageUrl
+      FROM user_fts
+      JOIN user ON user_fts.rowid = user.internalId
+      WHERE user_fts MATCH ${formattedSearchInput}
       LIMIT 10;
-    `;
-
+      `;
       const foundUsersResult = await ctx.db.run(foundUsers);
 
       const zUserSearchResult = z.array(
         z.object({
-          rowid: z.number(),
+          userId: z.string(),
           firstName: z.string(),
           lastName: z.string(),
           email: z.string(),
+          imageUrl: z.string().optional(),
         }),
       );
 
-      const parsedResult = zUserSearchResult.parse(foundUsersResult);
+      const parsedResult = zUserSearchResult.parse(foundUsersResult.rows);
 
       return parsedResult;
     }),

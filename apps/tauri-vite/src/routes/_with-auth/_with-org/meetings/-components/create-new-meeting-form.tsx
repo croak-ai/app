@@ -24,6 +24,7 @@ import { trpc } from "@/utils/trpc";
 import { useNavigate } from "@tanstack/react-router";
 import MeetingMemberList from "./meeting-member-list";
 import { useUser } from "@clerk/clerk-react";
+import { UserSearchCombobox } from "./select-users";
 
 export default function CreateMeetingForm({
   onCreated,
@@ -262,22 +263,41 @@ export default function CreateMeetingForm({
                 </FormItem>
               )}
             />
+            <UserSearchCombobox />
             <FormField
               control={form.control}
               name="meetingMembers"
               render={({ field }) => (
-                <FormControl>
-                  <MeetingMemberList
-                    members={field.value}
-                    onRemoveMember={(zUserId) =>
-                      remove(
-                        field.value.findIndex(
-                          (member) => member.zUserId === zUserId,
-                        ),
-                      )
-                    }
-                  />
-                </FormControl>
+                <>
+                  <FormControl>
+                    <MeetingMemberList
+                      members={field.value.filter((member) => member.zRequired)}
+                      onRemoveMember={(zUserId) =>
+                        remove(
+                          field.value.findIndex(
+                            (member) => member.zUserId === zUserId,
+                          ),
+                        )
+                      }
+                    />
+                  </FormControl>
+                  {field.value.some((member) => !member.zRequired) && (
+                    <FormControl>
+                      <MeetingMemberList
+                        members={field.value.filter(
+                          (member) => !member.zRequired,
+                        )}
+                        onRemoveMember={(zUserId) =>
+                          remove(
+                            field.value.findIndex(
+                              (member) => member.zUserId === zUserId,
+                            ),
+                          )
+                        }
+                      />
+                    </FormControl>
+                  )}
+                </>
               )}
             />
           </form>

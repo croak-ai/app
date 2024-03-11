@@ -1,13 +1,4 @@
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@acme/ui/components/ui/sheet";
+import { Sheet, SheetContent } from "@acme/ui/components/ui/sheet";
 import { Plus } from "lucide-react";
 
 import { Button } from "@acme/ui/components/ui/button";
