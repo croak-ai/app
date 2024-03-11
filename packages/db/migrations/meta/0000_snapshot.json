@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "732f38a7-7768-49a2-9bf1-5f9b11b5ade3",
+  "id": "bb77beec-bc47-414d-93ee-694032b2bc38",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "channel": {
@@ -422,57 +422,6 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "meetingParticipant": {
-      "name": "meetingParticipant",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "meetingId": {
-          "name": "meetingId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "userId": {
-          "name": "userId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "deletedAt": {
-          "name": "deletedAt",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
     "message": {
       "name": "message",
       "columns": {
@@ -695,14 +644,21 @@
         },
         "firstName": {
           "name": "firstName",
-          "type": "text(256)",
+          "type": "text(1024)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
         "lastName": {
           "name": "lastName",
-          "type": "text(256)",
+          "type": "text(1024)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "fullName": {
+          "name": "fullName",
+          "type": "text(1024)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false

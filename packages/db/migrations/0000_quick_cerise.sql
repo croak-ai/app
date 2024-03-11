@@ -67,15 +67,6 @@ CREATE TABLE `meetingTranscriptedMessage` (
 	`deletedAt` integer
 );
 --> statement-breakpoint
-CREATE TABLE `meetingParticipant` (
-	`id` text PRIMARY KEY NOT NULL,
-	`meetingId` text NOT NULL,
-	`userId` text NOT NULL,
-	`createdAt` integer NOT NULL,
-	`updatedAt` integer NOT NULL,
-	`deletedAt` integer
-);
---> statement-breakpoint
 CREATE TABLE `message` (
 	`id` text PRIMARY KEY NOT NULL,
 	`channelId` text NOT NULL,
@@ -112,8 +103,9 @@ CREATE TABLE `user` (
 	`internalId` integer PRIMARY KEY NOT NULL,
 	`userId` text(256),
 	`role` text(256) NOT NULL,
-	`firstName` text(256),
-	`lastName` text(256),
+	`firstName` text(1024),
+	`lastName` text(1024),
+	`fullName` text(1024),
 	`email` text(256) NOT NULL,
 	`imageUrl` text(10000),
 	`createdAt` integer NOT NULL,
@@ -142,24 +134,22 @@ CREATE TABLE `workspaceMember` (
 	`deletedAt` integer
 );
 --> statement-breakpoint
-
-CREATE VIRTUAL TABLE user_fts USING fts5(firstName, lastName, email, content="user", content_rowid="internalId");
+CREATE VIRTUAL TABLE user_fts USING fts5(firstName, lastName, fullName, email, content="user", content_rowid="internalId");
 --> statement-breakpoint
 
-
 CREATE TRIGGER user_ai AFTER INSERT ON user BEGIN
-    INSERT INTO user_fts(rowid, firstName, lastName, email) VALUES (new.internalId, new.firstName, new.lastName, new.email);
+    INSERT INTO user_fts(rowid, firstName, lastName, fullName, email) VALUES (new.internalId, new.firstName, new.lastName, new.fullName, new.email);
 END;    
 --> statement-breakpoint
 
 CREATE TRIGGER user_ad AFTER DELETE ON user BEGIN
-    INSERT INTO user_fts(user_fts, rowid, firstName, lastName, email) VALUES('delete', old.internalId, old.firstName, old.lastName, old.email);
+    INSERT INTO user_fts(user_fts, rowid, firstName, lastName, fullName, email) VALUES('delete', old.internalId, old.firstName, old.lastName, old.fullName, old.email);
 END;
 --> statement-breakpoint
 
 CREATE TRIGGER user_au AFTER UPDATE ON user BEGIN
-    INSERT INTO user_fts(user_fts, rowid, firstName, lastName, email) VALUES('delete', old.internalId, old.firstName, old.lastName, old.email);
-    INSERT INTO user_fts(rowid, firstName, lastName, email) VALUES (new.internalId, new.firstName, new.lastName, new.email);
+    INSERT INTO user_fts(user_fts, rowid, firstName, lastName, fullName, email) VALUES('delete', old.internalId, old.firstName, old.lastName, old.fullName, old.email);
+    INSERT INTO user_fts(rowid, firstName, lastName, fullName, email) VALUES (new.internalId, new.firstName, new.lastName, new.fullName, new.email);
 END;
 --> statement-breakpoint
 
