@@ -73,15 +73,18 @@ export function UserSearchCombobox() {
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="max-h-[100px] w-[200px] overflow-y-auto p-0">
+      <PopoverContent
+        className="max-h-[300px] w-[200px] overflow-y-auto p-0"
+        side="top"
+      >
         <Command>
           <CommandList>
+            <UserList />
             <Input
               placeholder="Search user..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <UserList />
           </CommandList>
         </Command>
       </PopoverContent>
