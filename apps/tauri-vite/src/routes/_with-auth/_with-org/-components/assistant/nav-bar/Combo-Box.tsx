@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
+import { History } from "lucide-react";
 
 import { cn } from "@acme/ui/lib/utils";
 import { Button } from "@acme/ui/components/ui/button";
@@ -53,7 +54,8 @@ export default function ComboBox() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
+        <History />
+        {/* <Button
           variant="outline"
           role="combobox"
           aria-expanded={open}
@@ -65,9 +67,9 @@ export default function ComboBox() {
             ? threads.data.find((thread) => thread.threadId === value)?.threadId
             : "Select thread..."}
           <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
+        </Button> */}
       </PopoverTrigger>
-      <PopoverContent className="popover-content-width-same-as-its-trigger p-0">
+      <PopoverContent className="p-0">
         <Command>
           <CommandInput placeholder="Search framework..." className="h-9" />
           <CommandEmpty>No thread found.</CommandEmpty>
