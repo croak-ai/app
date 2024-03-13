@@ -1,24 +1,28 @@
 import * as React from "react";
-import { ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown, Check } from "lucide-react";
 import { Button } from "@acme/ui/components/ui/button";
 import {
   Command,
-  CommandGroup,
-  CommandInput,
   CommandItem,
   CommandList,
 } from "@acme/ui/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@acme/ui/components/ui/popover";
+import { Dialog, DialogContent } from "@acme/ui/components/ui/dialog";
 import { trpc } from "@/utils/trpc";
 import { Skeleton } from "@acme/ui/components/ui/skeleton";
 import { Input } from "@acme/ui/components/ui/input";
+import { Avatar, AvatarImage } from "@acme/ui/components/ui/avatar";
+import { RouterOutput } from "@/utils/trpc";
 
-export function UserSearchCombobox() {
-  const [open, setOpen] = React.useState(false);
+type SearchedUser = RouterOutput["searchUsers"]["searchUsers"][0];
+
+export function UserSearchCombobox({
+  existingUserIds,
+  onSelect,
+}: {
+  existingUserIds: string[];
+  onSelect: (user: SearchedUser) => void;
+}) {
+  const [open, setOpen] = React.useState(false); // Keep the dropdown always open
   const [searchTerm, setSearchTerm] = React.useState("");
   const [selectedUser, setSelectedUser] = React.useState("");
 
@@ -30,8 +34,10 @@ export function UserSearchCombobox() {
   );
 
   const handleSelect = (userId: string) => {
-    setSelectedUser(userId);
-    setOpen(false);
+    const user = data?.find((user) => user.userId === userId);
+    if (user) {
+      onSelect(user); // Call onSelect without closing the dropdown
+    }
   };
 
   const UserList = () => {
@@ -49,45 +55,53 @@ export function UserSearchCombobox() {
           <CommandItem
             key={user.userId}
             onSelect={() => handleSelect(user.userId)}
+            disabled={existingUserIds.includes(user.userId)}
+            className="flex items-center justify-between"
           >
-            {user.firstName} {user.lastName}
+            <div className="flex items-center">
+              <Avatar className="mr-2 h-4 w-4">
+                <AvatarImage
+                  src={user.imageUrl}
+                  alt={`${user.firstName} ${user.lastName}`}
+                />
+              </Avatar>
+              {user.firstName} {user.lastName}
+            </div>
+            {existingUserIds.includes(user.userId) && (
+              <Check className="h-4 w-4" />
+            )}
           </CommandItem>
         ))}
+        <div className="h-4" />
       </>
     );
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-[200px] justify-between"
-        >
-          {selectedUser
-            ? data?.find((user) => user.userId === selectedUser)?.firstName ||
-              "Select user..."
-            : "Select user..."}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent
-        className="max-h-[300px] w-[200px] overflow-y-auto p-0"
-        side="top"
+    <div>
+      <Button
+        variant="secondary"
+        size="sm"
+        type="button"
+        onClick={() => setOpen(true)}
       >
-        <Command>
-          <CommandList>
-            <UserList />
-            <Input
-              placeholder="Search user..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+        Add user {open ? <ChevronsUpDown /> : null}
+      </Button>
+      <Dialog modal={true} open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-h-[300px] w-[200px] overflow-y-auto p-0">
+          asd
+          <Command>
+            <CommandList>
+              <Input
+                placeholder="Search user..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <UserList />
+            </CommandList>
+          </Command>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }

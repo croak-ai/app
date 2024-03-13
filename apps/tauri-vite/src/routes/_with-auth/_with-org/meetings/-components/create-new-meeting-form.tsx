@@ -263,7 +263,18 @@ export default function CreateMeetingForm({
                 </FormItem>
               )}
             />
-            <UserSearchCombobox />
+            <UserSearchCombobox
+              existingUserIds={fields.map((field) => field.zUserId)}
+              onSelect={(user) => {
+                append({
+                  zUserId: user.userId,
+                  zFullName: `${user.firstName} ${user.lastName}`,
+                  zImageUrl: user.imageUrl,
+                  zRequired: false, // Set this based on your logic
+                  zHost: false, // Set this based on your logic
+                });
+              }}
+            />
             <FormField
               control={form.control}
               name="meetingMembers"

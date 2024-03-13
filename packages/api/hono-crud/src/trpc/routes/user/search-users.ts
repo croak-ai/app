@@ -12,7 +12,7 @@ export const searchUsers = router({
     .input(zSearchUserInput)
     .query(async ({ ctx, input }) => {
       const formattedSearchInput = `"${input.zSearch}"*`;
-      console.log(formattedSearchInput);
+
       const foundUsers = sql`
       SELECT user.userId, user.firstName, user.lastName, user.email, user.imageUrl
       FROM user_fts
