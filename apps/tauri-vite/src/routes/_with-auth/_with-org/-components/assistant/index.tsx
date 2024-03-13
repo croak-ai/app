@@ -6,7 +6,11 @@ import { useState } from "react";
 import ChatBox from "./chat-box";
 import NavBar from "./nav-bar";
 
-export default function Assistant() {
+interface AssistantProps {
+  windowSize: number[];
+}
+
+export default function Assistant(props: AssistantProps) {
   // const [input, setInput] = useState("");
   // const [messages, setMessages] = useState<Messages>([]);
   // const [isLoading, setIsLoading] = useState(false);
@@ -15,7 +19,10 @@ export default function Assistant() {
 
   return (
     <div className="flex h-full w-full flex-col items-center">
-      <NavBar />
+      <div style={{ position: "relative", top: 0, left: "-300px" }}>
+        OH FUCK
+      </div>
+      <NavBar windowSize={props.windowSize} />
       <ChatBox />
     </div>
   );

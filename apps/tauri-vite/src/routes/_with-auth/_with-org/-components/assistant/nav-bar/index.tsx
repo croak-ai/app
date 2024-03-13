@@ -5,9 +5,12 @@ import { Button } from "@acme/ui/components/ui/button";
 import NavButton from "./nav-button";
 import ComboBox from "./Combo-Box";
 
-export default function NavBar() {
+interface NavBarProps {
+  windowSize: number[];
+}
+
+export default function NavBar(props: NavBarProps) {
   const [activeButton, setActiveButton] = useState("CHAT");
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   //Send activeButton state to navbarButton to refactor in future
 
   return (
@@ -22,9 +25,9 @@ export default function NavBar() {
           >
             CHAT
           </Button> */}
-          <ComboBox />
         </div>
 
+        <ComboBox windowSize={props.windowSize} />
         <Button className="mx-2 h-6 rounded-none bg-transparent px-0 text-white hover:bg-transparent hover:text-white">
           X
         </Button>

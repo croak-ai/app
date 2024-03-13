@@ -19,6 +19,8 @@ import {
   PopoverTrigger,
 } from "@acme/ui/components/ui/popover";
 import { trpc } from "@/utils/trpc";
+import { useEffect, useRef, useState } from "react";
+import { ProseStateProvider } from "@/components/playground-editor/ProseStateProvider";
 
 const frameworks = [
   {
@@ -43,9 +45,38 @@ const frameworks = [
   },
 ];
 
-export default function ComboBox() {
-  const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState("");
+interface ComboBoxProps {
+  windowSize: number[];
+}
+
+export default function ComboBox(props: ComboBoxProps) {
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState("");
+  const buttonRef = useRef<HTMLButtonElement>(null); // Create a ref for the button
+  const [buttonOffsetFromRight, setButtonOffsetFromRight] = useState(0); // State to hold the offset
+
+  useEffect(() => {
+    const updateButtonOffset = () => {
+      if (buttonRef.current) {
+        const padding = 8;
+        const buttonWidth = buttonRef.current.offsetWidth;
+        const buttonRight = buttonRef.current.getBoundingClientRect().right;
+        const offset = window.innerWidth - buttonRight + buttonWidth - padding;
+        setButtonOffsetFromRight(offset);
+      }
+    };
+
+    // Call the function once when the component mounts
+    updateButtonOffset();
+
+    // Add event listener for window resize
+    window.addEventListener("resize", updateButtonOffset);
+
+    // Clean up the event listener when the component unmounts
+    return () => {
+      window.removeEventListener("resize", updateButtonOffset);
+    };
+  }, [buttonRef.current]); // Empty dependency array ensures the effect runs only on mount and unmount
 
   const threads = trpc.retrieveThreadList.retrieveThreadList.useQuery();
   if (!threads.data) return null;
@@ -54,8 +85,14 @@ export default function ComboBox() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <History />
-        {/* <Button
+        <Button
+          ref={buttonRef}
+          variant="ghost"
+          size="icon"
+          className="h-[1.6rem] w-[1.6rem]"
+        >
+          <History className="h-[1.3rem] w-[1.3rem]" />
+          {/* <Button
           variant="outline"
           role="combobox"
           aria-expanded={open}
@@ -67,9 +104,15 @@ export default function ComboBox() {
             ? threads.data.find((thread) => thread.threadId === value)?.threadId
             : "Select thread..."}
           <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button> */}
+          */}
+        </Button>
       </PopoverTrigger>
-      <PopoverContent className="p-0">
+      <PopoverContent
+        className="w-[400px] p-0"
+        side="left"
+        align="start"
+        sideOffset={props.windowSize[1] - buttonOffsetFromRight}
+      >
         <Command>
           <CommandInput placeholder="Search framework..." className="h-9" />
           <CommandEmpty>No thread found.</CommandEmpty>
