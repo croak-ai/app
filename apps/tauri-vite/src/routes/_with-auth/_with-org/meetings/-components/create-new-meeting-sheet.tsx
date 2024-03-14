@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { Button } from "@acme/ui/components/ui/button";
 import CreateMeetingForm from "./create-new-meeting-form";
 import { useState } from "react";
+import { ScrollArea } from "@acme/ui/components/ui/scroll-area";
 
 export const CreateNewMeetingSheetButton = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,7 +16,9 @@ export const CreateNewMeetingSheetButton = () => {
       </Button>
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetContent side={"left"}>
-          <CreateMeetingForm onCreated={() => setIsOpen(false)} />
+          <ScrollArea className="h-screen pb-4 pr-2">
+            <CreateMeetingForm onCreated={() => setIsOpen(false)} />
+          </ScrollArea>
         </SheetContent>
       </Sheet>
     </>

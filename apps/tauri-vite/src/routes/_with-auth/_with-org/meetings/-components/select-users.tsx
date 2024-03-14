@@ -1,17 +1,15 @@
 import * as React from "react";
-import { ChevronsUpDown, Check } from "lucide-react";
-import { Button } from "@acme/ui/components/ui/button";
+import { Check } from "lucide-react";
 import {
   Command,
   CommandItem,
   CommandList,
 } from "@acme/ui/components/ui/command";
-import { Dialog, DialogContent } from "@acme/ui/components/ui/dialog";
 import { trpc } from "@/utils/trpc";
-import { Skeleton } from "@acme/ui/components/ui/skeleton";
 import { Input } from "@acme/ui/components/ui/input";
 import { Avatar, AvatarImage } from "@acme/ui/components/ui/avatar";
 import { RouterOutput } from "@/utils/trpc";
+import { Icons } from "@acme/ui/components/bonus/icons";
 
 type SearchedUser = RouterOutput["searchUsers"]["searchUsers"][0];
 
@@ -22,9 +20,7 @@ export function UserSearchCombobox({
   existingUserIds: string[];
   onSelect: (user: SearchedUser) => void;
 }) {
-  const [open, setOpen] = React.useState(false); // Keep the dropdown always open
   const [searchTerm, setSearchTerm] = React.useState("");
-  const [selectedUser, setSelectedUser] = React.useState("");
 
   const { data, isFetching } = trpc.searchUsers.searchUsers.useQuery(
     {
@@ -36,21 +32,36 @@ export function UserSearchCombobox({
   const handleSelect = (userId: string) => {
     const user = data?.find((user) => user.userId === userId);
     if (user) {
-      onSelect(user); // Call onSelect without closing the dropdown
+      onSelect(user);
+      setSearchTerm("");
     }
   };
 
+  const spinner = React.useMemo(
+    () => <Icons.spinner className="mx-auto h-4 w-4 animate-spin" />,
+    [],
+  );
   const UserList = () => {
-    if (isFetching) {
-      return <Skeleton />;
+    if (!data) {
+      return <></>;
     }
 
-    if (data?.length === 0) {
-      return <CommandItem>No users found</CommandItem>;
+    const UserContainer = ({ children }: { children: React.ReactNode }) => (
+      <div className="absolute bottom-full z-10 max-h-60 w-full overflow-auto rounded border border-secondary bg-background p-2 shadow-md">
+        {children}
+      </div>
+    );
+
+    if (isFetching) {
+      return <UserContainer>{spinner}</UserContainer>;
+    }
+
+    if (data.length === 0) {
+      return <UserContainer>No users found</UserContainer>;
     }
 
     return (
-      <>
+      <UserContainer>
         {data?.map((user) => (
           <CommandItem
             key={user.userId}
@@ -72,36 +83,22 @@ export function UserSearchCombobox({
             )}
           </CommandItem>
         ))}
-        <div className="h-4" />
-      </>
+      </UserContainer>
     );
   };
 
   return (
-    <div>
-      <Button
-        variant="secondary"
-        size="sm"
-        type="button"
-        onClick={() => setOpen(true)}
-      >
-        Add user {open ? <ChevronsUpDown /> : null}
-      </Button>
-      <Dialog modal={true} open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-h-[300px] w-[200px] overflow-y-auto p-0">
-          asd
-          <Command>
-            <CommandList>
-              <Input
-                placeholder="Search user..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <UserList />
-            </CommandList>
-          </Command>
-        </DialogContent>
-      </Dialog>
+    <div className="relative">
+      <Command>
+        <CommandList>
+          <Input
+            placeholder="Search user..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <UserList />
+        </CommandList>
+      </Command>
     </div>
   );
 }

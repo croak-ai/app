@@ -26,7 +26,7 @@ const MeetingMemberList: React.FC<MemberListProps> = ({
   return (
     <Card>
       <CardContent>
-        <div className="p-2">
+        <div className="max-h-60 overflow-auto p-2">
           {members.map(({ zFullName, zUserId, zImageUrl, zHost }) => (
             <div
               key={zUserId}
@@ -49,6 +49,7 @@ const MeetingMemberList: React.FC<MemberListProps> = ({
                     variant="ghost"
                     size="icon"
                     className="ml-2 h-4 w-4"
+                    type="button"
                   >
                     <X />
                   </Button>

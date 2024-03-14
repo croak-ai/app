@@ -270,7 +270,7 @@ export default function CreateMeetingForm({
                   zUserId: user.userId,
                   zFullName: `${user.firstName} ${user.lastName}`,
                   zImageUrl: user.imageUrl,
-                  zRequired: false, // Set this based on your logic
+                  zRequired: true, // Set this based on your logic
                   zHost: false, // Set this based on your logic
                 });
               }}
