@@ -3,6 +3,9 @@ import { cn } from "@acme/ui/lib/utils";
 import { Button } from "@acme/ui/components/ui/button";
 import { Input } from "@acme/ui/components/ui/input";
 import { useState } from "react";
+import { trpc } from "@/utils/trpc";
+import chat from "openai";
+import OpenAI from "openai";
 
 //Add these types to another file
 type AIMessage = {
@@ -36,9 +39,9 @@ type UserMessage = {
   }[];
 };
 
-type Message = AIMessage | UserMessage;
+type Message = OpenAI.Beta.Threads.Messages.ThreadMessage;
 
-type Messages = Message[];
+type Messages = OpenAI.Beta.Threads.Messages.ThreadMessage[];
 
 interface ChatBoxProps {
   activeThread: string;
@@ -49,12 +52,22 @@ export default function ChatBox(Props: ChatBoxProps) {
   const [messages, setMessages] = useState<Messages>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  /* Store the users message in the state and return its content */
-  function setThreadMessages(thread: string) {}
+  /* set all thread messages in state based on threadId */
+  function setThreadMessages(thread: string) {
+    //We need to figure out how to import the corretc openai type here
+    const messages =
+      trpc.retrieveThreadMessages.retrieveThreadMessages.useQuery({
+        zThreadId: thread,
+      });
+
+    if (!messages.data) return [];
+
+    setMessages(messages.data);
+  }
 
   /* Store the users message in the state and return its content */
   function handleUserMessage() {
-    const userMessage: Message = {
+    const userMessage = {
       id: "1",
       role: "user",
       content: [{ type: "text", text: { value: input, annotations: [] } }],
