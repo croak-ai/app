@@ -96,7 +96,7 @@ export default function ChatBox() {
   }
 
   return (
-    <div className="flex w-full grow flex-col gap-6 overflow-y-auto rounded-sm border border-white p-4 sm:p-8">
+    <div className="flex w-full grow flex-col gap-6 overflow-y-auto rounded-sm p-4 sm:p-8">
       <div className="flex grow flex-col justify-start gap-4 overflow-y-scroll rounded-lg border-slate-400 pr-2">
         {messages.map(({ id, role, content }) => {
           return (
