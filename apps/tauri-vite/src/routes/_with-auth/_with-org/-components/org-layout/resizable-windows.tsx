@@ -74,7 +74,7 @@ const ResizableWindows: React.FC<MailProps> = ({
         )}
         ref={aiPanelRef}
       >
-        <Assistant windowSize={windowSize} />
+        <Assistant />
       </ResizablePanel>
     </ResizablePanelGroup>
   );
