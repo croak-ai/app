@@ -25,8 +25,6 @@ export default function ComboBox() {
   const [value, setValue] = useState("");
 
   const threads = trpc.retrieveThreadList.retrieveThreadList.useQuery();
-  if (!threads.data) return null;
-  const empty = threads.data.length === 0;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -34,19 +32,6 @@ export default function ComboBox() {
       <PopoverTrigger className="mx-0.5 h-[1.4rem] w-[1.4rem]">
         <Button variant="ghost" size="icon" className="h-[1.4rem] w-[1.4rem]">
           <History className="h-[1.1rem] w-[1.1rem]" />
-          {/* <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-full"
-        >
-          {empty
-            ? "No threads found"
-            : value
-            ? threads.data.find((thread) => thread.threadId === value)?.threadId
-            : "Select thread..."}
-          <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          */}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-0" side="left" align="start">
@@ -54,7 +39,7 @@ export default function ComboBox() {
           <CommandInput placeholder="Search framework..." className="h-9" />
           <CommandEmpty>No thread found.</CommandEmpty>
           <CommandGroup>
-            {threads.data.map((thread) => (
+            {threads.data?.map((thread) => (
               <CommandItem
                 key={thread.id}
                 value={thread.threadId}

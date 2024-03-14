@@ -22,7 +22,6 @@ const ResizableWindows: React.FC<MailProps> = ({
   children,
 }) => {
   const aiPanelRef = useRef<ImperativeResizablePanel>(null);
-  const [windowSize, setWindowSize] = React.useState<number[]>(defaultLayout);
 
   useEffect(() => {
     if (aiPanelRef.current) {
@@ -36,11 +35,6 @@ const ResizableWindows: React.FC<MailProps> = ({
     );
   }, [isAICollapsed]);
 
-  const containerWidth = window.innerWidth;
-  const containerHeight = window.innerHeight;
-  console.log("Containerwidth: ", containerWidth);
-  console.log("Windowsize: ", windowSize);
-
   return (
     <ResizablePanelGroup
       direction="horizontal"
@@ -49,11 +43,6 @@ const ResizableWindows: React.FC<MailProps> = ({
           "org-resizable-panels:layout",
           JSON.stringify(sizes),
         );
-        setWindowSize([
-          (sizes[0] / 100) * containerHeight,
-          (sizes[1] / 100) * containerWidth,
-        ]);
-        console.log(sizes);
       }}
     >
       <ResizablePanel defaultSize={defaultLayout[0]}>{children}</ResizablePanel>
