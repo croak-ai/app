@@ -6,15 +6,7 @@ import { useState } from "react";
 import ChatBox from "./chat-box";
 import NavBar from "./nav-bar";
 
-interface AssistantProps {
-  windowSize: number[];
-}
-
-export default function Assistant(props: AssistantProps) {
-  // const [input, setInput] = useState("");
-  // const [messages, setMessages] = useState<Messages>([]);
-  // const [isLoading, setIsLoading] = useState(false);
-
+export default function Assistant() {
   /* Query Assistant with given user message, add Assistant response message to state */
 
   return (
@@ -22,7 +14,7 @@ export default function Assistant(props: AssistantProps) {
       <div style={{ position: "relative", top: 0, left: "-300px" }}>
         OH FUCK
       </div>
-      <NavBar windowSize={props.windowSize} />
+      <NavBar />
       <ChatBox />
     </div>
   );
