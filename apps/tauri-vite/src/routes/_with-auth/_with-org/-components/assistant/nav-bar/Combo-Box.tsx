@@ -16,6 +16,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  PopoverAnchor,
 } from "@acme/ui/components/ui/popover";
 import { trpc } from "@/utils/trpc";
 import { useState } from "react";
@@ -30,7 +31,8 @@ export default function ComboBox() {
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
+      <PopoverAnchor className="absolute bottom-0" />
+      <PopoverTrigger>
         <Button variant="ghost" size="icon" className="h-[1.6rem] w-[1.6rem]">
           <History className="h-[1.3rem] w-[1.3rem]" />
           {/* <Button
@@ -48,7 +50,7 @@ export default function ComboBox() {
           */}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="p-0">
+      <PopoverContent className="p-0" side="left" align="start">
         <Command>
           <CommandInput placeholder="Search framework..." className="h-9" />
           <CommandEmpty>No thread found.</CommandEmpty>

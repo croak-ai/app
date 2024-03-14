@@ -10,7 +10,7 @@ export default function NavBar() {
   //Send activeButton state to navbarButton to refactor in future
 
   return (
-    <div className="m-2 w-full">
+    <div className="relative m-2 w-full">
       <div className="flex w-full items-center justify-between">
         <div className="flex flex-grow px-1">
           {/* <Button

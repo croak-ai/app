@@ -11,9 +11,6 @@ export default function Assistant() {
 
   return (
     <div className="flex h-full w-full flex-col items-center">
-      <div style={{ position: "relative", top: 0, left: "-300px" }}>
-        OH FUCK
-      </div>
       <NavBar />
       <ChatBox />
     </div>
