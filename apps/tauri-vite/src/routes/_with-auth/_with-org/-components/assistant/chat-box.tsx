@@ -41,7 +41,9 @@ type UserMessage = {
 
 type Message = OpenAI.Beta.Threads.Messages.ThreadMessage;
 
-type Messages = OpenAI.Beta.Threads.Messages.ThreadMessage[];
+type Content = OpenAI.Beta.Threads.Messages.MessageContentText;
+
+type Messages = Message[];
 
 interface ChatBoxProps {
   activeThread: string;
@@ -67,16 +69,31 @@ export default function ChatBox(Props: ChatBoxProps) {
 
   /* Store the users message in the state and return its content */
   function handleUserMessage() {
-    const userMessage = {
+    const userMessage: Message = {
       id: "1",
+      object: "thread.message",
+      created_at: 12345,
+      thread_id: "",
       role: "user",
-      content: [{ type: "text", text: { value: input, annotations: [] } }],
+      content: [
+        {
+          type: "text",
+          text: {
+            value: input,
+            annotations: [],
+          },
+        },
+      ],
+      file_ids: [],
+      assistant_id: "",
+      run_id: "",
+      metadata: {},
     };
 
     setInput("");
     setMessages((prevMessages) => [...prevMessages, userMessage]);
     setIsLoading(true);
-    return userMessage.content[0]?.text.value;
+    return userMessage.content[0].text.value;
   }
 
   /* Query Assistant with given user message, add Assistant response message to state */

@@ -1,6 +1,5 @@
 /* Should retrieve the thread and all of its messages */
 
-import { assistantThread } from "@acme/db/schema/tenant";
 import { protectedProcedureWithOrgDB, router } from "../../config/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
