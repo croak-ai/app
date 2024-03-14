@@ -74,7 +74,7 @@ const ResizableWindows: React.FC<MailProps> = ({
         )}
         ref={aiPanelRef}
       >
-        <Assistant />
+        <Assistant setAICollapsed={setAICollapsed} />
       </ResizablePanel>
     </ResizablePanelGroup>
   );

@@ -5,8 +5,13 @@ import { Button } from "@acme/ui/components/ui/button";
 import ComboBox from "./Combo-Box";
 
 import { X, PlusCircle } from "lucide-react";
+import { set } from "zod";
 
-export default function NavBar() {
+interface NavBarProps {
+  setAICollapsed: (collapsed: boolean) => void;
+}
+
+export default function NavBar(Props: NavBarProps) {
   const [activeButton, setActiveButton] = useState("CHAT");
   //Send activeButton state to navbarButton to refactor in future
 
@@ -36,6 +41,7 @@ export default function NavBar() {
           variant="ghost"
           size="icon"
           className="mx-0.5 h-[1.4rem] w-[1.4rem]"
+          onClick={() => Props.setAICollapsed(true)}
         >
           <X className="h-[1.1rem] w-[1.1rem]" />
         </Button>

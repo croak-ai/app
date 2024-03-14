@@ -6,12 +6,16 @@ import { useState } from "react";
 import ChatBox from "./chat-box";
 import NavBar from "./nav-bar";
 
-export default function Assistant() {
+interface AssistantProps {
+  setAICollapsed: (collapsed: boolean) => void;
+}
+
+export default function Assistant(Props: AssistantProps) {
   /* Query Assistant with given user message, add Assistant response message to state */
 
   return (
     <div className="flex h-full w-full flex-col items-center">
-      <NavBar />
+      <NavBar setAICollapsed={Props.setAICollapsed} />
       <ChatBox />
     </div>
   );
