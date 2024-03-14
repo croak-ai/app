@@ -31,7 +31,7 @@ export default function ComboBox() {
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverAnchor className="absolute bottom-0" />
+      <PopoverAnchor className="absolute -bottom-1 -left-1" />
       <PopoverTrigger>
         <Button variant="ghost" size="icon" className="h-[1.6rem] w-[1.6rem]">
           <History className="h-[1.3rem] w-[1.3rem]" />
