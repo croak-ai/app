@@ -2,13 +2,12 @@
 
 import { useState } from "react";
 import { Button } from "@acme/ui/components/ui/button";
-import ComboBox from "./Combo-Box";
-
 import { X, PlusCircle } from "lucide-react";
-import { set } from "zod";
+import ThreadSelection from "./thread-selection";
 
 interface NavBarProps {
   setAICollapsed: (collapsed: boolean) => void;
+  setThread: (thread: string) => void;
 }
 
 export default function NavBar(Props: NavBarProps) {
@@ -37,7 +36,7 @@ export default function NavBar(Props: NavBarProps) {
           </Button>
         </div>
 
-        <ComboBox />
+        <ThreadSelection setThread={Props.setThread} />
         <Button
           variant="ghost"
           size="icon"

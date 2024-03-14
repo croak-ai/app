@@ -11,12 +11,13 @@ interface AssistantProps {
 }
 
 export default function Assistant(Props: AssistantProps) {
+  const [thread, setThread] = useState("");
   /* Query Assistant with given user message, add Assistant response message to state */
 
   return (
     <div className="flex h-full w-full flex-col items-center">
-      <NavBar setAICollapsed={Props.setAICollapsed} />
-      <ChatBox />
+      <NavBar setAICollapsed={Props.setAICollapsed} setThread={setThread} />
+      <ChatBox activeThread={thread} />
     </div>
   );
 }

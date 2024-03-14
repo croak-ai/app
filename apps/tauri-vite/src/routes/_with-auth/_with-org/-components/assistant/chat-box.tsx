@@ -40,10 +40,17 @@ type Message = AIMessage | UserMessage;
 
 type Messages = Message[];
 
-export default function ChatBox() {
+interface ChatBoxProps {
+  activeThread: string;
+}
+
+export default function ChatBox(Props: ChatBoxProps) {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Messages>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  /* Store the users message in the state and return its content */
+  function setThreadMessages(thread: string) {}
 
   /* Store the users message in the state and return its content */
   function handleUserMessage() {

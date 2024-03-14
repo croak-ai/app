@@ -20,7 +20,11 @@ import {
 import { trpc } from "@/utils/trpc";
 import { useState } from "react";
 
-export default function ComboBox() {
+interface ThreadSelectionProps {
+  setThread: (thread: string) => void;
+}
+
+export default function ThreadSelection(Props: ThreadSelectionProps) {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
 
