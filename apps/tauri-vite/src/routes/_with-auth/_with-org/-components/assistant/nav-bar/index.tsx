@@ -2,11 +2,9 @@
 
 import { useState } from "react";
 import { Button } from "@acme/ui/components/ui/button";
-import NavButton from "./nav-button";
 import ComboBox from "./Combo-Box";
 
-import { X } from "lucide-react";
-import { CirclePlus } from "lucide-react";
+import { X, PlusCircle } from "lucide-react";
 
 export default function NavBar() {
   const [activeButton, setActiveButton] = useState("CHAT");
@@ -27,8 +25,19 @@ export default function NavBar() {
         </div>
 
         <ComboBox />
-        <Button variant="ghost" size="icon" className="h-[1.6rem] w-[1.6rem]">
-          <X className="h-[1.3rem] w-[1.3rem]" />
+        <Button
+          variant="ghost"
+          size="icon"
+          className="mx-0.5 h-[1.4rem] w-[1.4rem]"
+        >
+          <PlusCircle className="h-[1.1rem] w-[1.1rem]" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="mx-0.5 h-[1.4rem] w-[1.4rem]"
+        >
+          <X className="h-[1.1rem] w-[1.1rem]" />
         </Button>
       </div>
     </div>
