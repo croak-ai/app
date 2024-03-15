@@ -4,46 +4,12 @@ import { Button } from "@acme/ui/components/ui/button";
 import { Input } from "@acme/ui/components/ui/input";
 import { useState } from "react";
 import { trpc } from "@/utils/trpc";
-import chat from "openai";
 import OpenAI from "openai";
 
-//Add these types to another file
-type AIMessage = {
-  id: string;
-  object: string;
-  created_at: number;
-  thread_id: string;
-  role: string;
-  content: {
-    type: string;
-    text: {
-      value: string;
-      annotations: string[];
-    };
-  }[];
-  file_ids: string[];
-  assistant_id: string;
-  run_id: string;
-  metadata: Record<string, string>;
-};
+type ThreadMessage = OpenAI.Beta.Threads.Messages.ThreadMessage;
+type ThreadMessages = ThreadMessage[];
 
-type UserMessage = {
-  id: string;
-  role: string;
-  content: {
-    type: string;
-    text: {
-      value: string;
-      annotations: string[];
-    };
-  }[];
-};
-
-type Message = OpenAI.Beta.Threads.Messages.ThreadMessage;
-
-type Content = OpenAI.Beta.Threads.Messages.MessageContentText;
-
-type Messages = Message[];
+type MessageContentText = OpenAI.Beta.Threads.Messages.MessageContentText;
 
 interface ChatBoxProps {
   activeThread: string;
@@ -51,7 +17,7 @@ interface ChatBoxProps {
 
 export default function ChatBox(Props: ChatBoxProps) {
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<Messages>([]);
+  const [messages, setMessages] = useState<ThreadMessages>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   /* set all thread messages in state based on threadId */
@@ -68,8 +34,8 @@ export default function ChatBox(Props: ChatBoxProps) {
   }
 
   /* Store the users message in the state and return its content */
-  function handleUserMessage() {
-    const userMessage: Message = {
+  function handleThreadMessage() {
+    const threadMessage: ThreadMessage = {
       id: "1",
       object: "thread.message",
       created_at: 12345,
@@ -91,16 +57,18 @@ export default function ChatBox(Props: ChatBoxProps) {
     };
 
     setInput("");
-    setMessages((prevMessages) => [...prevMessages, userMessage]);
+    setMessages((prevThreadMessages) => [...prevThreadMessages, threadMessage]);
     setIsLoading(true);
-    return userMessage.content[0].text.value;
+
+    const messageContent = threadMessage.content[0] as MessageContentText;
+    return messageContent.text.value;
   }
 
   /* Query Assistant with given user message, add Assistant response message to state */
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    const userMessage = handleUserMessage();
+    const threadMessage = handleThreadMessage();
 
     const endpoint = "http://localhost:3001/assistant";
 
@@ -110,7 +78,7 @@ export default function ChatBox(Props: ChatBoxProps) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message: userMessage }),
+        body: JSON.stringify({ message: threadMessage }),
       });
 
       if (!response.ok) {
@@ -118,12 +86,15 @@ export default function ChatBox(Props: ChatBoxProps) {
       }
 
       const responseData = await response.json();
-      const latestMessage: Message = responseData[0];
+      const threadMessageRes: ThreadMessage = responseData[0];
 
-      if (!latestMessage) {
+      if (!threadMessageRes) {
         throw new Error("Latest message doesn't exist or is undefined");
       }
-      setMessages((prevMessages) => [...prevMessages, latestMessage]);
+      setMessages((prevThreadMessages) => [
+        ...prevThreadMessages,
+        threadMessageRes,
+      ]);
     } catch (error) {
       //Error handling here in future
       console.error("Error:", error);
@@ -136,6 +107,7 @@ export default function ChatBox(Props: ChatBoxProps) {
     <div className="flex w-full grow flex-col gap-6 overflow-y-auto rounded-sm p-4 sm:p-8">
       <div className="flex grow flex-col justify-start gap-4 overflow-y-scroll rounded-lg border-slate-400 pr-2">
         {messages.map(({ id, role, content }) => {
+          const messageContent = content[0] as MessageContentText;
           return (
             <div
               key={id}
@@ -144,7 +116,7 @@ export default function ChatBox(Props: ChatBoxProps) {
                 role === "user" ? "self-start bg-primary" : "self-end",
               )}
             >
-              {content[0]?.text.value}
+              {messageContent.text.value}
             </div>
           );
         })}
