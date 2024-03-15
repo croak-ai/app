@@ -12,7 +12,7 @@ export const user = sqliteTable(
   "user",
   {
     internalId: integer("internalId").primaryKey(),
-    userId: text("userId", { length: 256 }).unique(),
+    userId: text("userId", { length: 256 }).notNull().unique(),
     role: text("role", { length: 256 }).notNull(),
     firstName: text("firstName", { length: 1024 }),
     lastName: text("lastName", { length: 1024 }),

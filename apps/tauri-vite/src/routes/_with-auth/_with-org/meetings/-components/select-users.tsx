@@ -10,6 +10,7 @@ import { Input } from "@acme/ui/components/ui/input";
 import { Avatar, AvatarImage } from "@acme/ui/components/ui/avatar";
 import { RouterOutput } from "@/utils/trpc";
 import { Icons } from "@acme/ui/components/bonus/icons";
+import UserHoverCard from "@/components/user/user-hover-card";
 
 type SearchedUser = RouterOutput["searchUsers"]["searchUsers"][0];
 
@@ -63,25 +64,27 @@ export function UserSearchCombobox({
     return (
       <UserContainer>
         {data?.map((user) => (
-          <CommandItem
-            key={user.userId}
-            onSelect={() => handleSelect(user.userId)}
-            disabled={existingUserIds.includes(user.userId)}
-            className="flex items-center justify-between"
-          >
-            <div className="flex items-center">
-              <Avatar className="mr-2 h-4 w-4">
-                <AvatarImage
-                  src={user.imageUrl}
-                  alt={`${user.firstName} ${user.lastName}`}
-                />
-              </Avatar>
-              {user.firstName} {user.lastName}
-            </div>
-            {existingUserIds.includes(user.userId) && (
-              <Check className="h-4 w-4" />
-            )}
-          </CommandItem>
+          <UserHoverCard userId={user.userId} side={"right"}>
+            <CommandItem
+              key={user.userId}
+              onSelect={() => handleSelect(user.userId)}
+              disabled={existingUserIds.includes(user.userId)}
+              className="flex items-center justify-between"
+            >
+              <div className="flex items-center">
+                <Avatar className="mr-2 h-4 w-4">
+                  <AvatarImage
+                    src={user.imageUrl}
+                    alt={`${user.firstName} ${user.lastName}`}
+                  />
+                </Avatar>
+                {user.firstName} {user.lastName}
+              </div>
+              {existingUserIds.includes(user.userId) && (
+                <Check className="h-4 w-4" />
+              )}
+            </CommandItem>
+          </UserHoverCard>
         ))}
       </UserContainer>
     );

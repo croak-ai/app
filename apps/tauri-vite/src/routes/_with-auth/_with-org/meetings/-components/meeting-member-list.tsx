@@ -7,6 +7,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@acme/ui/components/ui/avatar";
+import UserHoverCard from "@/components/user/user-hover-card";
 
 interface MemberListProps {
   members: {
@@ -28,34 +29,36 @@ const MeetingMemberList: React.FC<MemberListProps> = ({
       <CardContent>
         <div className="max-h-60 overflow-auto p-2">
           {members.map(({ zFullName, zUserId, zImageUrl, zHost }) => (
-            <div
-              key={zUserId}
-              className="mb-2 flex items-center justify-between"
-            >
-              <Badge variant={"outline"}>
-                {zHost && <Crown className="mr-2 h-4 w-4 text-primary" />}
+            <UserHoverCard userId={zUserId} side={"right"}>
+              <div
+                key={zUserId}
+                className="mb-2 flex items-center justify-between"
+              >
+                <Badge variant={"outline"}>
+                  {zHost && <Crown className="mr-2 h-4 w-4 text-primary" />}
 
-                <Avatar className="mr-2 h-4 w-4">
-                  <AvatarImage src={zImageUrl} alt={zFullName} />
-                  <AvatarFallback>
-                    {zFullName ? zFullName[0] : "?"}
-                  </AvatarFallback>
-                </Avatar>
-                {zFullName}
-                {!zHost && (
-                  <Button
-                    onClick={() => onRemoveMember(zUserId)}
-                    aria-label="Remove member"
-                    variant="ghost"
-                    size="icon"
-                    className="ml-2 h-4 w-4"
-                    type="button"
-                  >
-                    <X />
-                  </Button>
-                )}
-              </Badge>
-            </div>
+                  <Avatar className="mr-2 h-4 w-4">
+                    <AvatarImage src={zImageUrl} alt={zFullName} />
+                    <AvatarFallback>
+                      {zFullName ? zFullName[0] : "?"}
+                    </AvatarFallback>
+                  </Avatar>
+                  {zFullName}
+                  {!zHost && (
+                    <Button
+                      onClick={() => onRemoveMember(zUserId)}
+                      aria-label="Remove member"
+                      variant="ghost"
+                      size="icon"
+                      className="ml-2 h-4 w-4"
+                      type="button"
+                    >
+                      <X />
+                    </Button>
+                  )}
+                </Badge>
+              </div>
+            </UserHoverCard>
           ))}
         </div>
       </CardContent>

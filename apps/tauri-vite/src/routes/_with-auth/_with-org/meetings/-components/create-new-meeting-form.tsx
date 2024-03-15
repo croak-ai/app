@@ -195,8 +195,7 @@ export default function CreateMeetingForm({
         <div>
           <h3 className="text-lg font-medium">Create a New Meeting.</h3>
           <p className="text-sm text-muted-foreground">
-            Meetings are where your team collaborates. Make sure the meeting
-            name is unique.
+            Make sure the meeting name is Unique.
           </p>
         </div>
         <Separator />

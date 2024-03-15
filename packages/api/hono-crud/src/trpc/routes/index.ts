@@ -17,6 +17,7 @@ import { meetingNameAvailable } from "./meeting/meeting-name-available";
 import { createMeeting } from "./meeting/create-meeting";
 import { getUserMeetings } from "./meeting/get-user-meetings";
 import { searchUsers } from "./user/search-users";
+import { getUserDetails } from "./user/get-user-details";
 
 export const appRouter = router({
   createNewTursoDB,
@@ -36,6 +37,7 @@ export const appRouter = router({
   createMeeting,
   getUserMeetings,
   searchUsers,
+  getUserDetails,
 });
 
 // export type definition of API

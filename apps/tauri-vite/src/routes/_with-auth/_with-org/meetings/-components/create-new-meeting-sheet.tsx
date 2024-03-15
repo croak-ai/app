@@ -16,7 +16,7 @@ export const CreateNewMeetingSheetButton = () => {
       </Button>
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetContent side={"left"}>
-          <ScrollArea className="h-screen pb-4 pr-2">
+          <ScrollArea className="h-screen pb-4 pr-4">
             <CreateMeetingForm onCreated={() => setIsOpen(false)} />
           </ScrollArea>
         </SheetContent>
