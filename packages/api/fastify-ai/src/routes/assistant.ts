@@ -7,6 +7,7 @@ import { query } from "../ai/functions/query";
 
 type AssistantBody = {
   message: string;
+  thread: string;
 };
 
 export default async function assistant(fastify: FastifyInstance) {

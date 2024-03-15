@@ -16,7 +16,7 @@ export default function Assistant(Props: AssistantProps) {
   return (
     <div className="flex h-full w-full flex-col items-center">
       <NavBar setAICollapsed={Props.setAICollapsed} setThread={setThread} />
-      <ChatBox activeThread={thread} />
+      <ChatBox thread={thread} />
     </div>
   );
 }

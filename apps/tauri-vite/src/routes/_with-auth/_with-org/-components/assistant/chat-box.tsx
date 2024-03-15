@@ -13,7 +13,7 @@ type ThreadMessages = ThreadMessage[];
 type MessageContentText = OpenAI.Beta.Threads.Messages.MessageContentText;
 
 interface ChatBoxProps {
-  activeThread: string;
+  thread: string;
 }
 
 export default function ChatBox(Props: ChatBoxProps) {
@@ -22,19 +22,19 @@ export default function ChatBox(Props: ChatBoxProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const sendMessage = useMutation({
-    mutationFn: (threadMessage: string) => queryAssistant(threadMessage),
+    mutationFn: (body: string) => queryAssistant(body),
   });
 
   /* Send message to AI server for procesing */
-  const queryAssistant = async (threadMessage: string) => {
+  async function queryAssistant(body: string) {
     return fetch("http://localhost:3001/assistant", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ message: threadMessage }),
+      body: body,
     });
-  };
+  }
 
   /* set all thread messages in state based on threadId */
   function queryThreadMessages(thread: string) {
@@ -87,7 +87,16 @@ export default function ChatBox(Props: ChatBoxProps) {
     try {
       const threadMessage = handleThreadMessage();
 
-      const AIResponse = await sendMessage.mutateAsync(threadMessage);
+      /* Pass the thread. If thread is "new" in endpoint then create a new thread and return it
+      If thread is not new then retrieve existing thread and add message to it */
+
+      /* Create request body with message and thread */
+      const body = JSON.stringify({
+        message: threadMessage,
+        thread: Props.thread,
+      });
+
+      const AIResponse = await sendMessage.mutateAsync(body);
 
       const AIThreadMessage: ThreadMessage = await AIResponse.json();
       console.log(AIThreadMessage);
@@ -118,8 +127,8 @@ export default function ChatBox(Props: ChatBoxProps) {
   If thread is not new we query the thread messages and set them in state
   If thread is new we do nothing
   */
-  if (Props.activeThread !== "new") {
-    queryThreadMessages(Props.activeThread);
+  if (Props.thread !== "new") {
+    queryThreadMessages(Props.thread);
   }
 
   return (
