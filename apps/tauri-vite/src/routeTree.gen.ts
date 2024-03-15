@@ -23,6 +23,7 @@ import { Route as WithAuthWithOrgCreateWorkspaceRouteImport } from './routes/_wi
 import { Route as WithAuthWithOrgWorkspaceIndexImport } from './routes/_with-auth/_with-org/workspace/index'
 import { Route as WithAuthWithOrgMeetingsIndexImport } from './routes/_with-auth/_with-org/meetings/index'
 import { Route as WithAuthWithOrgWorkspaceWorkspaceSlugRouteImport } from './routes/_with-auth/_with-org/workspace/$workspaceSlug/route'
+import { Route as WithAuthWithOrgMeetingsMeetingIdRouteImport } from './routes/_with-auth/_with-org/meetings/$meetingId/route'
 import { Route as WithAuthWithOrgWorkspaceWorkspaceSlugIndexImport } from './routes/_with-auth/_with-org/workspace/$workspaceSlug/index'
 import { Route as WithAuthWithOrgWorkspaceWorkspaceSlugChannelChannelIdRouteImport } from './routes/_with-auth/_with-org/workspace/$workspaceSlug/channel/$channelId/route'
 
@@ -105,6 +106,12 @@ const WithAuthWithOrgWorkspaceWorkspaceSlugRouteRoute =
     ).then((d) => d.Route),
   )
 
+const WithAuthWithOrgMeetingsMeetingIdRouteRoute =
+  WithAuthWithOrgMeetingsMeetingIdRouteImport.update({
+    path: '/$meetingId',
+    getParentRoute: () => WithAuthWithOrgMeetingsRouteRoute,
+  } as any)
+
 const WithAuthWithOrgWorkspaceWorkspaceSlugIndexRoute =
   WithAuthWithOrgWorkspaceWorkspaceSlugIndexImport.update({
     path: '/',
@@ -157,6 +164,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WithAuthWithOrgWorkspaceRouteImport
       parentRoute: typeof WithAuthWithOrgRouteImport
     }
+    '/_with-auth/_with-org/meetings/$meetingId': {
+      preLoaderRoute: typeof WithAuthWithOrgMeetingsMeetingIdRouteImport
+      parentRoute: typeof WithAuthWithOrgMeetingsRouteImport
+    }
     '/_with-auth/_with-org/workspace/$workspaceSlug': {
       preLoaderRoute: typeof WithAuthWithOrgWorkspaceWorkspaceSlugRouteImport
       parentRoute: typeof WithAuthWithOrgWorkspaceRouteImport
@@ -188,6 +199,7 @@ export const routeTree = rootRoute.addChildren([
     WithAuthWithOrgRouteRoute.addChildren([
       WithAuthWithOrgCreateWorkspaceRouteRoute,
       WithAuthWithOrgMeetingsRouteRoute.addChildren([
+        WithAuthWithOrgMeetingsMeetingIdRouteRoute,
         WithAuthWithOrgMeetingsIndexRoute,
       ]),
       WithAuthWithOrgWorkspaceRouteRoute.addChildren([

@@ -12,6 +12,8 @@ export const Route = createLazyFileRoute("/_with-auth/_with-org/meetings")({
 });
 
 function MeetingsLayout() {
+  const { meetingsInitialData } = Route.useRouteContext();
+
   const meetingsLayoutValues = localStorage.getItem(
     "meetings-resizable-panels:layout",
   );
@@ -39,7 +41,7 @@ function MeetingsLayout() {
             <CreateNewMeetingSheetButton />
           </div>
           <div className="flex h-full w-full flex-col ">
-            <MeetingList />
+            <MeetingList initialData={meetingsInitialData} />
           </div>
         </ResizablePanel>
         <ResizableHandle />

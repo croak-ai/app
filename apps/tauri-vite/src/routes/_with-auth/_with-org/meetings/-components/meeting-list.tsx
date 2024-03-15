@@ -1,12 +1,26 @@
 import { trpc } from "@/utils/trpc";
-import { Link } from "@tanstack/react-router";
+import { Link, useParams } from "@tanstack/react-router";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
 import { ScrollArea } from "@acme/ui/components/ui/scroll-area";
 import { Badge } from "@acme/ui/components/ui/badge";
 import { Crown } from "lucide-react";
+import { RouterOutput } from "@/utils/trpc";
 
-export default function MeetingList() {
-  const userMeetings = trpc.getUserMeetings.getUserMeetings.useQuery();
+type UserMeetings = RouterOutput["getUserMeetings"]["getUserMeetings"];
+
+export default function MeetingList({
+  initialData,
+}: {
+  initialData?: UserMeetings;
+}) {
+  const { meetingId } = useParams({ strict: false }) as {
+    meetingId: string;
+  };
+
+  const userMeetings = trpc.getUserMeetings.getUserMeetings.useQuery(
+    undefined,
+    { initialData },
+  );
 
   const MeetingItems = () => {
     if (userMeetings.isLoading || !userMeetings.data) {
@@ -22,10 +36,11 @@ export default function MeetingList() {
         <div className="flex flex-col gap-2 p-4 pt-0">
           {userMeetings.data.map((meeting) => (
             <Link
-              to={`/meetings`}
+              to={`/meetings/$meetingId`}
+              params={{ meetingId: meeting.meeting.id }}
               key={meeting.meeting.id}
               className={`flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all hover:bg-accent ${
-                "asd" === meeting.meeting.id ? "bg-muted" : ""
+                meetingId === meeting.meeting.id ? "bg-muted" : ""
               }`}
             >
               <div className="flex w-full flex-col gap-1">
