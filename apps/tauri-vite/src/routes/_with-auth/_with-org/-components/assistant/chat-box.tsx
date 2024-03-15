@@ -5,6 +5,7 @@ import { Input } from "@acme/ui/components/ui/input";
 import { useState } from "react";
 import { trpc } from "@/utils/trpc";
 import OpenAI from "openai";
+import { useMutation } from "@tanstack/react-query";
 
 type ThreadMessage = OpenAI.Beta.Threads.Messages.ThreadMessage;
 type ThreadMessages = ThreadMessage[];
@@ -19,6 +20,21 @@ export default function ChatBox(Props: ChatBoxProps) {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ThreadMessages>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const sendMessage = useMutation({
+    mutationFn: (threadMessage: string) => queryAssistant(threadMessage),
+  });
+
+  /* Send message to AI server for procesing */
+  const queryAssistant = async (threadMessage: string) => {
+    return fetch("http://localhost:3001/assistant", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ message: threadMessage }),
+    });
+  };
 
   /* set all thread messages in state based on threadId */
   function queryThreadMessages(thread: string) {
@@ -36,7 +52,6 @@ export default function ChatBox(Props: ChatBoxProps) {
   /* Store the users message in the state and return its content */
   function handleThreadMessage() {
     setIsLoading(true);
-    setInput("");
 
     const threadMessage: ThreadMessage = {
       id: "1",
@@ -58,7 +73,7 @@ export default function ChatBox(Props: ChatBoxProps) {
       run_id: null,
       metadata: {},
     };
-
+    setInput("");
     setMessages((prevThreadMessages) => [...prevThreadMessages, threadMessage]);
 
     const messageContent = threadMessage.content[0] as MessageContentText;
@@ -69,28 +84,15 @@ export default function ChatBox(Props: ChatBoxProps) {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    const threadMessage = handleThreadMessage();
-
-    const endpoint = "http://localhost:3001/assistant";
-
     try {
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ message: threadMessage }),
-      });
+      const threadMessage = handleThreadMessage();
 
-      if (!response.ok) {
-        throw new Error("HTTP status code out of successful range");
-      }
+      const AIResponse = await sendMessage.mutateAsync(threadMessage);
 
-      const threadMessageRes: ThreadMessage = await response.json();
-      console.log(threadMessageRes);
-      //const threadMessageRes: ThreadMessage = responseData;
+      const AIThreadMessage: ThreadMessage = await AIResponse.json();
+      console.log(AIThreadMessage);
 
-      if (!threadMessageRes) {
+      if (!AIThreadMessage) {
         throw new Error("Latest message doesn't exist or is undefined");
       }
 
@@ -102,11 +104,11 @@ export default function ChatBox(Props: ChatBoxProps) {
 
       setMessages((prevThreadMessages) => [
         ...prevThreadMessages,
-        threadMessageRes,
+        AIThreadMessage,
       ]);
     } catch (error) {
       //Error handling here in future
-      console.error("Error:", error);
+      console.error("Error sending message to AI server:", error);
     } finally {
       setIsLoading(false);
     }

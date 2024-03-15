@@ -105,8 +105,10 @@ export default async function assistant(fastify: FastifyInstance) {
         },
       );
 
-      /* Now we must check the run status again until it is 
-        complete and our response is waiting*/
+      /* 
+      Now we must check the run status again until it is 
+      complete and our response is waiting
+      */
       while (status !== "completed" && finalRunDetails !== null) {
         const runDetails = await openai.beta.threads.runs.retrieve(
           thread.id,
