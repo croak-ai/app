@@ -1,4 +1,3 @@
-import { Card, CardContent } from "@acme/ui/components/ui/card";
 import { Button } from "@acme/ui/components/ui/button";
 import { X, Crown } from "lucide-react";
 import { Badge } from "@acme/ui/components/ui/badge";
@@ -7,7 +6,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@acme/ui/components/ui/avatar";
-import UserHoverCard from "@/components/user/user-hover-card";
+import { UserHoverCard } from "@/components/user/user-card";
 
 interface MemberListProps {
   members: {
@@ -25,11 +24,16 @@ const MeetingMemberList: React.FC<MemberListProps> = ({
   onRemoveMember,
 }) => {
   return (
-    <div className="max-h-60 w-full space-y-2 overflow-auto rounded-sm bg-card p-2">
-      {members.map(({ zFullName, zUserId, zImageUrl, zHost }) => (
-        <div key={zUserId} className="flex items-center justify-between">
+    <div>
+      {members.length > 0 && (
+        <div className="mb-2 text-sm">
+          You have <b>{members.length}</b> members in this meeting
+        </div>
+      )}
+      <div className="max-h-60 w-full space-y-2 overflow-auto rounded-sm bg-card p-2">
+        {members.map(({ zFullName, zUserId, zImageUrl, zHost }) => (
           <UserHoverCard userId={zUserId} side={"right"}>
-            <div>
+            <div key={zUserId} className="flex items-center justify-between">
               <Badge variant={"outline"}>
                 {zHost && <Crown className="mr-2 h-4 w-4 text-primary" />}
 
@@ -55,8 +59,8 @@ const MeetingMemberList: React.FC<MemberListProps> = ({
               </Badge>
             </div>
           </UserHoverCard>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };

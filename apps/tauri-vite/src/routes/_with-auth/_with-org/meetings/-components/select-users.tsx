@@ -10,7 +10,7 @@ import { Input } from "@acme/ui/components/ui/input";
 import { Avatar, AvatarImage } from "@acme/ui/components/ui/avatar";
 import { RouterOutput } from "@/utils/trpc";
 import { Icons } from "@acme/ui/components/bonus/icons";
-import UserHoverCard from "@/components/user/user-hover-card";
+import { UserHoverCard } from "@/components/user/user-card";
 
 type SearchedUser = RouterOutput["searchUsers"]["searchUsers"][0];
 
@@ -58,7 +58,11 @@ export function UserSearchCombobox({
     }
 
     if (data.length === 0) {
-      return <UserContainer>No users found</UserContainer>;
+      return (
+        <UserContainer>
+          <span className="y text-sm opacity-50">No users found</span>
+        </UserContainer>
+      );
     }
 
     return (

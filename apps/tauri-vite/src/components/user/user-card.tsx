@@ -12,6 +12,11 @@ import {
   HoverCardTrigger,
 } from "@acme/ui/components/ui/hover-card";
 import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@acme/ui/components/ui/popover";
+import {
   Dialog,
   DialogContent,
   DialogTrigger,
@@ -24,17 +29,7 @@ import { CheckIcon } from "@radix-ui/react-icons";
 import { Button } from "@acme/ui/components/ui/button";
 import { useState } from "react";
 
-export default function UserHoverCard({
-  children,
-  side,
-  userId,
-}: {
-  children: React.ReactNode;
-  side: "left" | "right" | "top" | "bottom";
-  userId: string;
-}) {
-  const [open, setOpen] = useState(false);
-
+function UserCard({ userId, enabled }: { userId: string; enabled: boolean }) {
   const { userId: currentUserId } = useAuth();
 
   const { workspaceSlug } = useParams({ strict: false }) as {
@@ -45,7 +40,7 @@ export default function UserHoverCard({
     {
       userId,
     },
-    { enabled: open },
+    { enabled: enabled },
   );
 
   const SharedWorkspaces = () => {
@@ -152,10 +147,48 @@ export default function UserHoverCard({
   };
 
   return (
+    <div>
+      <UserDetails />
+    </div>
+  );
+}
+
+export function UserPopoverCard({
+  children,
+  side,
+  userId,
+}: {
+  children: React.ReactNode;
+  side: "left" | "right" | "top" | "bottom";
+  userId: string;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>{children}</PopoverTrigger>
+      <PopoverContent side={side}>
+        <UserCard userId={userId} enabled={open} />
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+export function UserHoverCard({
+  children,
+  side,
+  userId,
+}: {
+  children: React.ReactNode;
+  side: "left" | "right" | "top" | "bottom";
+  userId: string;
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
     <HoverCard openDelay={0} closeDelay={0} open={open} onOpenChange={setOpen}>
       <HoverCardTrigger asChild>{children}</HoverCardTrigger>
       <HoverCardContent className="w-80" side={side}>
-        <UserDetails />
+        <UserCard userId={userId} enabled={open} />
       </HoverCardContent>
     </HoverCard>
   );
