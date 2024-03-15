@@ -22,7 +22,7 @@ export default function ChatBox(Props: ChatBoxProps) {
 
   /* set all thread messages in state based on threadId */
   function setThreadMessages(thread: string) {
-    //We need to figure out how to import the corretc openai type here
+    //We need to figure out how to import the correct openai type here
     const messages =
       trpc.retrieveThreadMessages.retrieveThreadMessages.useQuery({
         zThreadId: thread,
