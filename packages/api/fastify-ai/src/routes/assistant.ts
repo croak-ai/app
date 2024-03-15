@@ -119,10 +119,10 @@ export default async function assistant(fastify: FastifyInstance) {
         await new Promise((resolve) => setTimeout(resolve, 2000));
       }
 
-      // List the assistants response messages
+      /* List the assistants response messages and send the latest */
       const messages = await openai.beta.threads.messages.list(thread.id);
-      //reply.send(messages.data[0]?.content[0]);
-      reply.send(messages.data);
+
+      reply.send(messages.data[0]);
     },
   );
 }

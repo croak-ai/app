@@ -1,7 +1,4 @@
 "use client";
-import { cn } from "@acme/ui/lib/utils";
-import { Button } from "@acme/ui/components/ui/button";
-import { Input } from "@acme/ui/components/ui/input";
 import { useState } from "react";
 import ChatBox from "./chat-box";
 import NavBar from "./nav-bar";
@@ -11,7 +8,9 @@ interface AssistantProps {
 }
 
 export default function Assistant(Props: AssistantProps) {
-  const [thread, setThread] = useState("");
+  /* Pull last thread from local storage or set it to new */
+  const [thread, setThread] = useState("new");
+
   /* Query Assistant with given user message, add Assistant response message to state */
 
   return (

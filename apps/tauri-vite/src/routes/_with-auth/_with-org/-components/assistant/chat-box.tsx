@@ -21,24 +21,27 @@ export default function ChatBox(Props: ChatBoxProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   /* set all thread messages in state based on threadId */
-  function setThreadMessages(thread: string) {
+  function queryThreadMessages(thread: string) {
     //We need to figure out how to import the correct openai type here
-    const messages =
+    const threadMessages =
       trpc.retrieveThreadMessages.retrieveThreadMessages.useQuery({
         zThreadId: thread,
       });
 
-    if (!messages.data) return [];
+    if (!threadMessages.data) return [];
 
-    setMessages(messages.data);
+    setMessages(threadMessages.data);
   }
 
   /* Store the users message in the state and return its content */
   function handleThreadMessage() {
+    setIsLoading(true);
+    setInput("");
+
     const threadMessage: ThreadMessage = {
       id: "1",
       object: "thread.message",
-      created_at: 12345,
+      created_at: Date.now(),
       thread_id: "",
       role: "user",
       content: [
@@ -51,14 +54,12 @@ export default function ChatBox(Props: ChatBoxProps) {
         },
       ],
       file_ids: [],
-      assistant_id: "",
-      run_id: "",
+      assistant_id: null,
+      run_id: null,
       metadata: {},
     };
 
-    setInput("");
     setMessages((prevThreadMessages) => [...prevThreadMessages, threadMessage]);
-    setIsLoading(true);
 
     const messageContent = threadMessage.content[0] as MessageContentText;
     return messageContent.text.value;
@@ -85,12 +86,20 @@ export default function ChatBox(Props: ChatBoxProps) {
         throw new Error("HTTP status code out of successful range");
       }
 
-      const responseData = await response.json();
-      const threadMessageRes: ThreadMessage = responseData[0];
+      const threadMessageRes: ThreadMessage = await response.json();
+      console.log(threadMessageRes);
+      //const threadMessageRes: ThreadMessage = responseData;
 
       if (!threadMessageRes) {
         throw new Error("Latest message doesn't exist or is undefined");
       }
+
+      /* 
+      Our Fastify assistant should return the threadId
+      If thread in current state is "new" we need to do a query to add thread to DB
+      Then we set threadId state.  
+      */
+
       setMessages((prevThreadMessages) => [
         ...prevThreadMessages,
         threadMessageRes,
@@ -101,6 +110,14 @@ export default function ChatBox(Props: ChatBoxProps) {
     } finally {
       setIsLoading(false);
     }
+  }
+
+  /* 
+  If thread is not new we query the thread messages and set them in state
+  If thread is new we do nothing
+  */
+  if (Props.activeThread !== "new") {
+    queryThreadMessages(Props.activeThread);
   }
 
   return (
