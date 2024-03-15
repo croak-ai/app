@@ -22,6 +22,7 @@ import { trpc } from "@/utils/trpc";
 import { Link, useParams } from "@tanstack/react-router";
 import { CheckIcon } from "@radix-ui/react-icons";
 import { Button } from "@acme/ui/components/ui/button";
+import { useState } from "react";
 
 export default function UserHoverCard({
   children,
@@ -32,23 +33,24 @@ export default function UserHoverCard({
   side: "left" | "right" | "top" | "bottom";
   userId: string;
 }) {
+  const [open, setOpen] = useState(false);
+
   const { userId: currentUserId } = useAuth();
 
   const { workspaceSlug } = useParams({ strict: false }) as {
     workspaceSlug: string;
   };
 
-  const { data, isLoading } = trpc.getUserDetails.getUserDetails.useQuery({
-    userId,
-  });
+  const { data, isLoading } = trpc.getUserDetails.getUserDetails.useQuery(
+    {
+      userId,
+    },
+    { enabled: open },
+  );
 
   const SharedWorkspaces = () => {
-    if (isLoading) {
+    if (isLoading || !data) {
       return <Skeleton className="h-12 w-12 rounded-full" />;
-    }
-
-    if (!data) {
-      return <div>User not found</div>;
     }
 
     return (
@@ -110,7 +112,7 @@ export default function UserHoverCard({
   };
 
   const UserDetails = () => {
-    if (isLoading) {
+    if (isLoading || !data) {
       return (
         <div className="flex space-x-4">
           <Skeleton className="h-12 w-12 rounded-full" />
@@ -121,10 +123,6 @@ export default function UserHoverCard({
           </div>
         </div>
       );
-    }
-
-    if (!data) {
-      return <div>User not found</div>;
     }
 
     return (
@@ -154,7 +152,7 @@ export default function UserHoverCard({
   };
 
   return (
-    <HoverCard openDelay={0} closeDelay={0}>
+    <HoverCard openDelay={0} closeDelay={0} open={open} onOpenChange={setOpen}>
       <HoverCardTrigger asChild>{children}</HoverCardTrigger>
       <HoverCardContent className="w-80" side={side}>
         <UserDetails />
