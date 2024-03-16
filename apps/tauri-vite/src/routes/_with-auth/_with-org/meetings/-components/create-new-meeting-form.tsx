@@ -42,7 +42,7 @@ export default function CreateMeetingForm({
     return <></>;
   }
 
-  const navigate = useNavigate({ from: "/create-meeting" });
+  const navigate = useNavigate();
 
   const utils = trpc.useUtils();
 
@@ -170,7 +170,7 @@ export default function CreateMeetingForm({
     try {
       setLoading(true);
 
-      await createMeeting.mutateAsync({
+      const { insertedId } = await createMeeting.mutateAsync({
         zName: data.meetingName,
         zDescription: data.meetingDescription,
         zMeetingMembers: data.meetingMembers,
@@ -180,9 +180,12 @@ export default function CreateMeetingForm({
 
       onCreated?.();
 
-      //   utils.getMeetings.getMeetings.invalidate();
+      utils.getUserMeetings.getUserMeetings.invalidate();
 
-      //   navigate({ to: "/meetings" });
+      navigate({
+        to: "/meetings/$meetingId",
+        params: { meetingId: insertedId },
+      });
     } catch (e) {
       setError(e as Error);
     }
