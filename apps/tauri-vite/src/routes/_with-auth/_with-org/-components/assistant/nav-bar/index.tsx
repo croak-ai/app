@@ -7,7 +7,7 @@ import ThreadSelection from "./thread-selection";
 
 interface NavBarProps {
   setAICollapsed: (collapsed: boolean) => void;
-  setThread: (thread: string) => void;
+  setThreadId: (thread: string) => void;
 }
 
 export default function NavBar(Props: NavBarProps) {
@@ -36,7 +36,7 @@ export default function NavBar(Props: NavBarProps) {
           </Button>
         </div>
 
-        <ThreadSelection setThread={Props.setThread} />
+        <ThreadSelection setThread={Props.setThreadId} />
         <Button
           variant="ghost"
           size="icon"

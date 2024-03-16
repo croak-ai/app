@@ -7,7 +7,7 @@ import { query } from "../ai/functions/query";
 
 type AssistantBody = {
   message: string;
-  thread: string;
+  activeThread: string;
 };
 
 export default async function assistant(fastify: FastifyInstance) {
@@ -20,15 +20,14 @@ export default async function assistant(fastify: FastifyInstance) {
       /* Could rebuild this to store assistant info in a single table instead of JSON */
       const assistant = await createOrRetrieveAssistant();
 
-      const { message } = request.body;
+      const { message, activeThread } = request.body;
       console.log("message: ", message);
 
-      // Initialize a thread
-      /* 
-      We should be grabbing thread ID from request. If thread ID doesnt exist 
-      we create a new thread and store it in the DB here
-       */
-      const thread = await openai.beta.threads.create();
+      /* Either create or retrieve thread based on value of activeThread */
+      const thread =
+        activeThread === "new"
+          ? await openai.beta.threads.create()
+          : await openai.beta.threads.retrieve(activeThread);
 
       //Add message to thread
       await openai.beta.threads.messages.create(thread.id, {
@@ -125,7 +124,7 @@ export default async function assistant(fastify: FastifyInstance) {
       /* List the assistants response messages and send the latest */
       const messages = await openai.beta.threads.messages.list(thread.id);
 
-      reply.send(messages.data[0]);
+      reply.send({ message: messages.data[0], thread: thread });
     },
   );
 }

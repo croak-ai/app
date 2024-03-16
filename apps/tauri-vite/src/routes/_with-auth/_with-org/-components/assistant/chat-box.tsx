@@ -2,7 +2,7 @@
 import { cn } from "@acme/ui/lib/utils";
 import { Button } from "@acme/ui/components/ui/button";
 import { Input } from "@acme/ui/components/ui/input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { trpc } from "@/utils/trpc";
 import OpenAI from "openai";
 import { useMutation } from "@tanstack/react-query";
@@ -11,30 +11,41 @@ type ThreadMessage = OpenAI.Beta.Threads.Messages.ThreadMessage;
 type ThreadMessages = ThreadMessage[];
 
 type MessageContentText = OpenAI.Beta.Threads.Messages.MessageContentText;
+type Thread = OpenAI.Beta.Threads.Thread;
 
 interface ChatBoxProps {
-  thread: string;
+  threadId: string;
+  setThreadId: (thread: string) => void;
+}
+
+interface AIJson {
+  message: ThreadMessage;
+  thread: Thread;
+}
+
+async function queryAssistant(body: string) {
+  return fetch("http://localhost:3001/assistant", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: body,
+  });
 }
 
 export default function ChatBox(Props: ChatBoxProps) {
+  console.log("RERENDERED: ", Props.threadId);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ThreadMessages>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  /* Create new thread in database */
+  const createThread = trpc.createThread.createThread.useMutation();
+
+  /* Send message to AI server for procesing */
   const sendMessage = useMutation({
     mutationFn: (body: string) => queryAssistant(body),
   });
-
-  /* Send message to AI server for procesing */
-  async function queryAssistant(body: string) {
-    return fetch("http://localhost:3001/assistant", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: body,
-    });
-  }
 
   /* set all thread messages in state based on threadId */
   function queryThreadMessages(thread: string) {
@@ -80,7 +91,8 @@ export default function ChatBox(Props: ChatBoxProps) {
     return messageContent.text.value;
   }
 
-  /* Query Assistant with given user message, add Assistant response message to state */
+  /* Send user message to AI server, grab assistant response and add to messages state.
+  If the thread is newly created add the thread to the database, update thread state */
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
@@ -93,27 +105,31 @@ export default function ChatBox(Props: ChatBoxProps) {
       /* Create request body with message and thread */
       const body = JSON.stringify({
         message: threadMessage,
-        thread: Props.thread,
+        activeThread: Props.threadId,
       });
 
       const AIResponse = await sendMessage.mutateAsync(body);
 
-      const AIThreadMessage: ThreadMessage = await AIResponse.json();
-      console.log(AIThreadMessage);
+      const AIJson: AIJson = await AIResponse.json();
+      console.log(AIJson.message);
 
-      if (!AIThreadMessage) {
-        throw new Error("Latest message doesn't exist or is undefined");
+      if (!AIJson.message || !AIJson.thread) {
+        throw new Error("Latest message/thread doesn't exist or is undefined");
       }
 
-      /* 
-      Our Fastify assistant should return the threadId
-      If thread in current state is "new" we need to do a query to add thread to DB
-      Then we set threadId state.  
-      */
+      if (Props.threadId === "new") {
+        await createThread.mutateAsync({
+          zThreadId: AIJson.thread.id,
+          zCreatedAt: AIJson.thread.created_at,
+        });
+        Props.setThreadId(AIJson.thread.id);
+        console.log(AIJson.thread.id);
+        return;
+      }
 
       setMessages((prevThreadMessages) => [
         ...prevThreadMessages,
-        AIThreadMessage,
+        AIJson.message,
       ]);
     } catch (error) {
       //Error handling here in future
@@ -127,9 +143,19 @@ export default function ChatBox(Props: ChatBoxProps) {
   If thread is not new we query the thread messages and set them in state
   If thread is new we do nothing
   */
-  if (Props.thread !== "new") {
-    queryThreadMessages(Props.thread);
-  }
+  useEffect(() => {
+    console.log("QUERY RUN");
+    if (Props.threadId !== "new") {
+      const threadMessages =
+        trpc.retrieveThreadMessages.retrieveThreadMessages.useQuery({
+          zThreadId: Props.threadId,
+        });
+
+      if (!threadMessages.data) return;
+
+      setMessages(threadMessages.data);
+    }
+  }, [Props.threadId]);
 
   return (
     <div className="flex w-full grow flex-col gap-6 overflow-y-auto rounded-sm p-4 sm:p-8">
