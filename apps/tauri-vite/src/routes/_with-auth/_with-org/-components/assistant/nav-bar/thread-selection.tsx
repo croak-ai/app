@@ -27,6 +27,7 @@ interface ThreadSelectionProps {
 export default function ThreadSelection(Props: ThreadSelectionProps) {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
+  console.log("currentValue", value);
 
   const threads = trpc.retrieveThreadList.retrieveThreadList.useQuery();
 
@@ -45,12 +46,16 @@ export default function ThreadSelection(Props: ThreadSelectionProps) {
           <CommandGroup>
             {threads.data?.map((thread) => (
               <CommandItem
+                /* Cant use currentValue because CMDK uses tolowercase
+              We can update to CMDK 1.0 but this breaks ShadCN for now */
                 key={thread.id}
                 value={thread.threadId}
                 onSelect={(currentValue) => {
-                  console.log("currentValue", currentValue);
-                  Props.setThreadId(currentValue);
-                  setValue(currentValue === value ? "" : currentValue);
+                  if (thread.threadId !== value) {
+                    setValue(thread.threadId);
+                    Props.setThreadId(thread.threadId);
+                    setOpen(false);
+                  }
                   setOpen(false);
                 }}
               >
