@@ -18,7 +18,10 @@ export const retrieveThreadMessages = router({
 
       /* Retrieve thread and messages */
       const openAI = new OpenAI({ apiKey: ctx.env.OPENAI_API_KEY });
-      const messages = await openAI.beta.threads.messages.list(input.zThreadId);
+      const messages = await openAI.beta.threads.messages.list(
+        input.zThreadId,
+        { order: "asc" },
+      );
 
       console.log("MESSAGES: ", messages.data);
       if (!messages.data) {

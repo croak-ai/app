@@ -2,7 +2,7 @@
 import { cn } from "@acme/ui/lib/utils";
 import { Button } from "@acme/ui/components/ui/button";
 import { Input } from "@acme/ui/components/ui/input";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { trpc } from "@/utils/trpc";
 import OpenAI from "openai";
 import { useMutation } from "@tanstack/react-query";
