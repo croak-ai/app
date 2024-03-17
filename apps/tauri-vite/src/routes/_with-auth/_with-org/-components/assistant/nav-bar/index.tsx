@@ -36,7 +36,7 @@ export default function NavBar(Props: NavBarProps) {
           </Button>
         </div>
 
-        <ThreadSelection setThread={Props.setThreadId} />
+        <ThreadSelection setThreadId={Props.setThreadId} />
         <Button
           variant="ghost"
           size="icon"

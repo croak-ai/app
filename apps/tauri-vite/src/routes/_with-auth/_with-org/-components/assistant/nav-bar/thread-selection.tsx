@@ -21,7 +21,7 @@ import { trpc } from "@/utils/trpc";
 import { useState } from "react";
 
 interface ThreadSelectionProps {
-  setThread: (thread: string) => void;
+  setThreadId: (thread: string) => void;
 }
 
 export default function ThreadSelection(Props: ThreadSelectionProps) {
@@ -49,6 +49,7 @@ export default function ThreadSelection(Props: ThreadSelectionProps) {
                 value={thread.threadId}
                 onSelect={(currentValue) => {
                   console.log("currentValue", currentValue);
+                  Props.setThreadId(currentValue);
                   setValue(currentValue === value ? "" : currentValue);
                   setOpen(false);
                 }}

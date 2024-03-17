@@ -36,6 +36,15 @@ async function queryAssistant(body: string) {
 export default function ChatBox(Props: ChatBoxProps) {
   console.log("RERENDERED: ", Props.threadId);
 
+  const threadMessages =
+    trpc.retrieveThreadMessages.retrieveThreadMessages.useQuery(
+      {
+        zThreadId: Props.threadId,
+      },
+      { enabled: Props.threadId !== "new" }, // Only fetch data when threadId is not "new"
+    );
+  console.log(threadMessages.data);
+
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ThreadMessages>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -100,9 +109,6 @@ export default function ChatBox(Props: ChatBoxProps) {
     try {
       const threadMessage = handleThreadMessage();
 
-      /* Pass the thread. If thread is "new" in endpoint then create a new thread and return it
-      If thread is not new then retrieve existing thread and add message to it */
-
       /* Create request body with message and thread */
       const body = JSON.stringify({
         message: threadMessage,
@@ -143,13 +149,25 @@ export default function ChatBox(Props: ChatBoxProps) {
   If thread is not new we query the thread messages and set them in state
   If thread is new we do nothing
   */
-  useEffect(() => {
-    console.log("UseEffect hit");
-    if (Props.threadId !== "new") {
-      console.log("UseEffect fetchign thread messages");
-      queryThreadMessages(Props.threadId);
-    }
-  }, [Props.threadId]);
+  // useEffect(() => {
+  //   console.log("UseEffect hit");
+  //   if (Props.threadId !== "new") {
+  //     console.log("UseEffect fetchign thread messages");
+
+  //     const threadMessages =
+  //       trpc.retrieveThreadMessages.retrieveThreadMessages.useQuery({
+  //         zThreadId: Props.threadId,
+  //       });
+
+  //     if (!threadMessages.data) {
+  //       return;
+  //     }
+  //     console.log("MESSAGES SET");
+  //     setMessages(threadMessages.data);
+
+  //     // queryThreadMessages(Props.threadId);
+  //   }
+  // }, [Props.threadId]);
 
   return (
     <div className="flex w-full grow flex-col gap-6 overflow-y-auto rounded-sm p-4 sm:p-8">

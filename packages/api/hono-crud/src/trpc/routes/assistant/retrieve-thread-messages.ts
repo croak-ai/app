@@ -17,9 +17,13 @@ export const retrieveThreadMessages = router({
       // Eventually check if user has permission to use assistant
 
       /* Retrieve thread and messages */
+      console.log("THREAD ID:", input.zThreadId);
       const openAI = new OpenAI({ apiKey: ctx.env.OPENAI_API_KEY });
-      const messages = await openAI.beta.threads.messages.list(input.zThreadId);
+      const messages = await openAI.beta.threads.messages.list(
+        "thread_65vCj6gyeXdkAZakQPyeprsz",
+      );
 
+      console.log("MESSAGES: ", messages.data);
       if (!messages.data) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
