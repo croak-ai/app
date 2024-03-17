@@ -15,6 +15,7 @@ type Thread = OpenAI.Beta.Threads.Thread;
 
 interface ChatBoxProps {
   threadId: string;
+  threadMessages: ThreadMessages;
   setThreadId: (thread: string) => void;
 }
 
@@ -35,40 +36,21 @@ async function queryAssistant(body: string) {
 
 export default function ChatBox(Props: ChatBoxProps) {
   console.log("RERENDERED: ", Props.threadId);
-
-  const threadMessages =
-    trpc.retrieveThreadMessages.retrieveThreadMessages.useQuery(
-      {
-        zThreadId: Props.threadId,
-      },
-      { enabled: Props.threadId !== "new" }, // Only fetch data when threadId is not "new"
-    );
-  console.log(threadMessages.data);
-
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<ThreadMessages>([]);
   const [isLoading, setIsLoading] = useState(false);
+  console.log("PROPS: ", Props.threadMessages);
+  const [messages, setMessages] = useState<ThreadMessages>(
+    Props.threadMessages,
+  );
 
   /* Create new thread in database */
   const createThread = trpc.createThread.createThread.useMutation();
+  console.log("MESSAGES: ", messages);
 
   /* Send message to AI server for procesing */
   const sendMessage = useMutation({
     mutationFn: (body: string) => queryAssistant(body),
   });
-
-  /* set all thread messages in state based on threadId */
-  function queryThreadMessages(thread: string) {
-    //We need to figure out how to import the correct openai type here
-    const threadMessages =
-      trpc.retrieveThreadMessages.retrieveThreadMessages.useQuery({
-        zThreadId: thread,
-      });
-
-    if (!threadMessages.data) return [];
-    console.log("MESSAGES SET");
-    setMessages(threadMessages.data);
-  }
 
   /* Store the users message in the state and return its content */
   function handleThreadMessage() {
@@ -144,30 +126,6 @@ export default function ChatBox(Props: ChatBoxProps) {
       setIsLoading(false);
     }
   }
-
-  /* 
-  If thread is not new we query the thread messages and set them in state
-  If thread is new we do nothing
-  */
-  // useEffect(() => {
-  //   console.log("UseEffect hit");
-  //   if (Props.threadId !== "new") {
-  //     console.log("UseEffect fetchign thread messages");
-
-  //     const threadMessages =
-  //       trpc.retrieveThreadMessages.retrieveThreadMessages.useQuery({
-  //         zThreadId: Props.threadId,
-  //       });
-
-  //     if (!threadMessages.data) {
-  //       return;
-  //     }
-  //     console.log("MESSAGES SET");
-  //     setMessages(threadMessages.data);
-
-  //     // queryThreadMessages(Props.threadId);
-  //   }
-  // }, [Props.threadId]);
 
   return (
     <div className="flex w-full grow flex-col gap-6 overflow-y-auto rounded-sm p-4 sm:p-8">

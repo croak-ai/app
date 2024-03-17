@@ -26,8 +26,9 @@ interface ThreadSelectionProps {
 
 export default function ThreadSelection(Props: ThreadSelectionProps) {
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState("");
-  console.log("currentValue", value);
+  const [value, setValue] = useState("new");
+  /* Pull previously selected thread from local storage here */
+  //console.log("currentValue", value);
 
   const threads = trpc.retrieveThreadList.retrieveThreadList.useQuery();
 
