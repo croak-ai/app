@@ -5,6 +5,7 @@ import { ScrollArea } from "@acme/ui/components/ui/scroll-area";
 import { Badge } from "@acme/ui/components/ui/badge";
 import { Crown } from "lucide-react";
 import { RouterOutput } from "@/utils/trpc";
+import { useMemo } from "react";
 
 type UserMeetings = RouterOutput["getUserMeetings"]["getUserMeetings"];
 
@@ -22,7 +23,7 @@ export default function MeetingList({
     { initialData },
   );
 
-  const MeetingItems = () => {
+  const MeetingItems = useMemo(() => {
     if (userMeetings.isLoading || !userMeetings.data) {
       return <div>Loading...</div>;
     }
@@ -80,11 +81,7 @@ export default function MeetingList({
         </div>
       </ScrollArea>
     );
-  };
+  }, [userMeetings.data, meetingId]); // Dependency array added to only re-render on userMeetings.data or meetingId change
 
-  return (
-    <div className="flex h-full w-full flex-col ">
-      <MeetingItems />
-    </div>
-  );
+  return <div className="flex h-full w-full flex-col ">{MeetingItems}</div>;
 }
