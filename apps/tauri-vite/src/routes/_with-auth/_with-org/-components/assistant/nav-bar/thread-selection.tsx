@@ -33,9 +33,9 @@ export default function ThreadSelection(Props: ThreadSelectionProps) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverAnchor className="absolute -bottom-1 -left-1" />
-      <PopoverTrigger className="mx-0.5 h-[1.4rem] w-[1.4rem]">
+      <PopoverTrigger className="mx-0.5 h-[1.4rem] w-[1.4rem]" asChild>
         <Button variant="ghost" size="icon" className="h-[1.4rem] w-[1.4rem]">
-          <History className="h-[1.1rem] w-[1.1rem]" />
+          <History type={undefined} className="h-[1.1rem] w-[1.1rem]" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-0" side="left" align="start">

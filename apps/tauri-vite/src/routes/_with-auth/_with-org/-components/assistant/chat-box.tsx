@@ -35,15 +35,9 @@ async function queryAssistant(body: string) {
 
 export default function ChatBox(Props: ChatBoxProps) {
   console.log("RERENDERED: ", Props.threadId);
-  const threadMessages =
-    trpc.retrieveThreadMessages.retrieveThreadMessages.useQuery({
-      zThreadId: Props.threadId,
-    });
 
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<ThreadMessages>(
-    threadMessages.data || [],
-  );
+  const [messages, setMessages] = useState<ThreadMessages>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   /* Create new thread in database */
@@ -63,7 +57,7 @@ export default function ChatBox(Props: ChatBoxProps) {
       });
 
     if (!threadMessages.data) return [];
-
+    console.log("MESSAGES SET");
     setMessages(threadMessages.data);
   }
 
@@ -149,12 +143,13 @@ export default function ChatBox(Props: ChatBoxProps) {
   If thread is not new we query the thread messages and set them in state
   If thread is new we do nothing
   */
-  // useEffect(() => {
-  //   console.log("QUERY RUN");
-  //   if (Props.thread !== "new") {
-  //     queryThreadMessages(Props.threadId);
-  //   }
-  // }, [Props.thread]);
+  useEffect(() => {
+    console.log("UseEffect hit");
+    if (Props.threadId !== "new") {
+      console.log("UseEffect fetchign thread messages");
+      queryThreadMessages(Props.threadId);
+    }
+  }, [Props.threadId]);
 
   return (
     <div className="flex w-full grow flex-col gap-6 overflow-y-auto rounded-sm p-4 sm:p-8">
