@@ -10,7 +10,7 @@ interface AssistantProps {
 
 export default function Assistant(Props: AssistantProps) {
   console.log("RELOAD");
-  /* Pull last thread from local storage or set it to new */
+  /* Pull last thread from local storage or set it to new on initial load*/
   const [threadId, setThreadId] = useState("new");
 
   const { data, status } =
@@ -20,7 +20,6 @@ export default function Assistant(Props: AssistantProps) {
       },
       { enabled: threadId !== "new" }, // Only fetch data when threadId is not "new"
     );
-  console.log("QUERY:", data);
 
   if (status === "error") {
     console.log("ERROR fetching threadMessages:", data);
@@ -32,7 +31,12 @@ export default function Assistant(Props: AssistantProps) {
     <div className="flex h-full w-full flex-col items-center">
       <NavBar setAICollapsed={Props.setAICollapsed} setThreadId={setThreadId} />
       {status === "pending" ? (
-        <div>Loading...</div>
+        <ChatBox
+          key={"loading"}
+          threadId={"loading"}
+          threadMessages={[]}
+          setThreadId={setThreadId}
+        />
       ) : (
         <ChatBox
           key={threadId}
