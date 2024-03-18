@@ -9,9 +9,9 @@ interface AssistantProps {
 }
 
 export default function Assistant(Props: AssistantProps) {
-  console.log("RELOAD");
   /* Pull last thread from local storage or set it to new on initial load*/
-  const [threadId, setThreadId] = useState("new");
+  const savedThreadId = localStorage.getItem("threadId") || "new";
+  const [threadId, setThreadId] = useState(savedThreadId);
 
   const { data, status } =
     trpc.retrieveThreadMessages.retrieveThreadMessages.useQuery(
@@ -29,11 +29,15 @@ export default function Assistant(Props: AssistantProps) {
 
   return (
     <div className="flex h-full w-full flex-col items-center">
-      <NavBar setAICollapsed={Props.setAICollapsed} setThreadId={setThreadId} />
+      <NavBar
+        threadId={threadId}
+        setThreadId={setThreadId}
+        setAICollapsed={Props.setAICollapsed}
+      />
       {status === "pending" ? (
         <ChatBox
-          key={"loading"}
-          threadId={"loading"}
+          key={"new"}
+          threadId={"new"}
           threadMessages={[]}
           setThreadId={setThreadId}
         />

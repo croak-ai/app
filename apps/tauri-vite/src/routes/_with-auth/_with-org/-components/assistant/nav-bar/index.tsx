@@ -6,8 +6,9 @@ import { X, PlusCircle } from "lucide-react";
 import ThreadSelection from "./thread-selection";
 
 interface NavBarProps {
-  setAICollapsed: (collapsed: boolean) => void;
+  threadId: string;
   setThreadId: (thread: string) => void;
+  setAICollapsed: (collapsed: boolean) => void;
 }
 
 export default function NavBar(Props: NavBarProps) {
@@ -36,11 +37,19 @@ export default function NavBar(Props: NavBarProps) {
           </Button>
         </div>
 
-        <ThreadSelection setThreadId={Props.setThreadId} />
+        <ThreadSelection
+          key={Props.threadId}
+          setThreadId={Props.setThreadId}
+          threadId={Props.threadId}
+        />
         <Button
           variant="ghost"
           size="icon"
           className="mx-0.5 h-[1.4rem] w-[1.4rem]"
+          onClick={() => {
+            Props.setThreadId("new");
+            localStorage.setItem("threadId", "new");
+          }}
         >
           <PlusCircle className="h-[1.1rem] w-[1.1rem]" />
         </Button>

@@ -21,14 +21,15 @@ import { trpc } from "@/utils/trpc";
 import { useState } from "react";
 
 interface ThreadSelectionProps {
+  threadId: string;
   setThreadId: (thread: string) => void;
 }
 
 export default function ThreadSelection(Props: ThreadSelectionProps) {
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState("new");
+  const [value, setValue] = useState(Props.threadId);
+  console.log("value: ", value);
   /* Pull previously selected thread from local storage here */
-  //console.log("currentValue", value);
 
   const threads = trpc.retrieveThreadList.retrieveThreadList.useQuery();
 
@@ -42,7 +43,7 @@ export default function ThreadSelection(Props: ThreadSelectionProps) {
       </PopoverTrigger>
       <PopoverContent className="p-0" side="left" align="start">
         <Command>
-          <CommandInput placeholder="Search framework..." className="h-9" />
+          <CommandInput placeholder="Search threads..." className="h-9" />
           <CommandEmpty>No thread found.</CommandEmpty>
           <CommandGroup>
             {threads.data?.map((thread) => (
@@ -51,10 +52,11 @@ export default function ThreadSelection(Props: ThreadSelectionProps) {
               We can update to CMDK 1.0 but this breaks ShadCN for now */
                 key={thread.id}
                 value={thread.threadId}
-                onSelect={(currentValue) => {
+                onSelect={() => {
                   if (thread.threadId !== value) {
                     setValue(thread.threadId);
                     Props.setThreadId(thread.threadId);
+                    localStorage.setItem("threadId", thread.threadId);
                     setOpen(false);
                   }
                   setOpen(false);

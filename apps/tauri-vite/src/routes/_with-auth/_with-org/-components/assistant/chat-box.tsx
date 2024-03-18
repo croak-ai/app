@@ -35,17 +35,16 @@ async function queryAssistant(body: string) {
 }
 
 export default function ChatBox(Props: ChatBoxProps) {
-  console.log("RERENDERED: ", Props.threadId);
+  console.log("CHATBOX THREADID: ", Props.threadId);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  console.log("PROPS: ", Props.threadMessages);
+  console.log("CHATBOX MESSAGES: ", Props.threadMessages);
   const [messages, setMessages] = useState<ThreadMessages>(
     Props.threadMessages,
   );
 
   /* Create new thread in database */
   const createThread = trpc.createThread.createThread.useMutation();
-  console.log("MESSAGES: ", messages);
 
   /* Send message to AI server for procesing */
   const sendMessage = useMutation({
@@ -100,7 +99,6 @@ export default function ChatBox(Props: ChatBoxProps) {
       const AIResponse = await sendMessage.mutateAsync(body);
 
       const AIJson: AIJson = await AIResponse.json();
-      console.log(AIJson.message);
 
       if (!AIJson.message || !AIJson.thread) {
         throw new Error("Latest message/thread doesn't exist or is undefined");
@@ -112,7 +110,7 @@ export default function ChatBox(Props: ChatBoxProps) {
           zCreatedAt: AIJson.thread.created_at,
         });
         Props.setThreadId(AIJson.thread.id);
-        console.log(AIJson.thread.id);
+        localStorage.setItem("threadId", AIJson.thread.id);
       }
 
       setMessages((prevThreadMessages) => [
@@ -176,6 +174,7 @@ export default function ChatBox(Props: ChatBoxProps) {
         className="flex items-center gap-2 space-x-2"
       >
         <Input
+          className="focus-visible:ring-0 focus-visible:ring-offset-0"
           type="text"
           autoFocus
           placeholder="Send a message"
