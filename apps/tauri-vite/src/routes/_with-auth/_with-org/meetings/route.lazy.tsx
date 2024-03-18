@@ -4,13 +4,16 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@acme/ui/components/ui/resizable";
-import CreateNewMeetingSheet from "./-components/create-new-meeting-sheet";
+import CreateNewMeetingSheetButton from "./-components/create-new-meeting-sheet";
+import MeetingList from "./-components/meeting-list";
 
 export const Route = createLazyFileRoute("/_with-auth/_with-org/meetings")({
   component: MeetingsLayout,
 });
 
 function MeetingsLayout() {
+  const { meetingsInitialData } = Route.useRouteContext();
+
   const meetingsLayoutValues = localStorage.getItem(
     "meetings-resizable-panels:layout",
   );
@@ -34,8 +37,12 @@ function MeetingsLayout() {
           maxSize={25}
           minSize={15}
         >
-          <CreateNewMeetingSheet />
-          <div className="flex h-full w-full flex-col ">Channels...</div>
+          <div className="flex w-full flex-col items-end p-2">
+            <CreateNewMeetingSheetButton />
+          </div>
+          <div className="flex h-full w-full flex-col ">
+            <MeetingList initialData={meetingsInitialData} />
+          </div>
         </ResizablePanel>
         <ResizableHandle />
         <ResizablePanel defaultSize={defaultMeetingsLayoutValues[1]}>

@@ -24,6 +24,7 @@ const app = new Hono<HonoConfig>()
     "*",
     cors({
       origin: "*",
+      maxAge: 86400, // 86400 seconds = 1 day
     }),
   )
   .use("*", clerk)

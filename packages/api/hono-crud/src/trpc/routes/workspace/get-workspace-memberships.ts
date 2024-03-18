@@ -8,7 +8,7 @@ export const getWorkspaceMemberships = router({
   getWorkspaceMemberships: protectedProcedureWithOrgDB.query(
     async ({ ctx }) => {
       const workspaceMemberships = await ctx.db
-        ?.select()
+        .select()
         .from(workspaceMember)
         .where(eq(workspaceMember.userId, ctx.auth.userId))
         .innerJoin(workspace, eq(workspace.id, workspaceMember.workspaceId));

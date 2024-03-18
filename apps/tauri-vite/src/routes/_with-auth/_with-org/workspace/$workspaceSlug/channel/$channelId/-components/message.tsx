@@ -3,6 +3,8 @@ import {
   AvatarFallback,
   Avatar,
 } from "@acme/ui/components/ui/avatar";
+import { UserPopoverCard } from "@/components/user/user-card";
+import { Button } from "@acme/ui/components/ui/button";
 
 interface Message {
   userId: string;
@@ -72,7 +74,11 @@ export default function Message({ message, previousMessage }: MessageProps) {
       </Avatar>
       <div className="grid gap-1 text-sm">
         <div className="flex items-center gap-1 font-medium text-primary">
-          {effectiveDisplayName}
+          <UserPopoverCard userId={userId} side="top">
+            <Button variant={"link"} className="m-0 inline border-none p-0">
+              {effectiveDisplayName}
+            </Button>
+          </UserPopoverCard>
           <span className="text-xs text-gray-500 dark:text-gray-400">
             {new Date(createdAt).toLocaleTimeString()}
           </span>
