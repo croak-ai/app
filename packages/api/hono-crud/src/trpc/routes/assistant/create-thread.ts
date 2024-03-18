@@ -7,6 +7,7 @@ import { z } from "zod";
 
 export const zCreateThread = z.object({
   zThreadId: z.string().min(2).max(256),
+  zPreview: z.string().max(256),
   zCreatedAt: z.number(),
 });
 
@@ -24,6 +25,7 @@ export const createThread = router({
         .values({
           userId: ctx.auth.userId,
           threadId: input.zThreadId,
+          preview: input.zPreview,
           createdAt: input.zCreatedAt,
           updatedAt: input.zCreatedAt,
         })

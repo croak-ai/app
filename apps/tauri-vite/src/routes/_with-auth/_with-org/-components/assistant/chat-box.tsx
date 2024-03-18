@@ -109,6 +109,7 @@ export default function ChatBox(Props: ChatBoxProps) {
       if (Props.threadId === "new") {
         await createThread.mutateAsync({
           zThreadId: AIJson.thread.id,
+          zPreview: message,
           zCreatedAt: AIJson.thread.created_at,
         });
         Props.setThreadId(AIJson.thread.id);
