@@ -22,6 +22,24 @@ CREATE TABLE `conversationMessage` (
 	`conversationId` text NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE `conversationSummary` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`channelId` text NOT NULL,
+	`conversationId` text NOT NULL,
+	`summaryText` text(500) NOT NULL,
+	`summaryEmbedding` blob NOT NULL,
+	`createdAt` integer NOT NULL,
+	`updatedAt` integer NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE `conversationSummaryRef` (
+	`id` text PRIMARY KEY NOT NULL,
+	`userId` text NOT NULL,
+	`conversationSummaryId` integer NOT NULL,
+	`createdAt` integer NOT NULL,
+	`updatedAt` integer NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE `meeting` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text(256) NOT NULL,
@@ -77,16 +95,6 @@ CREATE TABLE `message` (
 	`deletedAt` integer
 );
 --> statement-breakpoint
-CREATE TABLE `nonGroupedMessage` (
-	`id` text PRIMARY KEY NOT NULL,
-	`channelId` text NOT NULL,
-	`userId` text NOT NULL,
-	`message` text(60000) NOT NULL,
-	`createdAt` integer NOT NULL,
-	`updatedAt` integer NOT NULL,
-	`deletedAt` integer
-);
---> statement-breakpoint
 CREATE TABLE `recurringMeeting` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text(256) NOT NULL,
@@ -99,9 +107,18 @@ CREATE TABLE `recurringMeeting` (
 	`deletedAt` integer
 );
 --> statement-breakpoint
+CREATE TABLE `testTable` (
+	`id` text PRIMARY KEY NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE `unSummarizedMessage` (
+	`id` text PRIMARY KEY NOT NULL,
+	`messageId` text NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE `user` (
 	`internalId` integer PRIMARY KEY NOT NULL,
-	`userId` text(256),
+	`userId` text(256) NOT NULL,
 	`role` text(256) NOT NULL,
 	`firstName` text(1024),
 	`lastName` text(1024),
@@ -134,6 +151,7 @@ CREATE TABLE `workspaceMember` (
 	`deletedAt` integer
 );
 --> statement-breakpoint
+
 CREATE VIRTUAL TABLE user_fts USING fts5(firstName, lastName, fullName, email, content="user", content_rowid="internalId");
 --> statement-breakpoint
 
