@@ -41,20 +41,21 @@ export default function ThreadSelection(Props: ThreadSelectionProps) {
           <History className="h-[1.1rem] w-[1.1rem]" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="p-0" side="left" align="start">
+      <PopoverContent className="w-96 p-0" side="left" align="start">
         <Command>
           <CommandInput placeholder="Search threads..." className="h-9" />
           <CommandEmpty>No threads found.</CommandEmpty>
           <CommandGroup>
             {threads.data?.map((thread) => (
               <CommandItem
+                className=""
                 /* Cant use currentValue because CMDK uses tolowercase
               We can update to CMDK 1.0 but this breaks ShadCN for now */
                 key={thread.id}
-                value={thread.threadId}
+                value={thread.preview}
                 onSelect={() => {
-                  if (thread.threadId !== value) {
-                    setValue(thread.threadId);
+                  if (thread.preview !== value) {
+                    setValue(thread.preview);
                     Props.setThreadId(thread.threadId);
                     localStorage.setItem("threadId", thread.threadId);
                     setOpen(false);
@@ -62,7 +63,7 @@ export default function ThreadSelection(Props: ThreadSelectionProps) {
                   setOpen(false);
                 }}
               >
-                {thread.threadId}
+                <p className="w-[17rem] truncate">{thread.preview}</p>
                 <CheckIcon
                   className={cn(
                     "ml-auto h-4 w-4",
