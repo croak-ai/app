@@ -71,6 +71,7 @@ export const assistantThread = sqliteTable("assistantThread", {
   id: text("id").$defaultFn(createId).primaryKey(),
   userId: text("userId", { length: 256 }).notNull(),
   threadId: text("threadId", { length: 256 }).notNull(),
+  preview: text("preview", { length: 256 }).notNull(),
   createdAt: integer("createdAt").notNull(),
   updatedAt: integer("updatedAt").notNull(),
 });
