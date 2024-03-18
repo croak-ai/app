@@ -7,20 +7,20 @@ import { trpc } from "@/utils/trpc";
 import OpenAI from "openai";
 import { useMutation } from "@tanstack/react-query";
 
-type ThreadMessage = OpenAI.Beta.Threads.Messages.ThreadMessage;
-type ThreadMessages = ThreadMessage[];
+type Message = OpenAI.Beta.Threads.Messages.Message;
+type Messages = Message[];
 
-type MessageContentText = OpenAI.Beta.Threads.Messages.MessageContentText;
+type MessageContentText = OpenAI.Beta.Threads.Messages.TextContentBlock;
 type Thread = OpenAI.Beta.Threads.Thread;
 
 interface ChatBoxProps {
   threadId: string;
-  threadMessages: ThreadMessages;
+  threadMessages: Messages;
   setThreadId: (thread: string) => void;
 }
 
 interface AIJson {
-  message: ThreadMessage;
+  message: Message;
   thread: Thread;
 }
 
@@ -39,9 +39,7 @@ export default function ChatBox(Props: ChatBoxProps) {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   console.log("CHATBOX MESSAGES: ", Props.threadMessages);
-  const [messages, setMessages] = useState<ThreadMessages>(
-    Props.threadMessages,
-  );
+  const [messages, setMessages] = useState<Messages>(Props.threadMessages);
 
   /* Create new thread in database */
   const createThread = trpc.createThread.createThread.useMutation();
@@ -52,13 +50,13 @@ export default function ChatBox(Props: ChatBoxProps) {
   });
 
   /* Store the users message in the state and return its content */
-  function handleThreadMessage() {
+  function handleUserMessage() {
     setIsLoading(true);
-
-    const threadMessage: ThreadMessage = {
+    const currentTime = Date.now();
+    const message: Message = {
       id: "1",
       object: "thread.message",
-      created_at: Date.now(),
+      created_at: currentTime,
       thread_id: "",
       role: "user",
       content: [
@@ -74,11 +72,15 @@ export default function ChatBox(Props: ChatBoxProps) {
       assistant_id: null,
       run_id: null,
       metadata: {},
+      completed_at: currentTime,
+      incomplete_at: currentTime,
+      incomplete_details: null,
+      status: "in_progress",
     };
     setInput("");
-    setMessages((prevThreadMessages) => [...prevThreadMessages, threadMessage]);
+    setMessages((prevMessages) => [...prevMessages, message]);
 
-    const messageContent = threadMessage.content[0] as MessageContentText;
+    const messageContent = message.content[0] as MessageContentText;
     return messageContent.text.value;
   }
 
@@ -88,11 +90,11 @@ export default function ChatBox(Props: ChatBoxProps) {
     e.preventDefault();
 
     try {
-      const threadMessage = handleThreadMessage();
+      const message = handleUserMessage();
 
       /* Create request body with message and thread */
       const body = JSON.stringify({
-        message: threadMessage,
+        message: message,
         activeThread: Props.threadId,
       });
 
@@ -113,10 +115,7 @@ export default function ChatBox(Props: ChatBoxProps) {
         localStorage.setItem("threadId", AIJson.thread.id);
       }
 
-      setMessages((prevThreadMessages) => [
-        ...prevThreadMessages,
-        AIJson.message,
-      ]);
+      setMessages((prevMessages) => [...prevMessages, AIJson.message]);
     } catch (error) {
       //Error handling here in future
       console.error("Error sending message to AI server:", error);
