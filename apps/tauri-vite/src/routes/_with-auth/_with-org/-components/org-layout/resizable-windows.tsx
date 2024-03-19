@@ -6,7 +6,7 @@ import {
 } from "@acme/ui/components/ui/resizable";
 import React, { useRef, useEffect } from "react";
 import { cn } from "@acme/ui/lib/utils";
-import ChatBot from "./chat-bot";
+import Assistant from "../assistant";
 
 interface MailProps {
   defaultLayout: number[];
@@ -17,7 +17,6 @@ interface MailProps {
 
 const ResizableWindows: React.FC<MailProps> = ({
   defaultLayout,
-
   isAICollapsed,
   setAICollapsed,
   children,
@@ -64,7 +63,7 @@ const ResizableWindows: React.FC<MailProps> = ({
         )}
         ref={aiPanelRef}
       >
-        <ChatBot />
+        <Assistant setAICollapsed={setAICollapsed} />
       </ResizablePanel>
     </ResizablePanelGroup>
   );

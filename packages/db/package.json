@@ -17,17 +17,17 @@
     "@planetscale/database": "^1.10.0",
     "@tursodatabase/api": "^1.2.2",
     "chalk": "4.1.2",
-    "drizzle-orm": "^0.28.6",
-    "sqlite-vss": "^0.1.2",
+    "drizzle-orm": "^0.30.2",
     "execa": "^5.1.1",
     "ora": "^5.4.1",
+    "sqlite-vss": "^0.1.2",
     "znv": "^0.4.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/inquirer": "^9.0.7",
     "dotenv-cli": "^7.2.1",
-    "drizzle-kit": "^0.19.13",
+    "drizzle-kit": "^0.20.14",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   }

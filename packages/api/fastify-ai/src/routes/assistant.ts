@@ -7,6 +7,7 @@ import { query } from "../ai/functions/query";
 
 type AssistantBody = {
   message: string;
+  activeThread: string;
 };
 
 export default async function assistant(fastify: FastifyInstance) {
@@ -16,13 +17,17 @@ export default async function assistant(fastify: FastifyInstance) {
       request: FastifyRequest<{ Body: AssistantBody }>,
       reply: FastifyReply,
     ) {
+      /* Could rebuild this to store assistant info in a single table instead of JSON */
       const assistant = await createOrRetrieveAssistant();
 
-      const { message } = request.body;
+      const { message, activeThread } = request.body;
       console.log("message: ", message);
 
-      // Initialize a thread
-      const thread = await openai.beta.threads.create();
+      /* Either create or retrieve thread based on value of activeThread */
+      const thread =
+        activeThread === "new"
+          ? await openai.beta.threads.create()
+          : await openai.beta.threads.retrieve(activeThread);
 
       //Add message to thread
       await openai.beta.threads.messages.create(thread.id, {
@@ -100,8 +105,10 @@ export default async function assistant(fastify: FastifyInstance) {
         },
       );
 
-      /* Now we must check the run status again until it is 
-        complete and our response is waiting*/
+      /* 
+      Now we must check the run status again until it is 
+      complete and our response is waiting
+      */
       while (status !== "completed" && finalRunDetails !== null) {
         const runDetails = await openai.beta.threads.runs.retrieve(
           thread.id,
@@ -114,10 +121,10 @@ export default async function assistant(fastify: FastifyInstance) {
         await new Promise((resolve) => setTimeout(resolve, 2000));
       }
 
-      // List the assistants response messages
+      /* List the assistants response messages and send the latest */
       const messages = await openai.beta.threads.messages.list(thread.id);
-      //reply.send(messages.data[0]?.content[0]);
-      reply.send(messages.data);
+
+      reply.send({ message: messages.data[0], thread: thread });
     },
   );
 }

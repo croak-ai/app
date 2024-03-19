@@ -13,6 +13,9 @@ import { getAvailableGroups } from "./turso-meta/get-available-groups";
 import { getMessages } from "./message/get-messages";
 import { getNewestMessage } from "./message/get-newest-message";
 import { syncDev } from "./turso-meta/sync-dev";
+import { createThread } from "./assistant/create-thread";
+import { retrieveThreadList } from "./assistant/retrieve-thread-list";
+import { retrieveThreadMessages } from "./assistant/retrieve-thread-messages";
 import { meetingNameAvailable } from "./meeting/meeting-name-available";
 import { createMeeting } from "./meeting/create-meeting";
 import { getUserMeetings } from "./meeting/get-user-meetings";
@@ -33,6 +36,9 @@ export const appRouter = router({
   getMessages,
   getNewestMessage,
   syncDev,
+  createThread,
+  retrieveThreadList,
+  retrieveThreadMessages,
   meetingNameAvailable,
   createMeeting,
   getUserMeetings,
