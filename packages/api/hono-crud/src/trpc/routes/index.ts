@@ -16,6 +16,11 @@ import { syncDev } from "./turso-meta/sync-dev";
 import { createThread } from "./assistant/create-thread";
 import { retrieveThreadList } from "./assistant/retrieve-thread-list";
 import { retrieveThreadMessages } from "./assistant/retrieve-thread-messages";
+import { meetingNameAvailable } from "./meeting/meeting-name-available";
+import { createMeeting } from "./meeting/create-meeting";
+import { getUserMeetings } from "./meeting/get-user-meetings";
+import { searchUsers } from "./user/search-users";
+import { getUserDetails } from "./user/get-user-details";
 
 export const appRouter = router({
   createNewTursoDB,
@@ -34,6 +39,11 @@ export const appRouter = router({
   createThread,
   retrieveThreadList,
   retrieveThreadMessages,
+  meetingNameAvailable,
+  createMeeting,
+  getUserMeetings,
+  searchUsers,
+  getUserDetails,
 });
 
 // export type definition of API

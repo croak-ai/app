@@ -66,6 +66,7 @@ export const clerkSync = async ({
           updatedAt: Date.now(),
           firstName: userData.firstName,
           lastName: userData.lastName,
+          fullName: `${userData.firstName} ${userData.lastName}`,
           imageUrl: userData.imageUrl,
         };
       })
@@ -82,6 +83,7 @@ export const clerkSync = async ({
             email: sql`EXCLUDED.email`,
             firstName: sql`EXCLUDED.firstName`,
             lastName: sql`EXCLUDED.lastName`,
+            fullName: sql`EXCLUDED.fullName`,
             imageUrl: sql`EXCLUDED.imageUrl`,
             updatedAt: Date.now(),
           },

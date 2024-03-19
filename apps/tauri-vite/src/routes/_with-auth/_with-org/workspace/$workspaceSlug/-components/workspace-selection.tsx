@@ -186,7 +186,10 @@ export default function WorkspaceSelection() {
             </Button>
           </PopoverTrigger>
 
-          <PopoverContent className="w-[320px] p-0 " align="start">
+          <PopoverContent
+            className="max-h-[300px] w-[320px] p-0 "
+            align="start"
+          >
             <Command className="rounded-lg border shadow-md">
               <CommandInput placeholder="Type a command or search..." />
               <CommandList>

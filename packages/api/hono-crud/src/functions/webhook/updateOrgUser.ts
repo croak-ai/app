@@ -37,6 +37,7 @@ export async function updateOrgUser(
       const updatedUser = {
         firstName: userData.first_name,
         lastName: userData.last_name,
+        fullName: `${userData.first_name} ${userData.last_name}`,
         email: userData.identifier,
         imageUrl: userData.image_url,
         profileImageUrl: userData.profile_image_url,
