@@ -6,6 +6,8 @@ import { useState } from "react";
 import { trpc } from "@/utils/trpc";
 import OpenAI from "openai";
 import { useMutation } from "@tanstack/react-query";
+import { useUser } from "@clerk/clerk-react";
+import croakLogo from "@acme/ui/assets/croakLogo.png";
 
 type Message = OpenAI.Beta.Threads.Messages.Message;
 type Messages = Message[];
@@ -35,11 +37,11 @@ async function queryAssistant(body: string) {
 }
 
 export default function ChatBox(Props: ChatBoxProps) {
-  console.log("CHATBOX THREADID: ", Props.threadId);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  console.log("CHATBOX MESSAGES: ", Props.threadMessages);
   const [messages, setMessages] = useState<Messages>(Props.threadMessages);
+
+  const { user } = useUser();
 
   /* Create new thread in database */
   const createThread = trpc.createThread.createThread.useMutation();
@@ -131,14 +133,36 @@ export default function ChatBox(Props: ChatBoxProps) {
         {messages.map(({ id, role, content }) => {
           const messageContent = content[0] as MessageContentText;
           return (
-            <div
-              key={id}
-              className={cn(
-                "max-w-lg  rounded-xl bg-gray-500 px-4 py-2 text-white [overflow-wrap:anywhere]",
-                role === "user" ? "self-start bg-primary" : "self-end",
+            <div>
+              {role === "user" ? (
+                <div className="my-1 flex items-center">
+                  <img
+                    src={user?.imageUrl}
+                    alt="User"
+                    className="h-6 w-6 rounded-full"
+                  />
+                  <span className="ml-1.5 text-sm">You</span>
+                </div>
+              ) : (
+                <div className="my-1 flex items-center">
+                  <img
+                    src={croakLogo}
+                    alt="Assistant"
+                    className="h-6 w-6 rounded-full"
+                  />
+                  <span className="ml-1.5 text-sm">Assistant</span>
+                </div>
               )}
-            >
-              {messageContent.text.value}
+
+              <div
+                key={id}
+                className={cn(
+                  "max-w-lg rounded-xl bg-gray-500 px-4 py-2 text-white [overflow-wrap:anywhere]",
+                  role === "user" ? "self-start bg-primary" : "self-end",
+                )}
+              >
+                {messageContent.text.value}
+              </div>
             </div>
           );
         })}

@@ -63,7 +63,7 @@ export default function ThreadSelection(Props: ThreadSelectionProps) {
                   setOpen(false);
                 }}
               >
-                <p className="w-[17rem] truncate">{thread.preview}</p>
+                <p className="max-w-[21rem] truncate">{thread.preview}</p>
                 <CheckIcon
                   className={cn(
                     "ml-auto h-4 w-4",
