@@ -1,1 +1,0 @@
-ALTER TABLE assistantThread ADD `preview` text(256) NOT NULL;
