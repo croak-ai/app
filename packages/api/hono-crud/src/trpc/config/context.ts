@@ -20,31 +20,8 @@ export function createTRPCContextFromHonoContext(c: HonoContext) {
       throw new Error("No auth object");
     }
 
-    const clerkInfo = getClerkOrgInfo({ auth });
-
-    if (!clerkInfo) {
-      return {
-        ...opts,
-        db: undefined,
-        clerk,
-        auth,
-        env: c.env,
-      };
-    }
-
-    const { tursoDbName, tursoGroupName, tursoOrgName } = clerkInfo;
-
-    const url = `libsql://${tursoDbName}-${tursoOrgName}.turso.io`;
-    const token = getDbAuthToken({
-      env: c.env,
-      groupName: tursoGroupName,
-    });
-
-    const db = createDbClient(url, token);
-
     return {
       ...opts,
-      db,
       clerk,
       auth,
       env: c.env,

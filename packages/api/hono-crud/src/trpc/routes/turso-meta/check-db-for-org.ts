@@ -1,10 +1,10 @@
-import { protectedProcedure, router } from "../../config/trpc";
+import { protectedProcedureWithOrgDB, router } from "../../config/trpc";
 import { sql } from "drizzle-orm";
 
 export const checkDBForOrg = router({
-  checkDBForOrg: protectedProcedure.query(async ({ ctx }) => {
+  checkDBForOrg: protectedProcedureWithOrgDB.query(async ({ ctx }) => {
     try {
-      const allTables = await ctx?.db?.get(sql`SELECT 1`);
+      const allTables = await ctx.db.get(sql`SELECT 1`);
 
       if (allTables) {
         return true;

@@ -8,3 +8,5 @@ export type RouterInput = inferRouterInputs<AppRouter>;
 export type RouterOutput = inferRouterOutputs<AppRouter>;
 
 export { type AppRouter } from "./trpc/routes";
+
+export { CroakDurableObject } from "./croak-durable-object";

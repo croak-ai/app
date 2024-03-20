@@ -8,5 +8,12 @@ main = 'src/worker.ts'
 [triggers]
 crons = ["* * * * *"]
 
+[durable_objects]
+bindings = [{name = "CROAK_DURABLE_OBJECT", class_name = "CroakDurableObject"}]
+
 [ai]
 binding = "cloudflareAI"
+
+[[migrations]]
+tag = "v1" # Should be unique for each entry
+new_classes = ["CroakDurableObject"]

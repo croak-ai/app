@@ -1,13 +1,11 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import type {
-  R2Bucket,
-  DurableObjectNamespace,
-} from "@cloudflare/workers-types";
+import type { DurableObjectNamespace } from "@cloudflare/workers-types";
 import type { Context, Input } from "hono";
 
 export type Bindings = {
   cloudflareAI: string;
+  CROAK_DURABLE_OBJECT: DurableObjectNamespace;
   OPENAI_API_KEY: string;
   CLERK_SECRET_KEY: string;
   CLERK_PUBLISHABLE_KEY: string;
