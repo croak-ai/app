@@ -137,6 +137,8 @@ export async function summarizeMessages(
       })
       .returning();
 
+    console.log(conversationSummaryResult);
+
     if (!conversationSummaryResult) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
@@ -160,18 +162,18 @@ export async function summarizeMessages(
     /* rows in vss_summaries and conversationSummary need to share the same ID */
     //Now this query is failing for some unknown reason
 
-    // const vectorSQL = sql`INSERT INTO vss_summaries(rowid, summary_embedding)
-    //                   VALUES (${conversationSummaryResult.id}, ${stringEmbedding})`;
+    const vectorSQL = sql`INSERT INTO vss_summaries(rowid, summary_embedding)
+                      VALUES (${conversationSummaryResult.id}, ${stringEmbedding})`;
 
-    // const vss_summary_result = await db.run(vectorSQL);
+    const vss_summary_result = await db.run(vectorSQL);
     // //console.log("Should be inserted");
 
-    // if (!vss_summary_result) {
-    //   throw new TRPCError({
-    //     code: "INTERNAL_SERVER_ERROR",
-    //     message: "Failed to insert conversation summary into vector table",
-    //   });
-    // }
+    if (!vss_summary_result) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to insert conversation summary into vector table",
+      });
+    }
 
     return;
   } catch (error) {
