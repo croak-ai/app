@@ -29,16 +29,40 @@ export default async function assistant(fastify: FastifyInstance) {
           ? await openai.beta.threads.create()
           : await openai.beta.threads.retrieve(activeThread);
 
-      //Add message to thread
+      //Add message to new or existing thread
       await openai.beta.threads.messages.create(thread.id, {
         role: "user",
         content: message,
       });
 
-      //Run the assistant with the thread we just created
-      const run = await openai.beta.threads.runs.create(thread.id, {
-        assistant_id: assistant.id,
-      });
+      //Run the assistant with the thread
+
+      const run = openai.beta.threads.runs
+        .createAndStream(thread.id, {
+          assistant_id: assistant.id,
+        })
+        .on("textCreated", (text) => process.stdout.write("\nassistant > "))
+        .on("textDelta", (textDelta, snapshot) =>
+          process.stdout.write(textDelta.value as string),
+        )
+        .on("toolCallCreated", (toolCall) =>
+          process.stdout.write(`\nassistant > ${toolCall.type}\n\n`),
+        )
+        .on("toolCallDelta", (toolCallDelta, snapshot) => {
+          if (toolCallDelta.type === "code_interpreter") {
+            if (toolCallDelta?.code_interpreter?.input) {
+              process.stdout.write(toolCallDelta.code_interpreter.input);
+            }
+            if (toolCallDelta?.code_interpreter?.outputs) {
+              process.stdout.write("\noutput >\n");
+              toolCallDelta.code_interpreter.outputs.forEach((output) => {
+                if (output.type === "logs") {
+                  process.stdout.write(`\n${output.logs}\n`);
+                }
+              });
+            }
+          }
+        });
 
       /*
       CRUCIAL
@@ -47,79 +71,78 @@ export default async function assistant(fastify: FastifyInstance) {
       function to answer the question
       
       This run will return complete and we must act accordingly and send the response
-
-
       */
+
       //Check run status periodically
       // (Wait until assistant chooses a function for us to use, then run it)
-      let status: string | null = null;
-      let finalRunDetails: Run | null = null;
-      while (status !== "requires_action" || finalRunDetails === null) {
-        const runDetails = await openai.beta.threads.runs.retrieve(
-          thread.id,
-          run.id,
-        );
-        console.log(status);
-        console.log("polling run1");
-        status = runDetails.status;
-        finalRunDetails = runDetails;
-        // Introduce a 2-second delay before the next iteration
-        await new Promise((resolve) => setTimeout(resolve, 2000)); // Delay for 2000 milliseconds (2 seconds)
-      }
+      // let status: string | null = null;
+      // let finalRunDetails: Run | null = null;
+      // while (status !== "requires_action" || finalRunDetails === null) {
+      //   const runDetails = await openai.beta.threads.runs.retrieve(
+      //     thread.id,
+      //     run.id,
+      //   );
+      //   console.log(status);
+      //   console.log("polling run1");
+      //   status = runDetails.status;
+      //   finalRunDetails = runDetails;
+      //   // Introduce a 2-second delay before the next iteration
+      //   await new Promise((resolve) => setTimeout(resolve, 2000)); // Delay for 2000 milliseconds (2 seconds)
+      // }
 
-      const tool =
-        finalRunDetails?.required_action?.submit_tool_outputs.tool_calls[0];
+      // const tool =
+      //   finalRunDetails?.required_action?.submit_tool_outputs.tool_calls[0];
 
-      if (!tool) {
-        reply.send("Tool call sent back by openAI doesnt exist");
-        return;
-      }
+      // if (!tool) {
+      //   reply.send("Tool call sent back by openAI doesnt exist");
+      //   return;
+      // }
 
       //This is how we will map string function names to actual functions
       // eslint-disable-next-line @typescript-eslint/ban-types
-      const aiFunctionsByName: { [key: string]: Function } = {
-        query,
-      };
+      // const aiFunctionsByName: { [key: string]: Function } = {
+      //   query,
+      // };
 
       //Get function ai chose
-      const aiFunction = aiFunctionsByName[tool.function.name];
+      // const aiFunction = aiFunctionsByName[tool.function.name];
 
-      if (!aiFunction) {
-        reply.send(
-          "AI is choosing a tool, however our json object is not matching it correctly",
-        );
-        return;
-      }
+      // if (!aiFunction) {
+      //   reply.send(
+      //     "AI is choosing a tool, however our json object is not matching it correctly",
+      //   );
+      //   return;
+      // }
 
       //Running our chosen function and feeding the results back to OpenAI
-      const toolSubmit = await openai.beta.threads.runs.submitToolOutputs(
-        thread.id,
-        run.id,
-        {
-          tool_outputs: [
-            {
-              tool_call_id: tool?.id,
-              output: await aiFunction(JSON.parse(tool?.function.arguments)),
-            },
-          ],
-        },
-      );
+      // const toolSubmit = await openai.beta.threads.runs.submitToolOutputs(
+      //   thread.id,
+      //   run.id,
+      //   {
+      //     tool_outputs: [
+      //       {
+      //         tool_call_id: tool?.id,
+      //         output: await aiFunction(JSON.parse(tool?.function.arguments)),
+      //       },
+      //     ],
+      //   },
+      // );
 
       /* 
       Now we must check the run status again until it is 
       complete and our response is waiting
       */
-      while (status !== "completed" && finalRunDetails !== null) {
-        const runDetails = await openai.beta.threads.runs.retrieve(
-          thread.id,
-          run.id,
-        );
-        console.log("polling run2");
-        status = runDetails.status;
-        finalRunDetails = runDetails;
+      // while (status !== "completed" && finalRunDetails !== null) {
+      //   const runDetails = await openai.beta.threads.runs.retrieve(
+      //     thread.id,
+      //     run.id,
+      //   );
+      //   console.log("polling run2");
+      //   status = runDetails.status;
+      //   finalRunDetails = runDetails;
 
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-      }
+      //   await new Promise((resolve) => setTimeout(resolve, 2000));
+      // }
 
       /* List the assistants response messages and send the latest */
       const messages = await openai.beta.threads.messages.list(thread.id);
