@@ -108,7 +108,7 @@ export const conversationSummary = sqliteTable("conversationSummary", {
   channelId: text("channelId").notNull(),
   conversationId: text("conversationId").notNull(),
   summaryText: text("summaryText", { length: 500 }).notNull(),
-  summaryEmbedding: blob("summaryEmbedding").notNull(),
+  summaryEmbedding: text("summaryEmbedding").notNull(),
   createdAt: integer("createdAt").notNull(),
   updatedAt: integer("updatedAt").notNull(),
 });

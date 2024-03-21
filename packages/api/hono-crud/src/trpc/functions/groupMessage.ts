@@ -123,7 +123,6 @@ export async function groupMessage(
     }
 
     const AIResponseObject = validatedResponse.data;
-    console.log("AIResponseObject: ", AIResponseObject);
 
     /* Check if we should make a new conversation or add to an existing one */
     if (AIResponseObject.conversationId === "new") {
