@@ -134,10 +134,6 @@ export const conversationMessage = sqliteTable("conversationMessage", {
   conversationId: text("conversationId").notNull(),
 });
 
-export const testTable = sqliteTable("testTable", {
-  id: text("id").$defaultFn(createId).primaryKey(),
-});
-
 export const meeting = sqliteTable("meeting", {
   id: text("id").$defaultFn(createId).primaryKey(),
   name: text("name", { length: 256 }).notNull().unique(),
