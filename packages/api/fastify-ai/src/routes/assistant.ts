@@ -4,6 +4,8 @@ import openai from "../ai/client";
 import { createOrRetrieveAssistant } from "../ai/helpers/createOrRetrieveAssistant";
 import { Run } from "openai/resources/beta/threads/runs/runs";
 import { query } from "../ai/functions/query";
+import { bundlerModuleNameResolver } from "typescript";
+import { FunctionToolCallDelta } from "openai/resources/beta/threads/runs/steps";
 
 type AssistantBody = {
   message: string;
@@ -21,7 +23,6 @@ export default async function assistant(fastify: FastifyInstance) {
       const assistant = await createOrRetrieveAssistant();
 
       const { message, activeThread } = request.body;
-      console.log("message: ", message);
 
       /* Either create or retrieve thread based on value of activeThread */
       const thread =
@@ -36,33 +37,38 @@ export default async function assistant(fastify: FastifyInstance) {
       });
 
       //Run the assistant with the thread
-
       const run = openai.beta.threads.runs
         .createAndStream(thread.id, {
           assistant_id: assistant.id,
         })
-        .on("textCreated", (text) => process.stdout.write("\nassistant > "))
+        .on("textCreated", (text) => process.stdout.write("\nassistant => "))
         .on("textDelta", (textDelta, snapshot) =>
           process.stdout.write(textDelta.value as string),
         )
         .on("toolCallCreated", (toolCall) =>
-          process.stdout.write(`\nassistant > ${toolCall.type}\n\n`),
+          console.log(`\nassistant tool call => ${toolCall.type}\n\n`),
         )
         .on("toolCallDelta", (toolCallDelta, snapshot) => {
-          if (toolCallDelta.type === "code_interpreter") {
-            if (toolCallDelta?.code_interpreter?.input) {
-              process.stdout.write(toolCallDelta.code_interpreter.input);
+          console.log("Tooooooooooool");
+          if (toolCallDelta.type === "function") {
+            console.log("Tool call is function");
+            if (toolCallDelta.function?.name) {
+              process.stdout.write(
+                "Function name:" + toolCallDelta.function.name,
+              );
             }
-            if (toolCallDelta?.code_interpreter?.outputs) {
-              process.stdout.write("\noutput >\n");
-              toolCallDelta.code_interpreter.outputs.forEach((output) => {
-                if (output.type === "logs") {
-                  process.stdout.write(`\n${output.logs}\n`);
-                }
-              });
-            }
+            // if (toolCallDelta?.code_interpreter?.outputs) {
+            //   process.stdout.write("\noutput >\n");
+            //   toolCallDelta.code_interpreter.outputs.forEach((output) => {
+            //     if (output.type === "logs") {
+            //       process.stdout.write(`\n${output.logs}\n`);
+            //     }
+            //   });
+            // }
           }
         });
+
+      await Bun.sleep(10000);
 
       /*
       CRUCIAL
@@ -145,9 +151,9 @@ export default async function assistant(fastify: FastifyInstance) {
       // }
 
       /* List the assistants response messages and send the latest */
-      const messages = await openai.beta.threads.messages.list(thread.id);
+      //const messages = await openai.beta.threads.messages.list(thread.id);
 
-      reply.send({ message: messages.data[0], thread: thread });
+      reply.send({ run, thread: thread });
     },
   );
 }
