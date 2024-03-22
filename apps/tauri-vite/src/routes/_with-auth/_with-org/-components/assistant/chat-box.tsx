@@ -100,9 +100,12 @@ export default function ChatBox(Props: ChatBoxProps) {
         activeThread: Props.threadId,
       });
 
+      console.log(body);
+
       const AIResponse = await sendMessage.mutateAsync(body);
 
-      const AIJson: AIJson = await AIResponse.json();
+      const AIJson = await AIResponse.json();
+      console.log("RES: ", AIJson);
 
       if (!AIJson.message || !AIJson.thread) {
         throw new Error("Latest message/thread doesn't exist or is undefined");

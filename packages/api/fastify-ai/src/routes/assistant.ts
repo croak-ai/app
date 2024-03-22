@@ -110,16 +110,15 @@ export default async function assistant(fastify: FastifyInstance) {
                 //console.log("EVENT", event.event);
               })
               .on("messageDelta", (messageDelta, snapshot) => {
-                if (messageDelta?.content) {
-                  const messageChunk = messageDelta
-                    .content[0] as TextDeltaBlock;
-                  process.stdout.write(messageChunk?.text?.value as string);
+                if (
+                  messageDelta?.content &&
+                  messageDelta.content[0]?.type === "text"
+                ) {
+                  const messageChunk = messageDelta.content[0].text?.value;
+                  //process.stdout.write(messageChunk?.text?.value);
+                  reply.send({ message: messageChunk, thread: thread });
                 }
               });
-
-            // for await (const event of toolSubmitStream) {
-            //   console.log(event);
-            // }
           }
         });
       //await Bun.sleep(15000);
@@ -206,8 +205,6 @@ export default async function assistant(fastify: FastifyInstance) {
 
       /* List the assistants response messages and send the latest */
       //const messages = await openai.beta.threads.messages.list(thread.id);
-
-      reply.send({ run, thread: thread });
     },
   );
 }
