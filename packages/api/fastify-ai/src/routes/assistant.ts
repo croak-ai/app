@@ -5,7 +5,11 @@ import { createOrRetrieveAssistant } from "../ai/helpers/createOrRetrieveAssista
 import { Run } from "openai/resources/beta/threads/runs/runs";
 import { query } from "../ai/functions/query";
 import { bundlerModuleNameResolver } from "typescript";
-import { FunctionToolCallDelta } from "openai/resources/beta/threads/runs/steps";
+import {
+  FunctionToolCall,
+  FunctionToolCallDelta,
+} from "openai/resources/beta/threads/runs/steps";
+import { TextDeltaBlock } from "openai/resources/beta/threads/messages/messages";
 
 type AssistantBody = {
   message: string;
@@ -36,39 +40,89 @@ export default async function assistant(fastify: FastifyInstance) {
         content: message,
       });
 
+      //Map string name to function call
+      const aiFunctionsByName: { [key: string]: Function } = {
+        query,
+      };
+
+      let functionName = "";
+      let functionArgs = "";
+      let functionId = "";
+      let runId = "";
+      let lastEvent = "";
+
       //Run the assistant with the thread
-      const run = openai.beta.threads.runs
-        .createAndStream(thread.id, {
-          assistant_id: assistant.id,
-        })
+      console.log("Running assistant");
+      const run = openai.beta.threads.runs.createAndStream(thread.id, {
+        assistant_id: assistant.id,
+      });
+
+      run
         .on("textCreated", (text) => process.stdout.write("\nassistant => "))
         .on("textDelta", (textDelta, snapshot) =>
           process.stdout.write(textDelta.value as string),
         )
-        .on("toolCallCreated", (toolCall) =>
-          console.log(`\nassistant tool call => ${toolCall.type}\n\n`),
-        )
-        .on("toolCallDelta", (toolCallDelta, snapshot) => {
-          console.log("Tooooooooooool");
-          if (toolCallDelta.type === "function") {
-            console.log("Tool call is function");
-            if (toolCallDelta.function?.name) {
-              process.stdout.write(
-                "Function name:" + toolCallDelta.function.name,
-              );
+        .on("toolCallCreated", (toolCall) => {
+          if (toolCall.type === "function") {
+            functionName = toolCall.function.name;
+            functionId = toolCall.id;
+            runId = run.currentRun()?.id as string;
+
+            if (!runId) {
+              reply.send("Run ID not found");
+              return;
             }
-            // if (toolCallDelta?.code_interpreter?.outputs) {
-            //   process.stdout.write("\noutput >\n");
-            //   toolCallDelta.code_interpreter.outputs.forEach((output) => {
-            //     if (output.type === "logs") {
-            //       process.stdout.write(`\n${output.logs}\n`);
-            //     }
-            //   });
+            console.log("FUNCTION NAME:", functionName);
+          }
+        })
+        .on("toolCallDelta", (toolCallDelta, snapshot) => {
+          if (toolCallDelta.type === "function") {
+            if (toolCallDelta.function?.arguments) {
+              functionArgs += toolCallDelta.function.arguments;
+              process.stdout.write(functionArgs);
+            }
+          }
+        })
+        .on("event", async (event) => {
+          //console.log("choosing tool event: ", event.event);
+          //console.log(runId);
+          if (event.event === "thread.run.requires_action") {
+            functionArgs = JSON.parse(functionArgs);
+
+            const aiFunction = aiFunctionsByName[functionName];
+
+            if (!aiFunction) {
+              reply.send(
+                "AI is choosing a tool, however our json object is not matching it correctly",
+              );
+              return;
+            }
+            const toolSubmitStream = openai.beta.threads.runs
+              .submitToolOutputsStream(thread.id, runId, {
+                tool_outputs: [
+                  {
+                    tool_call_id: functionId,
+                    output: await aiFunction(functionArgs),
+                  },
+                ],
+              })
+              .on("event", (event) => {
+                //console.log("EVENT", event.event);
+              })
+              .on("messageDelta", (messageDelta, snapshot) => {
+                if (messageDelta?.content) {
+                  const messageChunk = messageDelta
+                    .content[0] as TextDeltaBlock;
+                  process.stdout.write(messageChunk?.text?.value as string);
+                }
+              });
+
+            // for await (const event of toolSubmitStream) {
+            //   console.log(event);
             // }
           }
         });
-
-      await Bun.sleep(10000);
+      //await Bun.sleep(15000);
 
       /*
       CRUCIAL
