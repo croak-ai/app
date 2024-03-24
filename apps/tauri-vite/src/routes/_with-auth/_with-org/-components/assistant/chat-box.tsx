@@ -5,15 +5,14 @@ import { Input } from "@acme/ui/components/ui/input";
 import { useState } from "react";
 import { trpc } from "@/utils/trpc";
 import OpenAI from "openai";
-import { useMutation } from "@tanstack/react-query";
 import { useUser } from "@clerk/clerk-react";
 import croakLogo from "@acme/ui/assets/croakLogo.png";
+import useStreamResponse from "./useStreamResponse";
 
 type Message = OpenAI.Beta.Threads.Messages.Message;
 type Messages = Message[];
 
 type MessageContentText = OpenAI.Beta.Threads.Messages.TextContentBlock;
-type Thread = OpenAI.Beta.Threads.Thread;
 
 interface ChatBoxProps {
   threadId: string;
@@ -21,25 +20,39 @@ interface ChatBoxProps {
   setThreadId: (thread: string) => void;
 }
 
-interface AIJson {
-  message: Message;
-  thread: Thread;
-}
+// async function queryAssistant(body: string) {
+//   const response = await fetch("http://localhost:3001/assistant", {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//     body: body,
+//   });
 
-async function queryAssistant(body: string) {
-  return fetch("http://localhost:3001/assistant", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: body,
-  });
-}
+//   if (!response.body) {
+//     throw new Error("Readable stream is not supported in this browser");
+//   }
+
+//   const reader = response.body.getReader();
+
+//   async function read() {
+//     const { done, value } = await reader.read();
+
+//     if (done) {
+//       set;
+//       return;
+//     }
+//   }
+// }
 
 export default function ChatBox(Props: ChatBoxProps) {
   const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  //const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<Messages>(Props.threadMessages);
+
+  const { startStream, isLoading } = useStreamResponse({
+    streamCallback: setMessages,
+  });
 
   const { user } = useUser();
 
@@ -47,13 +60,54 @@ export default function ChatBox(Props: ChatBoxProps) {
   const createThread = trpc.createThread.createThread.useMutation();
 
   /* Send message to AI server for procesing */
-  const sendMessage = useMutation({
-    mutationFn: (body: string) => queryAssistant(body),
-  });
+  // const sendMessage = useMutation({
+  //   mutationFn: async (body: string) => {
+  //     const response = await fetch("http://localhost:3001/assistant", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: body,
+  //     });
+
+  //     if (!response.body) {
+  //       throw new Error("Readable stream is not supported in this browser");
+  //     }
+
+  //     const reader = response.body.getReader();
+
+  //     if (reader) {
+  //       read();
+  //     }
+
+  //     async function read() {
+  //       const { done, value } = await reader.read();
+
+  //       if (done) {
+  //         setIsLoading(false);
+  //         return;
+  //       }
+
+  //       const text = new TextDecoder("utf-8").decode(value);
+
+  //       if (text.includes("stream ended")) {
+  //         //Replace all text before and including "stream ended" with empty string
+  //         //Then parse JSON data sent after
+  //         const message = JSON.parse(text.replace(/.*stream ended/, ""));
+  //         setMessages((prevMessages) => [...prevMessages, message]);
+  //       } else {
+  //         setStreamData((prevStreamData) => prevStreamData + text);
+  //       }
+  //       read();
+  //     }
+
+  //     return {streamData, messages, isLoading}
+  //   },
+  // });
 
   /* Store the users message in the state and return its content */
   function handleUserMessage() {
-    setIsLoading(true);
+    //setIsLoading(true);
     const currentTime = Date.now();
     const message: Message = {
       id: "1",
@@ -94,37 +148,35 @@ export default function ChatBox(Props: ChatBoxProps) {
     try {
       const message = handleUserMessage();
 
+      let newThreadId = "";
       if (Props.threadId === "new") {
-        const newThreadId = await createThread.mutateAsync({
-          zPreview: message,
+        newThreadId = await createThread.mutateAsync({
+          zMessage: message,
         });
-        Props.setThreadId(newThreadId);
         localStorage.setItem("threadId", newThreadId);
+        Props.setThreadId(newThreadId);
       }
       //Here be careful if the props are not updated in time (threadId)
       /* Create request body with message and thread */
       const body = JSON.stringify({
         message: message,
-        activeThread: Props.threadId,
+        thread: { id: newThreadId || Props.threadId, new: newThreadId !== "" },
       });
 
       console.log("api body:", body);
 
-      const AIResponse = await sendMessage.mutateAsync(body);
+      startStream(body);
+      // const AIJson = await AIResponse.json();
+      // console.log("RES: ", AIJson);
 
-      const AIJson = await AIResponse.json();
-      console.log("RES: ", AIJson);
-
-      if (!AIJson.message) {
-        throw new Error("Latest message/thread doesn't exist or is undefined");
-      }
-
-      setMessages((prevMessages) => [...prevMessages, AIJson.message]);
+      // if (!AIJson.message) {
+      //   throw new Error("Latest message/thread doesn't exist or is undefined");
+      // }
     } catch (error) {
       //Error handling here in future
       console.error("Error sending message to AI server:", error);
     } finally {
-      setIsLoading(false);
+      //setIsLoading(false);
     }
   }
 
@@ -134,7 +186,7 @@ export default function ChatBox(Props: ChatBoxProps) {
         {messages.map(({ id, role, content }) => {
           const messageContent = content[0] as MessageContentText;
           return (
-            <div>
+            <div key={id}>
               {role === "user" ? (
                 <div className="my-1 flex items-center">
                   <img

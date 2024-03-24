@@ -639,7 +639,7 @@ importers:
         specifier: ^20.11.5
         version: 20.11.30
       fastify:
-        specifier: ^4.24.3
+        specifier: ^4.26.2
         version: 4.26.2
       openai:
         specifier: ^4.23.0
@@ -9565,6 +9565,7 @@ packages:
       loose-envify: 1.4.0
       object-assign: 4.1.1
     dev: false
+    bundledDependencies: false
 
   /create-require@1.1.1:
     resolution: {integrity: sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==}

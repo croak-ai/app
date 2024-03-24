@@ -7,7 +7,7 @@ import { z } from "zod";
 import OpenAI from "openai";
 
 export const zCreateThread = z.object({
-  zPreview: z.string().max(256),
+  zMessage: z.string().max(256),
 });
 
 export const createThread = router({
@@ -21,12 +21,17 @@ export const createThread = router({
 
       const newThread = await openai.beta.threads.create();
 
+      await openai.beta.threads.messages.create(newThread.id, {
+        role: "user",
+        content: input.zMessage,
+      });
+
       const [assistantThreadResult] = await ctx.db
         .insert(assistantThread)
         .values({
           userId: ctx.auth.userId,
           threadId: newThread.id,
-          preview: input.zPreview,
+          preview: input.zMessage,
           createdAt: newThread.created_at,
           updatedAt: newThread.created_at,
         })

@@ -1,19 +1,12 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-//import db from "../db/client";
 import openai from "../ai/client";
 import { createOrRetrieveAssistant } from "../ai/helpers/createOrRetrieveAssistant";
-import { Run } from "openai/resources/beta/threads/runs/runs";
 import { query } from "../ai/functions/query";
-import { bundlerModuleNameResolver } from "typescript";
-import {
-  FunctionToolCall,
-  FunctionToolCallDelta,
-} from "openai/resources/beta/threads/runs/steps";
-import { TextDeltaBlock } from "openai/resources/beta/threads/messages/messages";
+import { Readable } from "stream";
 
 type AssistantBody = {
   message: string;
-  threadId: string;
+  thread: { id: string; new: boolean };
 };
 
 export default async function assistant(fastify: FastifyInstance) {
@@ -23,101 +16,110 @@ export default async function assistant(fastify: FastifyInstance) {
       request: FastifyRequest<{ Body: AssistantBody }>,
       reply: FastifyReply,
     ) {
-      /* Could rebuild this to store assistant info in a single table instead of JSON */
-      const assistant = await createOrRetrieveAssistant();
+      try {
+        /* Could rebuild this to store assistant info in a single table instead of JSON */
+        const assistant = await createOrRetrieveAssistant();
 
-      const { message, threadId } = request.body;
+        const params = request.body;
 
-      /* Retrieve thread based on value of threadId in body */
-      const thread = await openai.beta.threads.retrieve(threadId);
+        /* Retrieve thread based on value of threadId in body */
+        const thread = await openai.beta.threads.retrieve(params.thread.id);
 
-      //Add message to new or existing thread
-      await openai.beta.threads.messages.create(thread.id, {
-        role: "user",
-        content: message,
-      });
+        //Add new message ot thread if the user did not create a new thread
+        if (!params.thread.new) {
+          await openai.beta.threads.messages.create(thread.id, {
+            role: "user",
+            content: params.message,
+          });
+        }
+        //Map string name to function call
+        const aiFunctionsByName: { [key: string]: Function } = {
+          query,
+        };
 
-      //Map string name to function call
-      const aiFunctionsByName: { [key: string]: Function } = {
-        query,
-      };
+        let functionName = "";
+        let functionArgs = "";
+        let functionId = "";
+        let runId = "";
+        let lastEvent = "";
 
-      let functionName = "";
-      let functionArgs = "";
-      let functionId = "";
-      let runId = "";
-      let lastEvent = "";
-
-      //Run the assistant with the thread
-      console.log("Running assistant");
-      const run = openai.beta.threads.runs.createAndStream(thread.id, {
-        assistant_id: assistant.id,
-      });
-
-      run
-        .on("textCreated", (text) => process.stdout.write("\nassistant => "))
-        .on("textDelta", (textDelta, snapshot) =>
-          process.stdout.write(textDelta.value as string),
-        )
-        .on("toolCallCreated", (toolCall) => {
-          if (toolCall.type === "function") {
-            functionName = toolCall.function.name;
-            functionId = toolCall.id;
-            runId = run.currentRun()?.id as string;
-
-            if (!runId) {
-              reply.send("Run ID not found");
-              return;
-            }
-            console.log("FUNCTION NAME:", functionName);
-          }
-        })
-        .on("toolCallDelta", (toolCallDelta, snapshot) => {
-          if (toolCallDelta.type === "function") {
-            if (toolCallDelta.function?.arguments) {
-              functionArgs += toolCallDelta.function.arguments;
-              process.stdout.write(functionArgs);
-            }
-          }
-        })
-        .on("event", async (event) => {
-          //console.log("choosing tool event: ", event.event);
-          //console.log(runId);
-          if (event.event === "thread.run.requires_action") {
-            functionArgs = JSON.parse(functionArgs);
-
-            const aiFunction = aiFunctionsByName[functionName];
-
-            if (!aiFunction) {
-              reply.send(
-                "AI is choosing a tool, however our json object is not matching it correctly",
-              );
-              return;
-            }
-            const toolSubmitStream = openai.beta.threads.runs
-              .submitToolOutputsStream(thread.id, runId, {
-                tool_outputs: [
-                  {
-                    tool_call_id: functionId,
-                    output: await aiFunction(functionArgs),
-                  },
-                ],
-              })
-              .on("event", (event) => {
-                //console.log("EVENT", event.event);
-              })
-              .on("messageDelta", (messageDelta, snapshot) => {
-                if (
-                  messageDelta?.content &&
-                  messageDelta.content[0]?.type === "text"
-                ) {
-                  const messageChunk = messageDelta.content[0].text?.value;
-                  //process.stdout.write(messageChunk?.text?.value);
-                  reply.send({ message: messageChunk, thread: thread });
-                }
-              });
-          }
+        //Run the assistant with the thread
+        console.log("Running assistant");
+        const run = openai.beta.threads.runs.createAndStream(thread.id, {
+          assistant_id: assistant.id,
         });
+
+        run
+          .on("textCreated", (text) => process.stdout.write("\nassistant => "))
+          .on("textDelta", (textDelta, snapshot) =>
+            process.stdout.write(textDelta.value as string),
+          )
+          .on("toolCallCreated", (toolCall) => {
+            if (toolCall.type === "function") {
+              functionName = toolCall.function.name;
+              functionId = toolCall.id;
+              runId = run.currentRun()?.id as string;
+
+              if (!runId) {
+                reply.send("Run ID not found");
+                return;
+              }
+              console.log("FUNCTION NAME:", functionName);
+            }
+          })
+          .on("toolCallDelta", (toolCallDelta, snapshot) => {
+            if (toolCallDelta.type === "function") {
+              if (toolCallDelta.function?.arguments) {
+                functionArgs += toolCallDelta.function.arguments;
+                process.stdout.write(functionArgs);
+              }
+            }
+          })
+          .on("event", async (event) => {
+            //console.log("choosing tool event: ", event.event);
+            //console.log(runId);
+            // if (event.event === "thread.run.requires_action") {
+            //   functionArgs = JSON.parse(functionArgs);
+            //   const aiFunction = aiFunctionsByName[functionName];
+            //   if (!aiFunction) {
+            //     reply.send(
+            //       "AI is choosing a tool, however our json object is not matching it correctly",
+            //     );
+            //     return;
+            //   }
+            //   const toolSubmitStream = openai.beta.threads.runs
+            //     .submitToolOutputsStream(thread.id, runId, {
+            //       tool_outputs: [
+            //         {
+            //           tool_call_id: functionId,
+            //           output: await aiFunction(functionArgs),
+            //         },
+            //       ],
+            //     })
+            //     .on("event", (event) => {
+            //       //console.log("EVENT", event.event);
+            //     })
+            //     .on("messageDelta", (messageDelta, snapshot) => {
+            //       if (
+            //         messageDelta?.content &&
+            //         messageDelta.content[0]?.type === "text"
+            //       ) {
+            //         const messageChunk = messageDelta.content[0].text?.value;
+            //         //process.stdout.write(messageChunk?.text?.value);
+            //         // reply.send({ message: messageChunk, thread: thread });
+            //       }
+            //     });
+            // }
+          })
+          .on("end", async () => {
+            reply.send("END STREAM");
+            const finalMessages = await run.finalMessages();
+            reply.send({ data: finalMessages[0] });
+          });
+        reply.send(run);
+      } catch (e) {
+        console.log(e);
+      }
       //await Bun.sleep(15000);
 
       /*
