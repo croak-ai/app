@@ -13,7 +13,7 @@ import { TextDeltaBlock } from "openai/resources/beta/threads/messages/messages"
 
 type AssistantBody = {
   message: string;
-  activeThread: string;
+  threadId: string;
 };
 
 export default async function assistant(fastify: FastifyInstance) {
@@ -26,13 +26,10 @@ export default async function assistant(fastify: FastifyInstance) {
       /* Could rebuild this to store assistant info in a single table instead of JSON */
       const assistant = await createOrRetrieveAssistant();
 
-      const { message, activeThread } = request.body;
+      const { message, threadId } = request.body;
 
-      /* Either create or retrieve thread based on value of activeThread */
-      const thread =
-        activeThread === "new"
-          ? await openai.beta.threads.create()
-          : await openai.beta.threads.retrieve(activeThread);
+      /* Retrieve thread based on value of threadId in body */
+      const thread = await openai.beta.threads.retrieve(threadId);
 
       //Add message to new or existing thread
       await openai.beta.threads.messages.create(thread.id, {

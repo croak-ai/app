@@ -21,7 +21,7 @@ messages.
 /* Triggers the conversation summarization process */
 export async function summarizeMessages(
   db: DBClientType,
-  openAI: OpenAI,
+  openai: OpenAI,
   cloudflareAI: cloudflareAI,
   conversationId: string,
   channelId: string,
@@ -55,7 +55,7 @@ export async function summarizeMessages(
       fetchConversationParticipants,
     ]);
 
-    const completion = await openAI.chat.completions.create({
+    const completion = await openai.chat.completions.create({
       messages: [
         {
           role: "system",

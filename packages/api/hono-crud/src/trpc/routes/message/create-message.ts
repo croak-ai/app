@@ -98,7 +98,7 @@ export const createMessage = router({
       }
 
       const cloudflareAI = new Ai(ctx.env.cloudflareAI);
-      const openAI = new OpenAI({ apiKey: ctx.env.OPENAI_API_KEY });
+      const openai = new OpenAI({ apiKey: ctx.env.OPENAI_API_KEY });
       /* 
       In both of these functions the token count of the messages
       we are throwing into the AI matter.
@@ -109,13 +109,13 @@ export const createMessage = router({
       /* Group message into conversation */
       const conversationId = await groupMessage(
         ctx.db,
-        openAI,
+        openai,
         newMessageResult,
       );
 
       await summarizeMessages(
         ctx.db,
-        openAI,
+        openai,
         cloudflareAI,
         conversationId,
         input.channelId,

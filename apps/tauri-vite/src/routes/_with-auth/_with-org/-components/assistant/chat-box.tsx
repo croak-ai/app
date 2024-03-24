@@ -94,31 +94,29 @@ export default function ChatBox(Props: ChatBoxProps) {
     try {
       const message = handleUserMessage();
 
+      if (Props.threadId === "new") {
+        const newThreadId = await createThread.mutateAsync({
+          zPreview: message,
+        });
+        Props.setThreadId(newThreadId);
+        localStorage.setItem("threadId", newThreadId);
+      }
+      //Here be careful if the props are not updated in time (threadId)
       /* Create request body with message and thread */
       const body = JSON.stringify({
         message: message,
         activeThread: Props.threadId,
       });
 
-      console.log(body);
+      console.log("api body:", body);
 
       const AIResponse = await sendMessage.mutateAsync(body);
 
       const AIJson = await AIResponse.json();
       console.log("RES: ", AIJson);
 
-      if (!AIJson.message || !AIJson.thread) {
+      if (!AIJson.message) {
         throw new Error("Latest message/thread doesn't exist or is undefined");
-      }
-
-      if (Props.threadId === "new") {
-        await createThread.mutateAsync({
-          zThreadId: AIJson.thread.id,
-          zPreview: message,
-          zCreatedAt: AIJson.thread.created_at,
-        });
-        Props.setThreadId(AIJson.thread.id);
-        localStorage.setItem("threadId", AIJson.thread.id);
       }
 
       setMessages((prevMessages) => [...prevMessages, AIJson.message]);
