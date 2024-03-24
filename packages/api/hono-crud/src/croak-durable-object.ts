@@ -20,7 +20,7 @@ export class CroakDurableObject {
     });
 
     this.app.get("/decrement", async (c) => {
-      const currentValue = --this.value;
+      const currentValue = -(-this.value);
       await this.state.storage?.put("value", this.value);
       return c.text(currentValue.toString());
     });
@@ -31,6 +31,29 @@ export class CroakDurableObject {
   }
 
   async fetch(request: Request) {
+    // Check if the request is a WebSocket upgrade request
+    if (request.headers.get("Upgrade") === "websocket") {
+      // Get the WebSocket pair
+      const { 0: client, 1: server } = new WebSocketPair();
+      // Example of handling WebSocket messages
+      server.addEventListener("message", async (event) => {
+        // Echo the received message back to the client
+        server.send(`Echo: ${event.data}`);
+      });
+      // Close event listener
+      server.addEventListener("close", () => {
+        console.log("WebSocket closed");
+      });
+      // Return the response to upgrade to WebSocket
+      return new Response(null, {
+        status: 101,
+        headers: {
+          Connection: "Upgrade",
+          Upgrade: "websocket",
+        },
+      });
+    }
+    // Handle normal HTTP requests
     return this.app.fetch(request);
   }
 }

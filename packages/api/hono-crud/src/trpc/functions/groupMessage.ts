@@ -1,4 +1,4 @@
-import { DBClientType, desc, eq } from "packages/db";
+import { DBClientType, desc, eq } from "@acme/db";
 import { DBMessage } from "../routes/message/create-message";
 import OpenAI from "openai";
 import { TRPCError } from "@trpc/server";
@@ -6,7 +6,7 @@ import {
   conversation,
   conversationMessage,
   message,
-} from "packages/db/schema/tenant";
+} from "@acme/db/schema/tenant";
 import { z } from "zod";
 
 const zAIGroupingResponse = z.object({

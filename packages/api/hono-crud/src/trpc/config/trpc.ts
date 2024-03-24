@@ -3,7 +3,7 @@ import { type Context } from "./context";
 import superjson from "superjson";
 import { getClerkOrgInfo } from "../../functions/clerk";
 import { getDbAuthToken } from "../../functions/db";
-import { createDbClient } from "packages/db";
+import { createDbClient } from "@acme/db";
 
 const t = initTRPC.context<Context>().create({
   transformer: superjson,

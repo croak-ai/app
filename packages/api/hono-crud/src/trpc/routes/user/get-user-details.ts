@@ -2,7 +2,7 @@ import { user, workspace, workspaceMember } from "@acme/db/schema/tenant";
 import { protectedProcedureWithOrgDB, router } from "../../config/trpc";
 import { z } from "zod";
 import { eq, and, sql } from "drizzle-orm";
-import { Column } from "packages/db";
+import { Column } from "@acme/db";
 
 export const getUserDetails = router({
   getUserDetails: protectedProcedureWithOrgDB

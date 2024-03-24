@@ -1,7 +1,7 @@
 import { Clerk } from "@clerk/backend";
 import { getDbAuthToken } from "../db";
-import { createDbClient, eq, sql } from "packages/db";
-import { user } from "packages/db/schema/tenant";
+import { createDbClient, eq, sql } from "@acme/db";
+import { user } from "@acme/db/schema/tenant";
 
 type InsertUser = typeof user.$inferInsert;
 export const clerkSync = async ({

@@ -1,12 +1,4 @@
-import {
-  DBClientType,
-  desc,
-  exists,
-  eq,
-  and,
-  isNotNull,
-  sql,
-} from "packages/db";
+import { DBClientType, desc, exists, eq, and, isNotNull, sql } from "@acme/db";
 import { DBMessage } from "../routes/message/create-message";
 import OpenAI from "openai";
 import { TRPCError } from "@trpc/server";
@@ -17,7 +9,7 @@ import {
   unSummarizedMessage,
   conversationSummary,
   conversationSummaryRef,
-} from "packages/db/schema/tenant";
+} from "@acme/db/schema/tenant";
 import { string, z } from "zod";
 import { Ai as cloudflareAI } from "@cloudflare/ai";
 

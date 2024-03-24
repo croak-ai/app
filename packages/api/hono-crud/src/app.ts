@@ -10,7 +10,8 @@ import type {
   ScheduledEvent,
   ExecutionContext,
 } from "@cloudflare/workers-types";
-import { clerkSync } from "./functions/cron/clerk-sync";
+import { upgradeWebSocket } from "hono/cloudflare-workers";
+import { websocket } from "./hono-routes/websocket";
 
 /* 
 Cors origin set to any for now because of weird enviornment specific issues.
@@ -29,6 +30,7 @@ const app = new Hono<HonoConfig>()
   )
   .use("*", clerk)
   .use("/trpc/*", trpc)
+  .route("/ws", websocket)
   .route("/webhook", clerkWebhook);
 
 /* Error handling */
