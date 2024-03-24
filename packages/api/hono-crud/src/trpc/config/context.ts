@@ -3,8 +3,7 @@ import { createDbClient } from "@acme/db";
 import { getAuth } from "@hono/clerk-auth";
 import { HonoContext } from "../../config";
 import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
-import { getDbAuthToken } from "../../functions/db";
-import { getClerkOrgInfo } from "../../functions/clerk";
+import { HTTPException } from "hono/http-exception";
 
 export function createTRPCContextFromHonoContext(c: HonoContext) {
   return (opts: FetchCreateContextFnOptions) => {
@@ -17,7 +16,7 @@ export function createTRPCContextFromHonoContext(c: HonoContext) {
     const clerk = c.get("clerk");
 
     if (!auth) {
-      throw new Error("No auth object");
+      throw new HTTPException(401);
     }
 
     return {

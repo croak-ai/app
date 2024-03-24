@@ -1,58 +1,53 @@
 import { DurableObjectState } from "@cloudflare/workers-types";
 import { Hono } from "hono";
 
+type UserStatus = "online" | "away" | "do not disturb";
+
 export class CroakDurableObject {
-  value: number = 0;
+  userStates: Map<string, { status: UserStatus; lastUpdate: number }> =
+    new Map();
   state: DurableObjectState;
   app: Hono = new Hono();
 
   constructor(state: DurableObjectState) {
     this.state = state;
     this.state.blockConcurrencyWhile(async () => {
-      const stored = await this.state.storage?.get<number>("value");
-      this.value = stored || 0;
+      const stored =
+        await this.state.storage?.get<
+          Map<string, { status: UserStatus; lastUpdate: number }>
+        >("userStates");
+      this.userStates = stored || new Map();
     });
 
-    this.app.get("/increment", async (c) => {
-      const currentValue = ++this.value;
-      await this.state.storage?.put("value", this.value);
-      return c.text(currentValue.toString());
+    this.app.get("/update/:userId/:status", async (c) => {
+      const userId = c.req.param("userId");
+      const status = c.req.param("status") as UserStatus;
+      if (["online", "away", "do not disturb"].includes(status)) {
+        const currentTime = Date.now();
+        this.userStates.set(userId, { status, lastUpdate: currentTime });
+        await this.state.storage?.put("userStates", this.userStates);
+        return c.text(`User ${userId} status updated to ${status}`);
+      } else {
+        return c.text(`Invalid status`, 400);
+      }
     });
 
-    this.app.get("/decrement", async (c) => {
-      const currentValue = -(-this.value);
-      await this.state.storage?.put("value", this.value);
-      return c.text(currentValue.toString());
-    });
+    this.app.get("/list", async (c) => {
+      const currentTime = Date.now();
+      this.userStates.forEach((value, key) => {
+        if (currentTime - value.lastUpdate > 120000) {
+          /* @ TODO we need to update the user table in the database to reflect the "last seen" status of the user */
+          /* We need to also invalidate the tanstack query's cache for the clients as well */
 
-    this.app.get("/", async (c) => {
-      return c.text(this.value.toString());
+          this.userStates.delete(key); // Cleanup expired users
+        }
+      });
+      await this.state.storage?.put("userStates", this.userStates);
+      return c.json([...this.userStates]);
     });
   }
 
   async fetch(request: Request) {
-    // Check if the request is a WebSocket upgrade request
-    if (request.headers.get("Upgrade") === "websocket") {
-      // Get the WebSocket pair
-      const { 0: client, 1: server } = new WebSocketPair();
-      // Example of handling WebSocket messages
-      server.addEventListener("message", async (event) => {
-        // Echo the received message back to the client
-        server.send(`Echo: ${event.data}`);
-      });
-      // Close event listener
-      server.addEventListener("close", () => {
-        console.log("WebSocket closed");
-      });
-      // Return the response to upgrade to WebSocket
-      return new Response(null, {
-        status: 101,
-        headers: {
-          Connection: "Upgrade",
-          Upgrade: "websocket",
-        },
-      });
-    }
     // Handle normal HTTP requests
     return this.app.fetch(request);
   }

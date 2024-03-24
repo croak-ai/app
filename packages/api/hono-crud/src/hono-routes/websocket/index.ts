@@ -1,33 +1,38 @@
-import {
-  OrganizationMembershipWebhookEvent,
-  UserWebhookEvent,
-  type EmailAddressJSON,
-} from "@clerk/backend";
 import { Hono } from "hono";
 import type { HonoConfig } from "../../config";
-import { createDbClient } from "@acme/db";
-import { verifyWebhook } from "../../functions/webhook/verifyWebhook";
-
-import { HTTPException } from "hono/http-exception";
-import { user } from "@acme/db/schema/tenant";
-import { eq } from "@acme/db";
-import { getDbAuthToken } from "../../functions/db";
-import { fetchUserMemberships } from "../../functions/webhook/fetchUserMemberships";
-import { updateOrgUser } from "../../functions/webhook/updateOrgUser";
 import { upgradeWebSocket } from "hono/cloudflare-workers";
+import { Context } from "hono";
+import { getAuth } from "@hono/clerk-auth";
+import { HTTPException } from "hono/http-exception";
 
 export const websocket = new Hono<HonoConfig>();
+// Custom middleware to check for a valid org ID
+const validateAuth = async (c: Context<HonoConfig>, next: Function) => {
+  const auth = getAuth(c);
+
+  if (!auth || !auth.orgId) {
+    throw new HTTPException(401, { message: "Unauthorized" });
+  }
+
+  await next();
+};
 
 websocket.get(
   "/",
-  upgradeWebSocket((c) => {
+  validateAuth,
+  upgradeWebSocket((c: Context<HonoConfig>) => {
+    const doId = c.env.CROAK_DURABLE_OBJECT.idFromName("croak");
+    const croak = c.env.CROAK_DURABLE_OBJECT.get(doId);
+
     return {
-      onMessage(event, ws) {
-        console.log(`Message from client: ${event.data}`);
-        ws.send(JSON.stringify(c));
+      onMessage: async (event, ws) => {
+        ws.send(`HI`);
       },
       onClose: () => {
         console.log("Connection closed");
+      },
+      onError: (err) => {
+        console.error("Error encountered");
       },
     };
   }),
