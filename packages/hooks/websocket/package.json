@@ -6,6 +6,7 @@
     "lint": "eslint \"**/*.ts*\""
   },
   "devDependencies": {
+    "@croak/hono-crud": "*",
     "@types/node": "^17.0.12",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
@@ -19,6 +20,7 @@
     "react-dom": "18.2.0"
   },
   "dependencies": {
+    "@clerk/clerk-react": "^4.30.4",
     "@tanstack/react-query": "^5.17.19"
   }
 }

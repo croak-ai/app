@@ -8,6 +8,7 @@ import { HTTPException } from "hono/http-exception";
 export const websocket = new Hono<HonoConfig>();
 // Custom middleware to check for a valid org ID
 const validateAuth = async (c: Context<HonoConfig>, next: Function) => {
+  console.log(JSON.stringify(c));
   const auth = getAuth(c);
 
   if (!auth || !auth.orgId) {
@@ -19,13 +20,12 @@ const validateAuth = async (c: Context<HonoConfig>, next: Function) => {
 
 websocket.get(
   "/",
-  validateAuth,
   upgradeWebSocket((c: Context<HonoConfig>) => {
     const doId = c.env.CROAK_DURABLE_OBJECT.idFromName("croak");
     const croak = c.env.CROAK_DURABLE_OBJECT.get(doId);
 
     return {
-      onMessage: async (event, ws) => {
+      onMessage: (event, ws) => {
         ws.send(`HI`);
       },
       onClose: () => {
