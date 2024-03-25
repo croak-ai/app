@@ -28,10 +28,14 @@ export const WebSocketProvider = ({
   const socketRef = useRef<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [reconnectAttempts, setReconnectAttempts] = useState(0);
-  const maxReconnectAttempts = 5; // Maximum number of reconnection attemptsy
+  const maxReconnectAttempts = 5; // Maximum number of reconnection attempts
   const reconnectDelay = 3000; // Delay before attempting to reconnect, in milliseconds
+  const heartbeatInterval = 20000; // Interval for sending heartbeat messages, in milliseconds
+  const heartbeatMessage = "heartbeat"; // Message to be sent as a heartbeat
 
   useEffect(() => {
+    let heartbeatTimer: NodeJS.Timeout; // Specify the type for heartbeatTimer
+
     const connectWebSocket = async () => {
       setReconnectAttempts(0); // Reset reconnection attempts when manually connecting
 
@@ -61,6 +65,13 @@ export const WebSocketProvider = ({
       ws.onopen = () => {
         console.log("WebSocket connection established.");
         setIsConnected(true);
+        // Start sending heartbeat messages
+        heartbeatTimer = setInterval(() => {
+          if (socketRef.current?.readyState === WebSocket.OPEN) {
+            socketRef.current.send(heartbeatMessage);
+            console.log("Heartbeat message sent.");
+          }
+        }, heartbeatInterval);
       };
 
       ws.onerror = (error) => {
@@ -71,6 +82,7 @@ export const WebSocketProvider = ({
         console.log("WebSocket connection closed.");
         setIsConnected(false);
         socketRef.current = null;
+        clearInterval(heartbeatTimer); // Clear the heartbeat timer
 
         if (reconnectAttempts < maxReconnectAttempts) {
           setTimeout(() => {
@@ -94,6 +106,7 @@ export const WebSocketProvider = ({
 
     return () => {
       socketRef.current?.close();
+      clearInterval(heartbeatTimer); // Ensure the heartbeat timer is cleared on cleanup
     };
   }, [url, getToken, reconnectAttempts]); // Add reconnectAttempts to the dependency array
 
