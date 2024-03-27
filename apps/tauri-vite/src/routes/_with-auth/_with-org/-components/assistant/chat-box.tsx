@@ -24,20 +24,21 @@ export default function ChatBox(Props: ChatBoxProps) {
   console.log(Props.threadId);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Messages>(Props.threadMessages);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const { startStream, isLoading } = useStreamResponse({
-    setMessages: setMessages,
+  const { startStream, isStreaming } = useStreamResponse({
     setThreadId: Props.setThreadId,
+    setMessages,
+    setIsLoading,
   });
 
   const { user } = useUser();
 
-  /* Create new thread in database */
+  /* Create new thread in database and openai */
   const createThread = trpc.createThread.createThread.useMutation();
 
   /* Store the users message in the state and return its content */
   function handleUserMessage() {
-    //setIsLoading(true);
     const currentTime = Date.now();
     const message: Message = {
       id: "1",
@@ -88,6 +89,7 @@ export default function ChatBox(Props: ChatBoxProps) {
       incomplete_details: null,
       status: "in_progress",
     };
+
     setInput("");
     setMessages((prevMessages) => [
       ...prevMessages,
@@ -103,8 +105,8 @@ export default function ChatBox(Props: ChatBoxProps) {
   If the thread is newly created add the thread to the database, update thread state */
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-
     try {
+      setIsLoading(true);
       const message = handleUserMessage();
 
       let newThreadId = "";
@@ -121,11 +123,8 @@ export default function ChatBox(Props: ChatBoxProps) {
         thread: { id: newThreadId || Props.threadId, new: newThreadId !== "" },
       });
 
-      console.log("api body:", body);
-      // Props.setThreadId(newThreadId);
       startStream(body);
     } catch (error) {
-      //Error handling here in future
       console.error("Error sending message to AI server:", error);
     } finally {
       //setIsLoading(false);
@@ -134,7 +133,7 @@ export default function ChatBox(Props: ChatBoxProps) {
 
   return (
     <div className="flex w-full grow flex-col gap-6 overflow-y-auto rounded-sm p-4 sm:p-8">
-      <div className="flex grow flex-col justify-start gap-4 overflow-y-scroll rounded-lg border-slate-400 pr-2">
+      <div className="flex grow flex-col justify-start gap-4 overflow-y-scroll rounded-lg border-slate-400">
         {messages.map(({ id, role, content }) => {
           const messageContent = content[0] as MessageContentText;
           return (
@@ -146,7 +145,7 @@ export default function ChatBox(Props: ChatBoxProps) {
                     alt="User"
                     className="h-6 w-6 rounded-full"
                   />
-                  <span className="ml-1.5 text-sm">You</span>
+                  <span className="ml-1.5 font-semibold">You</span>
                 </div>
               ) : (
                 <div className="my-1 flex items-center">
@@ -155,18 +154,29 @@ export default function ChatBox(Props: ChatBoxProps) {
                     alt="Assistant"
                     className="h-6 w-6 rounded-full"
                   />
-                  <span className="ml-1.5 text-sm">Assistant</span>
+                  <span className="ml-1.5 font-semibold">Assistant</span>
                 </div>
               )}
 
-              <div
-                key={id}
-                className={cn(
-                  "max-w-lg rounded-xl bg-gray-500 px-4 py-2 text-white [overflow-wrap:anywhere]",
-                  role === "user" ? "self-start bg-primary" : "self-end",
-                )}
-              >
-                {/* <span
+              {isLoading && id === "new" ? (
+                <>
+                  <div className="flex space-x-1 self-end px-4 py-4">
+                    <div className="h-1 w-1 animate-bounce rounded-full bg-white"></div>
+                    <div className="h-1 w-1 animate-bounce rounded-full bg-white [animation-delay:0.15s]"></div>
+                    <div className="h-1 w-1 animate-bounce rounded-full bg-white [animation-delay:0.3s]"></div>
+                  </div>
+                </>
+              ) : (
+                <div
+                  key={id}
+                  className={cn(
+                    "inline-block max-w-lg rounded-xl px-4 py-2 text-white [overflow-wrap:anywhere]",
+                    role === "user"
+                      ? "self-start bg-slate-600"
+                      : "self-end bg-green-700",
+                  )}
+                >
+                  {/* <span
                   className={cn(
                     "animate-typing",
                     isLoading === true && id === "new"
@@ -174,21 +184,13 @@ export default function ChatBox(Props: ChatBoxProps) {
                       : "",
                   )}
                 > */}
-                {messageContent.text.value}
-                {/* </span> */}
-              </div>
+                  {messageContent.text.value}
+                  {/* </span> */}
+                </div>
+              )}
             </div>
           );
         })}
-        {/* {isLoading && (
-          <>
-            <div className="m-2 flex space-x-1 self-end">
-              <div className="h-2 w-2 animate-bounce rounded-full bg-white"></div>
-              <div className="h-2 w-2 animate-bounce rounded-full bg-white [animation-delay:-0.15s]"></div>
-              <div className="h-2 w-2 animate-bounce rounded-full bg-white [animation-delay:-0.3s]"></div>
-            </div>
-          </>
-        )} */}
         {messages.length === 0 && (
           <div className="flex grow items-center justify-center self-stretch">
             <svg

@@ -6,17 +6,18 @@ type Message = OpenAI.Beta.Threads.Messages.Message;
 type Messages = Message[];
 
 interface StreamResponseProps {
-  setMessages: React.Dispatch<React.SetStateAction<Messages>>;
   setThreadId: (thread: string) => void;
+  setMessages: React.Dispatch<React.SetStateAction<Messages>>;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function useStreamResponse(Props: StreamResponseProps) {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
   const currentTime = Date.now();
 
   const { mutate: startStream } = useMutation({
     mutationFn: async (body: string) => {
-      setIsLoading(true);
+      setIsStreaming(true);
       const response = await fetch("http://localhost:3001/assistant", {
         method: "POST",
         headers: {
@@ -28,42 +29,12 @@ export default function useStreamResponse(Props: StreamResponseProps) {
       if (!response.body) {
         throw new Error("ReadableStream not supported in this browser.");
       }
-
-      const initialResponseMessage: Message = {
-        id: "new",
-        object: "thread.message",
-        created_at: currentTime,
-        thread_id: "",
-        role: "assistant",
-        content: [
-          {
-            type: "text",
-            text: {
-              value: "",
-              annotations: [],
-            },
-          },
-        ],
-        file_ids: [],
-        assistant_id: null,
-        run_id: null,
-        metadata: {},
-        completed_at: currentTime,
-        incomplete_at: currentTime,
-        incomplete_details: null,
-        status: "in_progress",
-      };
-
-      Props.setMessages((prevMessageArray) => {
-        console.log("Initial Array:", prevMessageArray);
-        return [...prevMessageArray, initialResponseMessage];
-      });
-
+      Props.setIsLoading(false);
       const reader = response.body.getReader();
       return reader;
     },
     onSuccess: (reader) => {
-      setIsLoading(true);
+      setIsStreaming(true);
       readStream(reader);
     },
   });
@@ -76,7 +47,7 @@ export default function useStreamResponse(Props: StreamResponseProps) {
       const { done, value } = await reader.read();
       if (done) {
         console.log("DONEEE");
-        setIsLoading(false);
+        setIsStreaming(false);
         return;
       }
 
@@ -88,7 +59,7 @@ export default function useStreamResponse(Props: StreamResponseProps) {
       } else {
         buffer += text;
         const newMessage: Message = {
-          id: "new",
+          id: "streaming",
           object: "thread.message",
           created_at: currentTime,
           thread_id: "",
@@ -127,5 +98,5 @@ export default function useStreamResponse(Props: StreamResponseProps) {
     read();
   }
 
-  return { startStream, isLoading };
+  return { startStream, isStreaming };
 }
