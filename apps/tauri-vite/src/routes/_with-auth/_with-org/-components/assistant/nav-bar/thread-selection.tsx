@@ -27,7 +27,8 @@ interface ThreadSelectionProps {
 
 export default function ThreadSelection(Props: ThreadSelectionProps) {
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(Props.threadId);
+  const [activeThreadId, setActiveThreadId] = useState(Props.threadId);
+  console.log("VALUE: ", activeThreadId);
 
   /* Pull previously selected thread from local storage here */
 
@@ -49,26 +50,22 @@ export default function ThreadSelection(Props: ThreadSelectionProps) {
           <CommandGroup>
             {threads.data?.map((thread) => (
               <CommandItem
-                /* Cant use currentValue because CMDK uses tolowercase
-              We can update to CMDK 1.0 but this breaks ShadCN for now */
                 key={thread.id}
-                value={thread.threadId}
+                value={`${thread.preview}:${thread.threadId}`}
                 onSelect={() => {
-                  if (thread.threadId !== value) {
-                    setValue(thread.threadId);
+                  if (thread.threadId !== Props.threadId) {
                     Props.setThreadId(thread.threadId);
                     localStorage.setItem("threadId", thread.threadId);
                     setOpen(false);
                   }
+                  setOpen(false);
                 }}
               >
                 <p className="max-w-[21rem] truncate">{thread.preview}</p>
-                <CheckIcon
-                  className={cn(
-                    "ml-auto h-4 w-4",
-                    value === thread.threadId ? "opacity-100" : "opacity-0",
-                  )}
-                />
+
+                {Props.threadId === thread.threadId && (
+                  <CheckIcon className={cn("ml-auto h-4 w-4")} />
+                )}
               </CommandItem>
             ))}
           </CommandGroup>

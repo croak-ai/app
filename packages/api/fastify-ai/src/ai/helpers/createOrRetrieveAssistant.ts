@@ -220,13 +220,14 @@ export async function createOrRetrieveAssistant() {
                 sql: {
                   type: "string",
                   description:
-                    'SQL statement, e.g. "SELECT CustomerName, City FROM Customers;"',
+                    'SQL statement, e.g. "SELECT CustomerName, City FROM Customers;" SELECT strftime("%m-%d-%Y", yourColumnName, "unixepoch") AS formatted_date FROM yourTableName;',
                 },
               },
               required: ["sql"],
             },
             description: `Query information in the SQL database. If a user asks you for
-            specific information run this function to look for what the user wants in the database`,
+            specific information run this function to look for what the user wants in the database.
+            If querying UNIX timestamps add SQLites strftime function to the query to convert to mm/dd/yyyy.`,
           },
         },
       ],
