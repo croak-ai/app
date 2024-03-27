@@ -32,6 +32,7 @@ export default function ThreadSelection(Props: ThreadSelectionProps) {
   /* Pull previously selected thread from local storage here */
 
   const threads = trpc.retrieveThreadList.retrieveThreadList.useQuery();
+  console.log("Threads: ", threads.data);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -48,14 +49,13 @@ export default function ThreadSelection(Props: ThreadSelectionProps) {
           <CommandGroup>
             {threads.data?.map((thread) => (
               <CommandItem
-                className=""
                 /* Cant use currentValue because CMDK uses tolowercase
               We can update to CMDK 1.0 but this breaks ShadCN for now */
                 key={thread.id}
-                value={thread.preview}
+                value={thread.id}
                 onSelect={() => {
-                  if (thread.preview !== value) {
-                    setValue(thread.preview);
+                  if (thread.id !== value) {
+                    setValue(thread.id);
                     Props.setThreadId(thread.threadId);
                     localStorage.setItem("threadId", thread.threadId);
                     setOpen(false);
