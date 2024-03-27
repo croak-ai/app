@@ -39,6 +39,7 @@ export default function ChatBox(Props: ChatBoxProps) {
 
   /* Store the users message in the state and return its content */
   function handleUserMessage() {
+    setIsLoading(true);
     const currentTime = Date.now();
     const message: Message = {
       id: "1",
@@ -106,7 +107,8 @@ export default function ChatBox(Props: ChatBoxProps) {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     try {
-      setIsLoading(true);
+      if (isLoading || isStreaming) return;
+      if (!input) return;
       const message = handleUserMessage();
 
       let newThreadId = "";
@@ -222,7 +224,7 @@ export default function ChatBox(Props: ChatBoxProps) {
           onChange={(e) => setInput(e.target.value)}
         />
         <Button type="submit">
-          {isLoading ? (
+          {isLoading || isStreaming ? (
             <div role="status">
               <svg
                 aria-hidden="true"
