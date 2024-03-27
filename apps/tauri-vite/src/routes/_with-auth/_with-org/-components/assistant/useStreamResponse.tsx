@@ -5,15 +5,18 @@ import OpenAI from "openai";
 type Message = OpenAI.Beta.Threads.Messages.Message;
 type Messages = Message[];
 
-function useStreamResponse({
-  streamCallback,
-}: {
-  streamCallback: React.Dispatch<React.SetStateAction<Messages>>;
-}) {
-  const [message, setMessage] = useState<Message | undefined>();
+interface StreamResponseProps {
+  setMessages: React.Dispatch<React.SetStateAction<Messages>>;
+  setThreadId: (thread: string) => void;
+}
+
+export default function useStreamResponse(Props: StreamResponseProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const currentTime = Date.now();
+
   const { mutate: startStream } = useMutation({
     mutationFn: async (body: string) => {
+      setIsLoading(true);
       const response = await fetch("http://localhost:3001/assistant", {
         method: "POST",
         headers: {
@@ -26,6 +29,36 @@ function useStreamResponse({
         throw new Error("ReadableStream not supported in this browser.");
       }
 
+      const initialResponseMessage: Message = {
+        id: "new",
+        object: "thread.message",
+        created_at: currentTime,
+        thread_id: "",
+        role: "assistant",
+        content: [
+          {
+            type: "text",
+            text: {
+              value: "",
+              annotations: [],
+            },
+          },
+        ],
+        file_ids: [],
+        assistant_id: null,
+        run_id: null,
+        metadata: {},
+        completed_at: currentTime,
+        incomplete_at: currentTime,
+        incomplete_details: null,
+        status: "in_progress",
+      };
+
+      Props.setMessages((prevMessageArray) => {
+        console.log("Initial Array:", prevMessageArray);
+        return [...prevMessageArray, initialResponseMessage];
+      });
+
       const reader = response.body.getReader();
       return reader;
     },
@@ -36,62 +69,63 @@ function useStreamResponse({
   });
 
   async function readStream(reader: ReadableStreamDefaultReader) {
+    let buffer = "";
+    console.log("buffer: ", buffer);
+
     async function read() {
-      try {
-        const { done, value } = await reader.read();
-        if (done) {
-          setIsLoading(false);
-          return;
-        }
-
-        const text = new TextDecoder().decode(value);
-        console.log("text: ", text);
-        if (text.includes("END STREAM")) {
-          setMessage(JSON.parse(text.replace(/.*END STREAM/, "")));
-        } else {
-          const currentTime = Date.now();
-
-          const newMessage: Message = {
-            id: "1",
-            object: "thread.message",
-            created_at: currentTime,
-            thread_id: "",
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: {
-                  value: text,
-                  annotations: [],
-                },
-              },
-            ],
-            file_ids: [],
-            assistant_id: null,
-            run_id: null,
-            metadata: {},
-            completed_at: currentTime,
-            incomplete_at: currentTime,
-            incomplete_details: null,
-            status: "in_progress",
-          };
-          //setResponses((prev) => prev + text);
-          //Replace last message in old array with new message and set new array state
-          streamCallback((prevMessageArray) => {
-            const newMessageArray = [...prevMessageArray];
-            newMessageArray[newMessageArray.length - 1] = newMessage;
-            return newMessageArray;
-          });
-        }
-        read();
-      } catch (e) {
-        console.log(e);
+      const { done, value } = await reader.read();
+      if (done) {
+        console.log("DONEEE");
+        setIsLoading(false);
+        return;
       }
+
+      const text = new TextDecoder().decode(value);
+      console.log("text: ", text);
+      if (text.includes("END STREAM")) {
+        const thread = JSON.parse(text.replace(/.*END STREAM/, ""));
+        Props.setThreadId(thread.threadId);
+      } else {
+        buffer += text;
+        const newMessage: Message = {
+          id: "new",
+          object: "thread.message",
+          created_at: currentTime,
+          thread_id: "",
+          role: "assistant",
+          content: [
+            {
+              type: "text",
+              text: {
+                value: buffer,
+                annotations: [],
+              },
+            },
+          ],
+          file_ids: [],
+          assistant_id: null,
+          run_id: null,
+          metadata: {},
+          completed_at: currentTime,
+          incomplete_at: currentTime,
+          incomplete_details: null,
+          status: "in_progress",
+        };
+
+        console.log("newMessage added");
+
+        //Replace last message in old array with new message and set new array state
+        Props.setMessages((prevMessageArray) => {
+          const newMessageArray = [...prevMessageArray];
+          newMessageArray.pop();
+          newMessageArray.push(newMessage);
+          return newMessageArray;
+        });
+      }
+      read();
     }
     read();
   }
 
-  return { message, startStream, isLoading };
+  return { startStream, isLoading };
 }
-
-export default useStreamResponse;
