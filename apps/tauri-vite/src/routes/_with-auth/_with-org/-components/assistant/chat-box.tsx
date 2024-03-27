@@ -11,7 +11,6 @@ import useStreamResponse from "./useStreamResponse";
 
 type Message = OpenAI.Beta.Threads.Messages.Message;
 type Messages = Message[];
-
 type MessageContentText = OpenAI.Beta.Threads.Messages.TextContentBlock;
 
 interface ChatBoxProps {
@@ -31,17 +30,16 @@ export default function ChatBox(Props: ChatBoxProps) {
     setMessages,
     setIsLoading,
   });
-
   const { user } = useUser();
 
   /* Create new thread in database and openai */
   const createThread = trpc.createThread.createThread.useMutation();
 
-  /* Store the users message in the state and return its content */
+  /* Store userMessage and Initial assistant response message in state */
   function handleUserMessage() {
     setIsLoading(true);
     const currentTime = Date.now();
-    const message: Message = {
+    const userMessage: Message = {
       id: "1",
       object: "thread.message",
       created_at: currentTime,
@@ -94,16 +92,18 @@ export default function ChatBox(Props: ChatBoxProps) {
     setInput("");
     setMessages((prevMessages) => [
       ...prevMessages,
-      message,
+      userMessage,
       initialResponseMessage,
     ]);
 
-    const messageContent = message.content[0] as MessageContentText;
+    const messageContent = userMessage.content[0] as MessageContentText;
     return messageContent.text.value;
   }
 
-  /* Send user message to AI server, grab assistant response and add to messages state.
-  If the thread is newly created add the thread to the database, update thread state */
+  /* 
+  Handle new messages, Create new thread in DB if needed, 
+  begin streaming AI response 
+  */
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     try {
@@ -119,17 +119,14 @@ export default function ChatBox(Props: ChatBoxProps) {
         localStorage.setItem("threadId", newThreadId);
       }
 
-      /* Create request body with message and thread */
       const body = JSON.stringify({
         message: message,
-        thread: { id: newThreadId || Props.threadId, new: newThreadId !== "" },
+        thread: { id: newThreadId || Props.threadId, new: newThreadId },
       });
 
       startStream(body);
     } catch (error) {
       console.error("Error sending message to AI server:", error);
-    } finally {
-      //setIsLoading(false);
     }
   }
 
@@ -139,6 +136,7 @@ export default function ChatBox(Props: ChatBoxProps) {
         {messages.map(({ id, role, content }) => {
           const messageContent = content[0] as MessageContentText;
           return (
+            /* Display user or assistant banner */
             <div key={id}>
               {role === "user" ? (
                 <div className="my-1 flex items-center">
@@ -160,6 +158,7 @@ export default function ChatBox(Props: ChatBoxProps) {
                 </div>
               )}
 
+              {/* If loading after submitting form display loading dots */}
               {isLoading && id === "new" ? (
                 <>
                   <div className="flex space-x-1 self-end px-4 py-4">
@@ -224,6 +223,7 @@ export default function ChatBox(Props: ChatBoxProps) {
           onChange={(e) => setInput(e.target.value)}
         />
         <Button type="submit">
+          {/* Display loading spinner when loading or streaming */}
           {isLoading || isStreaming ? (
             <div role="status">
               <svg

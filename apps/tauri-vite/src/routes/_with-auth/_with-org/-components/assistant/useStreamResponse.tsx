@@ -14,7 +14,7 @@ interface StreamResponseProps {
 export default function useStreamResponse(Props: StreamResponseProps) {
   const [isStreaming, setIsStreaming] = useState(false);
   const currentTime = Date.now();
-
+  /* Fetch response from AI server and initialize stream reader */
   const { mutate: startStream } = useMutation({
     mutationFn: async (body: string) => {
       setIsStreaming(true);
@@ -29,19 +29,22 @@ export default function useStreamResponse(Props: StreamResponseProps) {
       if (!response.body) {
         throw new Error("ReadableStream not supported in this browser.");
       }
-      Props.setIsLoading(false);
       const reader = response.body.getReader();
       return reader;
     },
     onSuccess: (reader) => {
+      Props.setIsLoading(false);
       setIsStreaming(true);
       readStream(reader);
     },
   });
 
+  /* 
+  Recrusively read stream until done. Update state by continuously
+  adding new text chunks to the last message in the array
+  */
   async function readStream(reader: ReadableStreamDefaultReader) {
     let buffer = "";
-    console.log("buffer: ", buffer);
 
     async function read() {
       const { done, value } = await reader.read();
@@ -83,9 +86,6 @@ export default function useStreamResponse(Props: StreamResponseProps) {
           status: "in_progress",
         };
 
-        console.log("newMessage added");
-
-        //Replace last message in old array with new message and set new array state
         Props.setMessages((prevMessageArray) => {
           const newMessageArray = [...prevMessageArray];
           newMessageArray.pop();
