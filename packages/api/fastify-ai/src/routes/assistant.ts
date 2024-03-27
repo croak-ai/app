@@ -73,7 +73,7 @@ export default async function assistant(fastify: FastifyInstance) {
                 reply.send("Run ID not found");
                 return;
               }
-              console.log("FUNCTION NAME:", functionName);
+              //console.log("FUNCTION NAME:", functionName);
             }
           })
           /* Gather function arguments */
@@ -106,9 +106,6 @@ export default async function assistant(fastify: FastifyInstance) {
                     },
                   ],
                 })
-                .on("event", (event) => {
-                  //console.log("EVENT", event.event);
-                })
                 .on("messageDelta", (messageDelta, snapshot) => {
                   if (
                     messageDelta?.content &&
@@ -117,7 +114,7 @@ export default async function assistant(fastify: FastifyInstance) {
                     const messageChunk = messageDelta.content[0].text?.value;
                     //process.stdout.write(messageChunk || " undefined ");
                     // reply.send({ message: messageChunk, thread: thread });
-                    readableStream.push(messageChunk || "");
+                    readableStream.push(messageChunk);
                   }
                 })
                 .on("end", async () => {

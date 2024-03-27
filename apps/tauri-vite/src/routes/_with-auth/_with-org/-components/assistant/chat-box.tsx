@@ -39,7 +39,7 @@ export default function ChatBox(Props: ChatBoxProps) {
     setIsLoading(true);
     const currentTime = Date.now();
     const userMessage: Message = {
-      id: "1",
+      id: "userMessage",
       object: "thread.message",
       created_at: currentTime,
       thread_id: "",

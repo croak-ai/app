@@ -49,20 +49,18 @@ export default function useStreamResponse(Props: StreamResponseProps) {
     async function read() {
       const { done, value } = await reader.read();
       if (done) {
-        console.log("DONEEE");
         setIsStreaming(false);
         return;
       }
 
       const text = new TextDecoder().decode(value);
-      console.log("text: ", text);
       if (text.includes("END STREAM")) {
         const thread = JSON.parse(text.replace(/.*END STREAM/, ""));
         Props.setThreadId(thread.threadId);
       } else {
         buffer += text;
         const newMessage: Message = {
-          id: "streaming",
+          id: Math.random().toString(),
           object: "thread.message",
           created_at: currentTime,
           thread_id: "",
