@@ -52,15 +52,14 @@ export default function ThreadSelection(Props: ThreadSelectionProps) {
                 /* Cant use currentValue because CMDK uses tolowercase
               We can update to CMDK 1.0 but this breaks ShadCN for now */
                 key={thread.id}
-                value={thread.id}
+                value={thread.threadId}
                 onSelect={() => {
-                  if (thread.id !== value) {
-                    setValue(thread.id);
+                  if (thread.threadId !== value) {
+                    setValue(thread.threadId);
                     Props.setThreadId(thread.threadId);
                     localStorage.setItem("threadId", thread.threadId);
                     setOpen(false);
                   }
-                  setOpen(false);
                 }}
               >
                 <p className="max-w-[21rem] truncate">{thread.preview}</p>
