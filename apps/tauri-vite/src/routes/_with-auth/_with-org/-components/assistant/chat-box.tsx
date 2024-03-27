@@ -130,8 +130,8 @@ export default function ChatBox(Props: ChatBoxProps) {
   }
 
   return (
-    <div className="flex w-full grow flex-col gap-6 overflow-y-auto rounded-sm p-4 sm:p-8">
-      <div className="flex grow flex-col justify-start gap-4 overflow-y-scroll rounded-lg border-slate-400">
+    <div className="flex w-full grow flex-col gap-6 overflow-y-auto rounded-sm p-2">
+      <div className="flex grow flex-col justify-start gap-4 overflow-y-scroll rounded-lg border-slate-400 px-4 scrollbar-thin">
         {messages.map(({ id, role, content }) => {
           const messageContent = content[0] as MessageContentText;
           return (
@@ -217,11 +217,11 @@ export default function ChatBox(Props: ChatBoxProps) {
           className="focus-visible:ring-0 focus-visible:ring-offset-0"
           type="text"
           autoFocus
-          placeholder="Send a message"
+          placeholder="Ask an assistant..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
         />
-        <Button type="submit">
+        <Button type="submit" className="bg-green-700">
           {/* Display loading spinner when loading or streaming */}
           {isLoading || isStreaming ? (
             <div role="status">
