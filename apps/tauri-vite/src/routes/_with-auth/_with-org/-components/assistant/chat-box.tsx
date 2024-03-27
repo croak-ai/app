@@ -20,7 +20,6 @@ interface ChatBoxProps {
 }
 
 export default function ChatBox(Props: ChatBoxProps) {
-  console.log("Chatbox threadId", Props.threadId);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Messages>(Props.threadMessages);
   const [isLoading, setIsLoading] = useState(false);

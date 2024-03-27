@@ -34,6 +34,9 @@ export async function createOrRetrieveAssistant() {
       NOTE: When typing your responses using function results do NOT include anything enclosed 
       by the metadata tags. For example, In "Can you give me the workspaceId of Ben !(userId = 888)!?" 
       the metadata will be enclosed by a starting '!(' and ending ')!'.
+
+      NOTE: If somebody asks you something not defined in your duties here respond to the best of
+      your ability.
       
       Provided below is the database schema (written using Drizzle) you will use to construct your queries
       
