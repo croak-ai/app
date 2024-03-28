@@ -5,6 +5,10 @@ account_id = "5ac5081163a705fd39c6647be55dcfce"
 workers_dev = false
 main = 'src/worker.ts'
 
+kv_namespaces = [
+  {binding = "GLOBAL_KV", id = "8a4938ab6184480bae23c6f36777cc42", preview_id="14461fe9834a4136ae280dc352ea78ba"}
+]
+
 [triggers]
 crons = ["* * * * *"]
 

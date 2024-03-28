@@ -1,12 +1,17 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import type { DurableObjectNamespace } from "@cloudflare/workers-types";
+import type {
+  DurableObjectNamespace,
+  KVNamespace,
+} from "@cloudflare/workers-types";
 import type { Context, Input } from "hono";
 
 export type Bindings = {
   cloudflareAI: string;
   CROAK_DURABLE_OBJECT: DurableObjectNamespace;
+  GLOBAL_KV: KVNamespace;
   OPENAI_API_KEY: string;
+  CLERK_JWKS_URL: string;
   CLERK_SECRET_KEY: string;
   CLERK_PUBLISHABLE_KEY: string;
   CLERK_ORG_WEBHOOK_SECRET_KEY: string;

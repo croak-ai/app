@@ -1,4 +1,4 @@
-import {
+import React, {
   createContext,
   useContext,
   useEffect,
@@ -55,7 +55,7 @@ export const WebSocketProvider = ({
         return;
       }
 
-      const ws = new WebSocket(url);
+      const ws = new WebSocket(`${url}?token=${encodeURIComponent(token)}`);
 
       ws.onmessage = (event) => {
         const message = event.data;
@@ -65,6 +65,13 @@ export const WebSocketProvider = ({
       ws.onopen = () => {
         console.log("WebSocket connection established.");
         setIsConnected(true);
+
+        // Send an initial heartbeat message immediately
+        if (socketRef.current?.readyState === WebSocket.OPEN) {
+          socketRef.current.send(heartbeatMessage);
+          console.log("Initial heartbeat message sent.");
+        }
+
         // Start sending heartbeat messages
         heartbeatTimer = setInterval(() => {
           if (socketRef.current?.readyState === WebSocket.OPEN) {

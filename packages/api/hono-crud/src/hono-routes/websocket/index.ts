@@ -2,17 +2,28 @@ import { Hono } from "hono";
 import type { HonoConfig } from "../../config";
 import { upgradeWebSocket } from "hono/cloudflare-workers";
 import { Context } from "hono";
-import { getAuth } from "@hono/clerk-auth";
 import { HTTPException } from "hono/http-exception";
+import verifyWebSocketRequest from "./verify-websocket-request";
 
 export const websocket = new Hono<HonoConfig>();
-// Custom middleware to check for a valid org ID
-const validateAuth = async (c: Context<HonoConfig>, next: Function) => {
-  console.log(JSON.stringify(c));
-  const auth = getAuth(c);
 
-  if (!auth || !auth.orgId) {
-    throw new HTTPException(401, { message: "Unauthorized" });
+// Custom middleware to check for a valid token in the query params
+const validateAuth = async (c: Context<HonoConfig>, next: Function) => {
+  const token = c.req.query("token");
+
+  if (!token) {
+    throw new HTTPException(401, {
+      message: "Unauthorized: No token provided",
+    });
+  }
+
+  try {
+    await verifyWebSocketRequest({
+      token,
+      c,
+    });
+  } catch (e) {
+    console.log(e);
   }
 
   await next();
@@ -20,6 +31,7 @@ const validateAuth = async (c: Context<HonoConfig>, next: Function) => {
 
 websocket.get(
   "/",
+  validateAuth,
   upgradeWebSocket((c: Context<HonoConfig>) => {
     const doId = c.env.CROAK_DURABLE_OBJECT.idFromName("croak");
     const croak = c.env.CROAK_DURABLE_OBJECT.get(doId);
