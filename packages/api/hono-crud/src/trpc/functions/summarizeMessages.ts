@@ -6,6 +6,7 @@ import {
   message,
   conversationSummary,
   conversationSummaryRef,
+  user,
 } from "packages/db/schema/tenant";
 import { Ai as cloudflareAI } from "@cloudflare/ai";
 
@@ -36,11 +37,15 @@ export async function summarizeMessages(
     */
     const fetchConversationMessages = db
       .select({
+        firstName: user.firstName,
+        lastName: user.lastName,
         userId: message.userId,
         message: message.message,
       })
       .from(conversationMessage)
       .innerJoin(message, eq(message.id, conversationMessage.messageId))
+
+      .innerJoin(user, eq(user.userId, message.userId))
       .where(eq(conversationMessage.conversationId, conversationId))
       .orderBy(desc(message.createdAt));
 
@@ -63,7 +68,8 @@ export async function summarizeMessages(
           group of messages in a conversation. Summaries should be as succint as the 
           level of detail provided in the conversation. If specific details are provided
           in the conversation you should mention them in your summary. However small talk
-          and irrelevant details should be omitted. 
+          and irrelevant details should be omitted. Summaries should be made in thirs person
+          and refer to participants by their first name.
 
           Use your own discretion on what you think should be kept or ommitted.
           Only respond with the summary of the conversation.
