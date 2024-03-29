@@ -10,6 +10,7 @@ import {
   Message,
   MessageDelta,
 } from "openai/resources/beta/threads/messages/messages";
+import { vectorQuery } from "../ai/functions/vectorQuery";
 
 type AssistantBody = {
   message: string;
@@ -42,6 +43,7 @@ export default async function assistant(fastify: FastifyInstance) {
         //Map string name to function call
         const aiFunctionsByName: { [key: string]: Function } = {
           query,
+          vectorQuery,
         };
 
         let functionName = "";

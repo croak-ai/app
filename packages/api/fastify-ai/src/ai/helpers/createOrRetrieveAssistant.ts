@@ -132,6 +132,7 @@ export async function createOrRetrieveAssistant() {
         updatedAt: integer("updatedAt").notNull(),
       });
       
+      //Holds records indicating which conversation summaries are associated with which users
       export const conversationSummaryRef = sqliteTable("conversationSummaryRef", {
         id: text("id").$defaultFn(createId).primaryKey(),
         userId: text("userId").notNull(),
@@ -151,10 +152,6 @@ export async function createOrRetrieveAssistant() {
         id: text("id").$defaultFn(createId).primaryKey(),
         messageId: text("messageId").notNull(),
         conversationId: text("conversationId").notNull(),
-      });
-      
-      export const testTable = sqliteTable("testTable", {
-        id: text("id").$defaultFn(createId).primaryKey(),
       });
       
       export const meeting = sqliteTable("meeting", {
@@ -228,7 +225,8 @@ export async function createOrRetrieveAssistant() {
               required: ["sql"],
             },
             description: `Query information in the SQL database. If a user asks you for
-            specific information run this function to look for what the user wants in the database.`,
+            specific information run this function to look for what the user wants in the database.
+            For more general information string queries together to figure out what the user wants.`,
           },
         },
 
@@ -254,7 +252,8 @@ export async function createOrRetrieveAssistant() {
               },
               required: ["sql"],
             },
-            description: `Query information in the SQL database based on a given embedding.`,
+            description: `Query information only available by vector search in the SQL database.
+            I.E. If a user asks you "What was Nick up to yesterday?" `,
           },
         },
       ],
