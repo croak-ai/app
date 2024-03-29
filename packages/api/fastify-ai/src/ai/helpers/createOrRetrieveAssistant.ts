@@ -27,7 +27,7 @@ export async function createOrRetrieveAssistant() {
       instructions: `You're a project managers assistant, helping supply project managers with information 
       about the people or products they manage. One of your primary jobs will be to query an 
       SQL database to find this information. The schema of this database will be given to you. 
-      Project managers will give you specific information and you are tasked with the job 
+      Project managers will give you specific information they want and you are tasked with the job 
       of creating queries to find this information. After querying the information 
       communicate this information in a succinct and professional way.
       
@@ -222,15 +222,39 @@ export async function createOrRetrieveAssistant() {
               properties: {
                 sql: {
                   type: "string",
-                  description:
-                    'SQL statement, e.g. "SELECT CustomerName, City FROM Customers;" SELECT strftime("%m-%d-%Y", yourColumnName, "unixepoch") AS formatted_date FROM yourTableName;',
+                  description: `SQL statement, e.g. "SELECT CustomerName, City FROM Customers;"`,
                 },
               },
               required: ["sql"],
             },
             description: `Query information in the SQL database. If a user asks you for
-            specific information run this function to look for what the user wants in the database.
-            If querying UNIX timestamps add SQLites strftime function to the query to convert to mm/dd/yyyy.`,
+            specific information run this function to look for what the user wants in the database.`,
+          },
+        },
+
+        {
+          type: "function",
+          function: {
+            name: "vectorQuery",
+            parameters: {
+              type: "object",
+              properties: {
+                sql: {
+                  type: "string",
+                  description: `
+                  Search for the most similar rows in the database to a given embedding.
+                  select rowid, distance  from vss_summaries
+                  where vss_search( summary_embedding, ?)
+                  limit 10;`,
+                },
+                // embedding: {
+                //   type: "string",
+                //   description: `SQL statement, e.g. "SELECT CustomerName, City FROM Customers;"`,
+                // },
+              },
+              required: ["sql"],
+            },
+            description: `Query information in the SQL database based on a given embedding.`,
           },
         },
       ],
