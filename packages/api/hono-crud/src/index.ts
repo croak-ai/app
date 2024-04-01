@@ -9,4 +9,4 @@ export type RouterOutput = inferRouterOutputs<AppRouter>;
 
 export { type AppRouter } from "./trpc/routes";
 
-export { CroakDurableObject } from "./croak-durable-object";
+export { CroakDurableObject } from "./hono-routes/websocket/croak-durable-object";

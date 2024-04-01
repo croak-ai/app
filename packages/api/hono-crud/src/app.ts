@@ -1,7 +1,7 @@
-import { Hono } from "hono";
+import { Context, Hono } from "hono";
+import { HonoConfig } from "./config";
 import { cors } from "hono/cors";
 
-import type { HonoConfig } from "./config";
 import { clerk } from "./hono-middleware/clerk";
 import { trpc } from "./hono-middleware/trpc";
 import { HTTPException } from "hono/http-exception";
@@ -10,27 +10,20 @@ import type {
   ScheduledEvent,
   ExecutionContext,
 } from "@cloudflare/workers-types";
-import { upgradeWebSocket } from "hono/cloudflare-workers";
-import { websocket } from "./hono-routes/websocket";
+import { websocketForwarder } from "./hono-routes/websocket/websocket-forwarder";
 
 /* 
-Cors origin set to any for now because of weird enviornment specific issues.
+Cors origin set to any for now because of weird environment specific issues.
 Should be localhost:3000 and localhost:1420 
 */
 const app = new Hono<HonoConfig>()
   .get("/", (c) => {
     return c.text("Hello world");
   })
-  .use(
-    "*",
-    cors({
-      origin: "*",
-      maxAge: 86400, // 86400 seconds = 1 day
-    }),
-  )
   .use("*", clerk)
+  .route("/ws/*", websocketForwarder)
+  .use("*", cors({ origin: "*", maxAge: 86400 }))
   .use("/trpc/*", trpc)
-  .route("/ws", websocket)
   .route("/webhook", clerkWebhook);
 
 /* Error handling */

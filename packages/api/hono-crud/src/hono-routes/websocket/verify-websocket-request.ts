@@ -11,18 +11,20 @@ interface JWKS {
 
 export default async function verifyWebSocketRequest({
   token,
-  c,
+  jwksUrl,
+  KV,
 }: {
   token: string;
-  c: Context<HonoConfig>;
+  jwksUrl: string;
+  KV: KVNamespace;
 }) {
   // Attempt to retrieve the cached JWKS from KV
-  let jwks: JWKS | null = await c.env.GLOBAL_KV.get("jwks", { type: "json" });
+  let jwks: JWKS | null = await KV.get("jwks", { type: "json" });
 
   // Check if JWKS is not in cache or is stale
   if (!jwks) {
     // Fetch new JWKS if not cached or cache is stale
-    const jwksResponse = await fetch(c.env.CLERK_JWKS_URL);
+    const jwksResponse = await fetch(jwksUrl);
     jwks = await jwksResponse.json();
 
     if (!jwks) {
@@ -32,7 +34,7 @@ export default async function verifyWebSocketRequest({
     }
 
     // Store the fetched JWKS in KV with an expiration (e.g., 24 hours = 86400 seconds)
-    await c.env.GLOBAL_KV.put("jwks", JSON.stringify(jwks), {
+    await KV.put("jwks", JSON.stringify(jwks), {
       expirationTtl: 86400,
     });
   }

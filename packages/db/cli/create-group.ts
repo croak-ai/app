@@ -41,7 +41,7 @@ export async function createGroups({
         body: JSON.stringify({
           name: name,
           location: locationCode,
-          extensions: ["vector", "vss"],
+          extensions: ["vector", "vss", "fuzzy"],
         }),
       },
     );

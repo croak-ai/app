@@ -1,4 +1,4 @@
-import React, {
+import {
   createContext,
   useContext,
   useEffect,
@@ -8,9 +8,10 @@ import React, {
   ReactNode,
 } from "react";
 import { useAuth } from "@clerk/clerk-react";
+import { WebSocketMessage } from "@croak/hono-crud/src/hono-routes/websocket/web-socket-req-messages-types";
 
 interface WebSocketContextType {
-  sendMessage: (message: string) => void;
+  sendMessage: (message: WebSocketMessage) => void;
 }
 
 const WebSocketContext = createContext<WebSocketContextType | undefined>(
@@ -31,7 +32,22 @@ export const WebSocketProvider = ({
   const maxReconnectAttempts = 5; // Maximum number of reconnection attempts
   const reconnectDelay = 3000; // Delay before attempting to reconnect, in milliseconds
   const heartbeatInterval = 20000; // Interval for sending heartbeat messages, in milliseconds
-  const heartbeatMessage = "heartbeat"; // Message to be sent as a heartbeat
+
+  const sendMessage = useCallback(
+    async (message: WebSocketMessage) => {
+      const token = await getToken(); // Assuming getToken is an async function that fetches the current token
+      if (!token) {
+        console.error("No token available for WebSocket connection.");
+        return;
+      }
+
+      if (socketRef.current?.readyState === WebSocket.OPEN) {
+        const messageWithToken = { ...message, token }; // Append the token to the message
+        socketRef.current.send(JSON.stringify(messageWithToken));
+      }
+    },
+    [getToken],
+  );
 
   useEffect(() => {
     let heartbeatTimer: NodeJS.Timeout; // Specify the type for heartbeatTimer
@@ -66,18 +82,10 @@ export const WebSocketProvider = ({
         console.log("WebSocket connection established.");
         setIsConnected(true);
 
-        // Send an initial heartbeat message immediately
-        if (socketRef.current?.readyState === WebSocket.OPEN) {
-          socketRef.current.send(heartbeatMessage);
-          console.log("Initial heartbeat message sent.");
-        }
+        sendMessage({ type: "HEARTBEAT", status: "ONLINE" });
 
-        // Start sending heartbeat messages
         heartbeatTimer = setInterval(() => {
-          if (socketRef.current?.readyState === WebSocket.OPEN) {
-            socketRef.current.send(heartbeatMessage);
-            console.log("Heartbeat message sent.");
-          }
+          sendMessage({ type: "HEARTBEAT", status: "ONLINE" });
         }, heartbeatInterval);
       };
 
@@ -116,12 +124,6 @@ export const WebSocketProvider = ({
       clearInterval(heartbeatTimer); // Ensure the heartbeat timer is cleared on cleanup
     };
   }, [url, getToken, reconnectAttempts]); // Add reconnectAttempts to the dependency array
-
-  const sendMessage = useCallback((message: string) => {
-    if (socketRef.current?.readyState === WebSocket.OPEN) {
-      socketRef.current.send(message);
-    }
-  }, []);
 
   if (!isConnected) {
     return <div>Connecting to WebSocket...</div>;

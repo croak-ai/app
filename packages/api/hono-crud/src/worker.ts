@@ -1,3 +1,3 @@
 export { default } from "./app";
 
-export { CroakDurableObject } from "./croak-durable-object";
+export { CroakDurableObject } from "./hono-routes/websocket/croak-durable-object";

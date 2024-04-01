@@ -1,9 +1,5 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import type {
-  DurableObjectNamespace,
-  KVNamespace,
-} from "@cloudflare/workers-types";
 import type { Context, Input } from "hono";
 
 export type Bindings = {
