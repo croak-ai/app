@@ -5,7 +5,7 @@ import db from "../../db/client";
 
 type queryInput = { sql: string };
 
-export async function query(params: queryInput) {
+export async function queryDatabase(params: queryInput) {
   const { sql } = params;
 
   try {
@@ -16,6 +16,6 @@ export async function query(params: queryInput) {
     return stringData;
   } catch (error) {
     console.error(error);
-    return null;
+    throw error;
   }
 }

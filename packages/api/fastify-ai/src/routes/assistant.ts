@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import openai from "../ai/client";
 import { createOrRetrieveAssistant } from "../ai/helpers/createOrRetrieveAssistant";
-import { query } from "../ai/functions/query";
+import { queryDatabase } from "../ai/functions/queryDatabase";
 import { Readable, PassThrough } from "stream";
 import { ConsoleLogWriter } from "drizzle-orm";
 import { read } from "fs";
@@ -41,7 +41,7 @@ export default async function assistant(fastify: FastifyInstance) {
       }
       //Map string name to function call
       const aiFunctionsByName: { [key: string]: Function } = {
-        query,
+        queryDatabase,
         vectorQuery,
       };
 
@@ -89,42 +89,49 @@ export default async function assistant(fastify: FastifyInstance) {
           .on("event", async (event) => {
             //console.log("event ", event.event);
             //console.log(runId);
+            try {
+              if (event.event === "thread.run.requires_action") {
+                console.log("Function Args: ", functionArgs);
+                functionArgs = JSON.parse(functionArgs);
+                console.log("Function Name: ", functionName);
+                const aiFunction = aiFunctionsByName[functionName];
+                if (!aiFunction) {
+                  reply.send(
+                    "AI is choosing a tool, however our json object is not matching it correctly",
+                  );
+                  return;
+                }
 
-            if (event.event === "thread.run.requires_action") {
-              console.log("Function Args: ", functionArgs);
-              functionArgs = JSON.parse(functionArgs);
-              console.log("Function Name: ", functionName);
-              const aiFunction = aiFunctionsByName[functionName];
-              if (!aiFunction) {
-                reply.send(
-                  "AI is choosing a tool, however our json object is not matching it correctly",
-                );
-                return;
+                const functionOutput = await aiFunction(functionArgs);
+
+                const toolSubmitStream = openai.beta.threads.runs
+                  .submitToolOutputsStream(thread.id, runId, {
+                    tool_outputs: [
+                      {
+                        tool_call_id: functionId,
+                        output: functionOutput,
+                      },
+                    ],
+                  })
+                  .on("messageDelta", (messageDelta, snapshot) => {
+                    if (
+                      messageDelta?.content &&
+                      messageDelta.content[0]?.type === "text"
+                    ) {
+                      const messageChunk = messageDelta.content[0].text?.value;
+                      //process.stdout.write(messageChunk || " undefined ");
+                      // reply.send({ message: messageChunk, thread: thread });
+                      readableStream.push(messageChunk);
+                    }
+                  })
+                  .on("end", async () => {
+                    readableStream.push("END STREAM");
+                    reply.send({ threadId: thread.id });
+                  });
               }
-              const toolSubmitStream = openai.beta.threads.runs
-                .submitToolOutputsStream(thread.id, runId, {
-                  tool_outputs: [
-                    {
-                      tool_call_id: functionId,
-                      output: await aiFunction(functionArgs),
-                    },
-                  ],
-                })
-                .on("messageDelta", (messageDelta, snapshot) => {
-                  if (
-                    messageDelta?.content &&
-                    messageDelta.content[0]?.type === "text"
-                  ) {
-                    const messageChunk = messageDelta.content[0].text?.value;
-                    //process.stdout.write(messageChunk || " undefined ");
-                    // reply.send({ message: messageChunk, thread: thread });
-                    readableStream.push(messageChunk);
-                  }
-                })
-                .on("end", async () => {
-                  readableStream.push("END STREAM");
-                  reply.send({ threadId: thread.id });
-                });
+            } catch (e) {
+              await openai.beta.threads.runs.cancel(thread.id, runId);
+              reply.send("Run failed, please try again.");
             }
           })
           .on("end", async () => {
@@ -139,7 +146,7 @@ export default async function assistant(fastify: FastifyInstance) {
       } catch (e) {
         console.log(e);
         await openai.beta.threads.runs.cancel(thread.id, runId);
-        reply.send("Run failed");
+        reply.send("Run failed, please try again.");
       }
     },
   );

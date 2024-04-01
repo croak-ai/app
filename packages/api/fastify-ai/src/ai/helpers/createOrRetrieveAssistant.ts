@@ -24,21 +24,12 @@ export async function createOrRetrieveAssistant() {
     //In the future we can pull this config from a database.
     const assistantConfig: AssistantCreateParams = {
       name: "Managerial Chat Bot",
-      instructions: `You're a project managers assistant, helping supply project managers with information 
-      about the people or products they manage within a messaging application. This messaging application summarizes
-      user messages for easier processing and also holds other relevant information related to messages and conversations.
-      Your primary job will be to query an SQL database to find this information. The schema of this database 
-      will be given to you.
-      
-      Communicate this information in a professional and succinct way.
-      
-      NOTE: Users will provide you with any userIds they wish to query on. For example, In "Can you give me the workspaceId of Ben !(userId = 888)!?" 
-      the userId will be enclosed by a starting '!(' and ending ')!'. When responding to messages that include these tags do not
-      include the tags and text insid ethe tags in your response. If you do not have enough information to accurately respond to a
-      user query, ask them for the information you need.
+      instructions: `You are a project managers assistant tasked with gathering the information needed for a project manager.
+      to do their job effectively. You will be asked questions about the application and user activities on the application.
+      Please answer to the best of your ability or alternatively run the 'queryDatabase' function to query the database for 
+      the information you require.
 
-      NOTE: If somebody asks you something not defined in your duties here respond to the best of
-      your ability.
+     
 
       Provided below is the database schema you will use to construct your queries
       
@@ -177,7 +168,7 @@ export async function createOrRetrieveAssistant() {
       \`messageId\` text NOT NULL
       );
      
-      //Holds all users in the application
+      //Holds all users and relevant user information in the application
       CREATE TABLE \`user\` (
       \`internalId\` integer PRIMARY KEY NOT NULL,
       \`userId\` text(256) NOT NULL,
@@ -254,7 +245,7 @@ export async function createOrRetrieveAssistant() {
         {
           type: "function",
           function: {
-            name: "query",
+            name: "queryDatabase",
             parameters: {
               type: "object",
               properties: {
@@ -269,8 +260,8 @@ export async function createOrRetrieveAssistant() {
               },
               required: ["sql"],
             },
-            description: `Use this function to query information in the SQL database. If a user asks you about things related to the application
-        and/or user activities on the application use this function to find an answer to their question.`,
+            description: `Use this function to query the SQL database directly. If a user asks you about things related to the application
+        and/or user activities on the application use this function to find information in the database and return it to them.`,
           },
         },
 
