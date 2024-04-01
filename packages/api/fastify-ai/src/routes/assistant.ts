@@ -24,37 +24,36 @@ export default async function assistant(fastify: FastifyInstance) {
       request: FastifyRequest<{ Body: AssistantBody }>,
       reply: FastifyReply,
     ) {
+      /* Could rebuild this to store assistant info in a single table instead of JSON */
+      const assistant = await createOrRetrieveAssistant();
+
+      const params = request.body;
+
+      /* Retrieve thread based on value of threadId in body */
+      const thread = await openai.beta.threads.retrieve(params.thread.id);
+
+      //Add new message to thread if the user did not create a new thread
+      if (!params.thread.new) {
+        await openai.beta.threads.messages.create(thread.id, {
+          role: "user",
+          content: params.message,
+        });
+      }
+      //Map string name to function call
+      const aiFunctionsByName: { [key: string]: Function } = {
+        query,
+        vectorQuery,
+      };
+
+      let functionName = "";
+      let functionArgs = "";
+      let functionId = "";
+      let runId = "";
+      let functionCall = false;
+
+      const readableStream = new Readable();
+      readableStream._read = () => {};
       try {
-        /* Could rebuild this to store assistant info in a single table instead of JSON */
-        const assistant = await createOrRetrieveAssistant();
-
-        const params = request.body;
-
-        /* Retrieve thread based on value of threadId in body */
-        const thread = await openai.beta.threads.retrieve(params.thread.id);
-
-        //Add new message ot thread if the user did not create a new thread
-        if (!params.thread.new) {
-          await openai.beta.threads.messages.create(thread.id, {
-            role: "user",
-            content: params.message,
-          });
-        }
-        //Map string name to function call
-        const aiFunctionsByName: { [key: string]: Function } = {
-          query,
-          vectorQuery,
-        };
-
-        let functionName = "";
-        let functionArgs = "";
-        let functionId = "";
-        let runId = "";
-        let functionCall = false;
-
-        const readableStream = new Readable();
-        readableStream._read = () => {};
-
         const run = openai.beta.threads.runs
           .createAndStream(thread.id, {
             assistant_id: assistant.id,
@@ -90,8 +89,11 @@ export default async function assistant(fastify: FastifyInstance) {
           .on("event", async (event) => {
             //console.log("event ", event.event);
             //console.log(runId);
+
             if (event.event === "thread.run.requires_action") {
+              console.log("Function Args: ", functionArgs);
               functionArgs = JSON.parse(functionArgs);
+              console.log("Function Name: ", functionName);
               const aiFunction = aiFunctionsByName[functionName];
               if (!aiFunction) {
                 reply.send(
@@ -136,6 +138,8 @@ export default async function assistant(fastify: FastifyInstance) {
         return reply.send(readableStream);
       } catch (e) {
         console.log(e);
+        await openai.beta.threads.runs.cancel(thread.id, runId);
+        reply.send("Run failed");
       }
     },
   );

@@ -25,188 +25,229 @@ export async function createOrRetrieveAssistant() {
     const assistantConfig: AssistantCreateParams = {
       name: "Managerial Chat Bot",
       instructions: `You're a project managers assistant, helping supply project managers with information 
-      about the people or products they manage. One of your primary jobs will be to query an 
-      SQL database to find this information. The schema of this database will be given to you. 
-      Project managers will give you specific information they want and you are tasked with the job 
-      of creating queries to find this information. After querying the information 
-      communicate this information in a succinct and professional way.
+      about the people or products they manage within a messaging application. This messaging application summarizes
+      user messages for easier processing and also holds other relevant information related to messages and conversations.
+      Your primary job will be to query an SQL database to find this information. The schema of this database 
+      will be given to you.
       
-      NOTE: When typing your responses using function results do NOT include anything enclosed 
-      by the metadata tags. For example, In "Can you give me the workspaceId of Ben !(userId = 888)!?" 
-      the metadata will be enclosed by a starting '!(' and ending ')!'.
+      Communicate this information in a professional and succinct way.
+      
+      NOTE: Users will provide you with any userIds they wish to query on. For example, In "Can you give me the workspaceId of Ben !(userId = 888)!?" 
+      the userId will be enclosed by a starting '!(' and ending ')!'. When responding to messages that include these tags do not
+      include the tags and text insid ethe tags in your response. If you do not have enough information to accurately respond to a
+      user query, ask them for the information you need.
 
       NOTE: If somebody asks you something not defined in your duties here respond to the best of
       your ability.
+
+      Provided below is the database schema you will use to construct your queries
       
-      Provided below is the database schema (written using Drizzle) you will use to construct your queries
-      
-      export const user = sqliteTable("user", {
-        userId: text("userId", { length: 256 }).primaryKey(),
-        role: text("role", { length: 256 }).notNull(),
-        firstName: text("firstName", { length: 256 }),
-        lastName: text("lastName", { length: 256 }),
-        email: text("email", { length: 256 }).notNull().unique(),
-        imageUrl: text("imageUrl", { length: 10000 }),
-        createdAt: integer("createdAt").notNull(),
-        updatedAt: integer("updatedAt").notNull(),
-      });
-      
-      export const workspace = sqliteTable(
-        "workspace",
-        {
-          id: text("id").$defaultFn(createId).primaryKey(),
-          name: text("name", { length: 256 }).notNull(),
-          slug: text("slug", { length: 256 }).notNull().unique(),
-          description: text("description", { length: 512 }).notNull(),
-          createdAt: integer("createdAt").notNull(),
-          updatedAt: integer("updatedAt").notNull(),
-          deletedAt: integer("deletedAt"),
-        },
-        (table) => {
-          return {
-            slugIdx: index("slug_idx").on(table.slug),
-          };
-        },
-      );
-      export const channel = sqliteTable(
-        "channel",
-        {
-          id: text("id").$defaultFn(createId).primaryKey(),
-          slug: text("slug", { length: 256 }).notNull(),
-          description: text("description", { length: 512 }).notNull(),
-          workspaceId: text("workspaceId").notNull(),
-          channelType: text("channelType", { length: 256 }).notNull(),
-          createdAt: integer("createdAt").notNull(),
-          updatedAt: integer("updatedAt").notNull(),
-          deletedAt: integer("deletedAt"),
-        },
-        (t) => ({
-          unq: unique().on(t.workspaceId, t.slug),
-        }),
+      CREATE TABLE \`assistantThread\` (
+      \`id\` text PRIMARY KEY NOT NULL,
+      \`userId\` text(256) NOT NULL,
+      \`threadId\` text(256) NOT NULL,
+      \`preview\` text(256) NOT NULL,
+      \`createdAt\` integer NOT NULL,
+      \`updatedAt\` integer NOT NULL
       );
       
-      export const workspaceMember = sqliteTable("workspaceMember", {
-        id: text("id").$defaultFn(createId).primaryKey(),
-        workspaceId: text("workspaceId").notNull(),
-        userId: text("userId").notNull(),
-        bCanManageChannels: integer("bCanManageChannels").default(0),
-        bCanManageWorkspaceMembers: integer("bCanManageWorkspaceMembers").default(0),
-        bCanManageWorkspaceSettings: integer("bCanManageWorkspaceSettings").default(
-          0,
-        ),
-        createdAt: integer("createdAt").notNull(),
-        updatedAt: integer("updatedAt").notNull(),
-        deletedAt: integer("deletedAt"),
-      });
-      
-      export const assistantThread = sqliteTable("assistantThread", {
-        id: text("id").$defaultFn(createId).primaryKey(),
-        userId: text("userId", { length: 256 }).notNull(),
-        threadId: text("threadId", { length: 256 }).notNull(),
-        createdAt: integer("createdAt").notNull(),
-        updatedAt: integer("updatedAt").notNull(),
-      });
-      
-      export const message = sqliteTable("message", {
-        id: text("id").$defaultFn(createId).primaryKey(),
-        channelId: text("channelId").notNull(),
-        userId: text("userId").notNull(),
-        message: text("message", { length: 60000 }).notNull(),
-        createdAt: integer("createdAt").notNull(),
-        updatedAt: integer("updatedAt").notNull(),
-        deletedAt: integer("deletedAt"),
-      });
-      
-      export const unSummarizedMessage = sqliteTable("unSummarizedMessage", {
-        id: text("id").$defaultFn(createId).primaryKey(),
-        messageId: text("messageId").notNull(),
-      });
-      
-      export const conversationSummary = sqliteTable("conversationSummary", {
-        id: integer("id").primaryKey({ autoIncrement: true }),
-        channelId: text("channelId").notNull(),
-        conversationId: text("conversationId").notNull(),
-        summaryText: text("summaryText", { length: 500 }).notNull(),
-        summaryEmbedding: blob("summaryEmbedding").notNull(),
-        createdAt: integer("createdAt").notNull(),
-        updatedAt: integer("updatedAt").notNull(),
-      });
-      
-      //Holds records indicating which conversation summaries are associated with which users
-      export const conversationSummaryRef = sqliteTable("conversationSummaryRef", {
-        id: text("id").$defaultFn(createId).primaryKey(),
-        userId: text("userId").notNull(),
-        conversationSummaryId: integer("conversationSummaryId").notNull(),
-        createdAt: integer("createdAt").notNull(),
-        updatedAt: integer("updatedAt").notNull(),
-      });
-      
-      export const conversation = sqliteTable("conversation", {
-        id: text("id").$defaultFn(createId).primaryKey(),
-        channelId: text("channelId").notNull(),
-        createdAt: integer("createdAt").notNull(),
-        updatedAt: integer("updatedAt").notNull(),
-      });
-      
-      export const conversationMessage = sqliteTable("conversationMessage", {
-        id: text("id").$defaultFn(createId).primaryKey(),
-        messageId: text("messageId").notNull(),
-        conversationId: text("conversationId").notNull(),
-      });
-      
-      export const meeting = sqliteTable("meeting", {
-        id: text("id").$defaultFn(createId).primaryKey(),
-        recurringMeetingId: text("recurringMeetingId"),
-        scheduledAt: integer("scheduledAt").notNull(),
-        startedAt: integer("startedAt"),
-        endedAt: integer("endedAt"),
-        createdAt: integer("createdAt").notNull(),
-        updatedAt: integer("updatedAt").notNull(),
-        deletedAt: integer("deletedAt"),
-      });
-      
-      export const recurringMeeting = sqliteTable("recurringMeeting", {
-        id: text("id").$defaultFn(createId).primaryKey(),
-        frequency: text("frequency", { length: 256 }).notNull(),
-        interval: integer("interval").notNull(),
-        count: integer("count"),
-        until: integer("until"),
-        createdAt: integer("createdAt").notNull(),
-        updatedAt: integer("updatedAt").notNull(),
-        deletedAt: integer("deletedAt"),
-      });
-      
-      export const meetingParticipant = sqliteTable("meetingParticipant", {
-        id: text("id").$defaultFn(createId).primaryKey(),
-        meetingId: text("meetingId").notNull(),
-        userId: text("userId").notNull(),
-        createdAt: integer("createdAt").notNull(),
-        updatedAt: integer("updatedAt").notNull(),
-        deletedAt: integer("deletedAt"),
-      });
-      
-      export const meetingMessage = sqliteTable("meetingMessage", {
-        id: text("id").$defaultFn(createId).primaryKey(),
-        meetingId: text("meetingId").notNull(),
-        userId: text("userId").notNull(),
-        message: text("message", { length: 60000 }).notNull(),
-        createdAt: integer("createdAt").notNull(),
-        updatedAt: integer("updatedAt").notNull(),
-        deletedAt: integer("deletedAt"),
-      });
-      
-      export const meetingTranscriptedMessage = sqliteTable(
-        "meetingTranscriptedMessage",
-        {
-          id: text("id").$defaultFn(createId).primaryKey(),
-          meetingId: text("meetingId").notNull(),
-          userId: text("userId").notNull(),
-          message: text("message", { length: 60000 }).notNull(),
-          createdAt: integer("createdAt").notNull(),
-          updatedAt: integer("updatedAt").notNull(),
-          deletedAt: integer("deletedAt"),
-        },
+      //Channels of communication within the application
+      CREATE TABLE \`channel\` (
+      \`id\` text PRIMARY KEY NOT NULL,
+      \`slug\` text(256) NOT NULL,
+      \`description\` text(512) NOT NULL,
+      \`workspaceId\` text NOT NULL,
+      \`channelType\` text(256) NOT NULL, //e.g. text, voice
+      \`createdAt\` integer NOT NULL,
+      \`updatedAt\` integer NOT NULL,
+      \`deletedAt\` integer
       );
+     
+      //Messages are grouped by ideas and proximity into conversations
+      CREATE TABLE \`conversation\` (
+      \`id\` text PRIMARY KEY NOT NULL,
+      \`channelId\` text NOT NULL,
+      \`createdAt\` integer NOT NULL,
+      \`updatedAt\` integer NOT NULL
+      );
+     
+      //Links Messages with conversations
+      CREATE TABLE \`conversationMessage\` (
+      \`id\` text PRIMARY KEY NOT NULL,
+      \`messageId\` text NOT NULL,     //ID of the message
+      \`conversationId\` text NOT NULL //ID of the conversation the message belongs to
+      );
+     
+      //Summarization of all conversation messages
+      CREATE TABLE \`conversationSummary\` (
+      \`id\` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+      \`channelId\` text NOT NULL,
+      \`conversationId\` text NOT NULL,   //ID of the conversation the summary belongs to
+      \`summaryText\` text(500) NOT NULL, //Summary of the conversation
+      \`summaryEmbedding\` blob NOT NULL, //Embedding of the summary for use with vector search
+      \`createdAt\` integer NOT NULL,
+      \`updatedAt\` integer NOT NULL
+      );
+     
+      //Links all users who participated in a conversation to the conversation summary
+      CREATE TABLE \`conversationSummaryRef\` (
+      \`id\` text PRIMARY KEY NOT NULL,
+      \`userId\` text NOT NULL,                   //User who participated in the conversation
+      \`conversationSummaryId\` integer NOT NULL, //ID of the conversationSummary
+      \`createdAt\` integer NOT NULL,
+      \`updatedAt\` integer NOT NULL
+      );
+     
+      //Meeting information 
+      CREATE TABLE \`meeting\` (
+      \`id\` text PRIMARY KEY NOT NULL,
+      \`name\` text(256) NOT NULL,
+      \`description\` text(512) NOT NULL,
+      \`recurringMeetingId\` text,
+      \`scheduledStartAt\` integer NOT NULL, //scheduled meeting start time
+      \`scheduledEndAt\` integer NOT NULL,   //scheduled meeting end time
+      \`startedAt\` integer,                 //Actual meeting start time
+      \`endedAt\` integer,                   //Actual meeting end time 
+      \`createdAt\` integer NOT NULL,
+      \`updatedAt\` integer NOT NULL,
+      \`deletedAt\` integer
+      );
+     
+      //Links users who participated in the meeting to the meeting
+      CREATE TABLE \`meetingMember\` (
+      \`id\` text PRIMARY KEY NOT NULL,
+      \`bIsHost\` integer DEFAULT 0 NOT NULL,
+      \`bIsRequiredToAttend\` integer DEFAULT 1 NOT NULL,
+      \`meetingId\` text NOT NULL,
+      \`userId\` text NOT NULL,
+      \`createdAt\` integer NOT NULL,
+      \`updatedAt\` integer NOT NULL,
+      \`deletedAt\` integer
+      );
+
+      //Holds all text messages sent during a meeting
+      CREATE TABLE \`meetingMessage\` (
+      \`id\` text PRIMARY KEY NOT NULL,
+      \`meetingId\` text NOT NULL,
+      \`userId\` text NOT NULL,
+      \`message\` text(60000) NOT NULL,
+      \`createdAt\` integer NOT NULL,
+      \`updatedAt\` integer NOT NULL,
+      \`deletedAt\` integer
+      );
+     
+      //Holds all messages transcribed during a meeting
+      CREATE TABLE \`meetingTranscriptedMessage\` (
+      \`id\` text PRIMARY KEY NOT NULL,
+      \`meetingId\` text NOT NULL,
+      \`userId\` text NOT NULL,
+      \`message\` text(60000) NOT NULL,
+      \`createdAt\` integer NOT NULL,
+      \`updatedAt\` integer NOT NULL,
+      \`deletedAt\` integer
+      );
+     
+      //Holds all messages sent in the application
+      CREATE TABLE \`message\` (
+      \`id\` text PRIMARY KEY NOT NULL,
+      \`channelId\` text NOT NULL,
+      \`userId\` text NOT NULL,           //User who sent the message
+      \`message\` text(60000) NOT NULL,
+      \`createdAt\` integer NOT NULL,
+      \`updatedAt\` integer NOT NULL,
+      \`deletedAt\` integer
+      );
+     
+      //Holds information specifically about recurring meetings
+      CREATE TABLE \`recurringMeeting\` (
+      \`id\` text PRIMARY KEY NOT NULL,
+      \`name\` text(256) NOT NULL,
+      \`daysOfWeek\` text,
+      \`timeOfDay\` integer,
+      \`durationInMinutes\` integer NOT NULL,
+      \`until\` integer,
+      \`createdAt\` integer NOT NULL,
+      \`updatedAt\` integer NOT NULL,
+      \`deletedAt\` integer
+      );
+
+      //Holds messages that have not yet been suummarized by an AI
+      CREATE TABLE \`unSummarizedMessage\` (
+      \`id\` text PRIMARY KEY NOT NULL,
+      \`messageId\` text NOT NULL
+      );
+     
+      //Holds all users in the application
+      CREATE TABLE \`user\` (
+      \`internalId\` integer PRIMARY KEY NOT NULL,
+      \`userId\` text(256) NOT NULL,
+      \`role\` text(256) NOT NULL,
+      \`firstName\` text(1024),
+      \`lastName\` text(1024),
+      \`fullName\` text(1024),
+      \`email\` text(256) NOT NULL,
+      \`imageUrl\` text(10000),
+      \`createdAt\` integer NOT NULL,
+      \`updatedAt\` integer NOT NULL
+      );
+     
+      /*
+      Holds a list of all workspaces in the application
+      Workspaces are a higher form of organization
+      Each workspace holds channels within
+      */
+      CREATE TABLE \`workspace\` (
+      \`id\` text PRIMARY KEY NOT NULL,
+      \`name\` text(256) NOT NULL,
+      \`slug\` text(256) NOT NULL,
+      \`description\` text(512) NOT NULL,
+      \`createdAt\` integer NOT NULL,
+      \`updatedAt\` integer NOT NULL,
+      \`deletedAt\` integer
+      );
+     
+      //Links users to their respective workspaces
+      CREATE TABLE \`workspaceMember\` (
+      \`id\` text PRIMARY KEY NOT NULL,
+      \`workspaceId\` text NOT NULL,
+      \`userId\` text NOT NULL,
+      \`bCanManageChannels\` integer DEFAULT 0,
+      \`bCanManageWorkspaceMembers\` integer DEFAULT 0,
+      \`bCanManageWorkspaceSettings\` integer DEFAULT 0,
+      \`createdAt\` integer NOT NULL,
+      \`updatedAt\` integer NOT NULL,
+      \`deletedAt\` integer
+      );
+      
+      
+      CREATE VIRTUAL TABLE user_fts USING fts5(firstName, lastName, fullName, email, content="user", content_rowid="internalId");
+     
+      
+      CREATE TRIGGER user_ai AFTER INSERT ON user BEGIN
+        INSERT INTO user_fts(rowid, firstName, lastName, fullName, email) VALUES (new.internalId, new.firstName, new.lastName, new.fullName, new.email);
+      END;    
+      
+      
+      CREATE TRIGGER user_ad AFTER DELETE ON user BEGIN
+        INSERT INTO user_fts(user_fts, rowid, firstName, lastName, fullName, email) VALUES('delete', old.internalId, old.firstName, old.lastName, old.fullName, old.email);
+      END;
+     
+      
+      CREATE TRIGGER user_au AFTER UPDATE ON user BEGIN
+        INSERT INTO user_fts(user_fts, rowid, firstName, lastName, fullName, email) VALUES('delete', old.internalId, old.firstName, old.lastName, old.fullName, old.email);
+        INSERT INTO user_fts(rowid, firstName, lastName, fullName, email) VALUES (new.internalId, new.firstName, new.lastName, new.fullName, new.email);
+      END;
+      
+      
+      CREATE UNIQUE INDEX \`channel_workspaceId_slug_unique\` ON \`channel\` (\`workspaceId\`,\`slug\`);--> statement-breakpoint
+      CREATE UNIQUE INDEX \`meeting_name_unique\` ON \`meeting\` (\`name\`);--> statement-breakpoint
+      CREATE UNIQUE INDEX \`recurringMeeting_name_unique\` ON \`recurringMeeting\` (\`name\`);--> statement-breakpoint
+      CREATE UNIQUE INDEX \`user_userId_unique\` ON \`user\` (\`userId\`);--> statement-breakpoint
+      CREATE UNIQUE INDEX \`user_email_unique\` ON \`user\` (\`email\`);--> statement-breakpoint
+      CREATE INDEX \`email_idx\` ON \`user\` (\`email\`);--> statement-breakpoint
+      CREATE INDEX \`userId_idx\` ON \`user\` (\`userId\`);--> statement-breakpoint
+      CREATE UNIQUE INDEX \`workspace_slug_unique\` ON \`workspace\` (\`slug\`);--> statement-breakpoint
+      CREATE INDEX \`slug_idx\` ON \`workspace\` (\`slug\`);
       `,
       model: "gpt-4",
       tools: [
@@ -219,43 +260,46 @@ export async function createOrRetrieveAssistant() {
               properties: {
                 sql: {
                   type: "string",
-                  description: `SQL statement, e.g. "SELECT CustomerName, City FROM Customers;"`,
+                  description: `SQL statement, e.g. "SELECT conversationSummary.summaryText
+                  FROM conversationSummary
+                  INNER JOIN conversationSummaryRef ON conversationSummary.id = conversationSummaryRef.conversationSummaryId
+                  WHERE conversationSummaryRef.userId = 'specific_user_id';
+                  "`,
                 },
               },
               required: ["sql"],
             },
-            description: `Query information in the SQL database. If a user asks you for
-            specific information run this function to look for what the user wants in the database.
-            For more general information string queries together to figure out what the user wants.`,
+            description: `Use this function to query information in the SQL database. If a user asks you about things related to the application
+        and/or user activities on the application use this function to find an answer to their question.`,
           },
         },
 
-        {
-          type: "function",
-          function: {
-            name: "vectorQuery",
-            parameters: {
-              type: "object",
-              properties: {
-                sql: {
-                  type: "string",
-                  description: `
-                  Search for the most similar rows in the database to a given embedding.
-                  select rowid, distance  from vss_summaries
-                  where vss_search( summary_embedding, ?)
-                  limit 10;`,
-                },
-                // embedding: {
-                //   type: "string",
-                //   description: `SQL statement, e.g. "SELECT CustomerName, City FROM Customers;"`,
-                // },
-              },
-              required: ["sql"],
-            },
-            description: `Query information only available by vector search in the SQL database.
-            I.E. If a user asks you "What was Nick up to yesterday?" `,
-          },
-        },
+        // {
+        //   type: "function",
+        //   function: {
+        //     name: "vectorQuery",
+        //     parameters: {
+        //       type: "object",
+        //       properties: {
+        //         sql: {
+        //           type: "string",
+        //           description: `
+        //           Search for the most similar rows in the database to a given embedding.
+        //           select rowid, distance  from vss_summaries
+        //           where vss_search( summary_embedding, ?)
+        //           limit 10;`,
+        //         },
+        //         // embedding: {
+        //         //   type: "string",
+        //         //   description: `SQL statement, e.g. "SELECT CustomerName, City FROM Customers;"`,
+        //         // },
+        //       },
+        //       required: ["sql"],
+        //     },
+        //     description: `Query information only available by vector search in the SQL database.
+        //     I.E. If a user asks you "What was Nick up to yesterday?" `,
+        //   },
+        // },
       ],
     };
     //gpt-3.5-turbo-1106
