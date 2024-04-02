@@ -3,6 +3,7 @@
 import type { Context, Input } from "hono";
 
 export type Bindings = {
+  DURABLE_OBJECT_HEARTBEAT_UPDATE_INTERVAL_MS: number;
   cloudflareAI: string;
   CROAK_DURABLE_OBJECT: DurableObjectNamespace;
   GLOBAL_KV: KVNamespace;

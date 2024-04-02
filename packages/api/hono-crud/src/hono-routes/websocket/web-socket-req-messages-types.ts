@@ -1,6 +1,10 @@
+import { user } from "@acme/db/schema/tenant";
+
+export type HeartbeatStatusType = typeof user.$inferInsert.lastKnownStatus;
+
 export type HeartbeatMessage = {
   type: "HEARTBEAT";
-  status: "ONLINE" | "AWAY" | "MOBILE";
+  status: HeartbeatStatusType;
 };
 
 export type ChatMessage = {

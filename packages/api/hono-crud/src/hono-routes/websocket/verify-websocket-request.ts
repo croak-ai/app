@@ -4,6 +4,7 @@ import { HTTPException } from "hono/http-exception";
 import jwkToPem from "jwk-to-pem";
 import fetch from "node-fetch";
 import { HonoConfig } from "../../config";
+import { JwtPayload } from "@clerk/types";
 
 interface JWKS {
   keys: Array<jwkToPem.RSA>;
@@ -57,5 +58,9 @@ export default async function verifyWebSocketRequest({
     });
   }
 
-  return await jwt.decode(token);
+  const decoded = await jwt.decode(token);
+
+  const payload = decoded.payload as JwtPayload;
+
+  return payload;
 }

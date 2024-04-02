@@ -20,6 +20,18 @@ export const user = sqliteTable(
     fullName: text("fullName", { length: 1024 }),
     email: text("email", { length: 256 }).notNull().unique(),
     imageUrl: text("imageUrl", { length: 10000 }),
+    lastKnownStatus: text("lastKnownStatus", {
+      enum: [
+        "ONLINE",
+        "OFFLINE",
+        "AWAY",
+        "DO_NOT_DISTURB",
+        "INVISIBLE",
+        "MOBILE_ONLINE",
+      ],
+    }),
+    lastKnownStatusConfirmedAt: integer("lastKnownStatusConfirmedAt"),
+    lastKnownStatusSwitchedAt: integer("lastKnownStatusSwitchedAt"),
     createdAt: integer("createdAt").notNull(),
     updatedAt: integer("updatedAt").notNull(),
   },

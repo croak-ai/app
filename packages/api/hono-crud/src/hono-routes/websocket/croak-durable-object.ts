@@ -1,15 +1,26 @@
 import { Hono } from "hono";
 import { upgradeWebSocket } from "hono/cloudflare-workers";
-import { HonoConfig } from "../../config";
 import { cors } from "hono/cors";
 import { WebSocketMessage } from "./web-socket-req-messages-types";
 import verifyWebSocketRequest from "./verify-websocket-request";
 import { Bindings } from "../../config";
+import { WSContext } from "hono/ws";
+import { HeartbeatStatusType } from "./web-socket-req-messages-types";
+import getDbConnection from "./get-db-connection";
+import { user } from "@acme/db/schema/tenant";
+import { eq } from "drizzle-orm";
+
+type UserStatus = {
+  status: HeartbeatStatusType;
+  updated: number; // Unix timestamp in milliseconds
+};
 
 export class CroakDurableObject {
   value: number = 0;
   state: DurableObjectState;
-  app: Hono<HonoConfig> = new Hono<HonoConfig>();
+  app: Hono = new Hono();
+  connections: Record<string, WSContext> = {}; // Store active WebSocket connections mapped by userId
+  currentStatuses: Record<string, UserStatus> = {}; // Store current status of each user
 
   constructor(state: DurableObjectState, env: Bindings) {
     this.state = state;
@@ -29,50 +40,110 @@ export class CroakDurableObject {
       upgradeWebSocket((c) => {
         return {
           onMessage: async (event, ws) => {
-            try {
-              let messageData = event.data;
+            let messageData = event.data;
 
-              // Ensure messageData is a string before attempting to parse it as JSON
-              if (messageData instanceof Blob) {
-                messageData = await messageData.text();
-              } else if (messageData instanceof ArrayBuffer) {
-                messageData = new TextDecoder().decode(messageData);
-              } else if (messageData instanceof SharedArrayBuffer) {
-                messageData = new TextDecoder().decode(
-                  new Uint8Array(messageData),
+            // Ensure messageData is a string before attempting to parse it as JSON
+            if (messageData instanceof Blob) {
+              messageData = await messageData.text();
+            } else if (messageData instanceof ArrayBuffer) {
+              messageData = new TextDecoder().decode(messageData);
+            } else if (messageData instanceof SharedArrayBuffer) {
+              messageData = new TextDecoder().decode(
+                new Uint8Array(messageData),
+              );
+            }
+
+            const message = JSON.parse(messageData);
+
+            const clerkAuth = await verifyWebSocketRequest({
+              token: message.token,
+              jwksUrl: env.CLERK_JWKS_URL,
+              KV: env.GLOBAL_KV,
+            });
+
+            const userId = clerkAuth.sub;
+
+            this.connections[userId] = ws;
+
+            const WebSocketMessage: WebSocketMessage = message;
+            // Handle different types of WebSocket messages
+            switch (WebSocketMessage.type) {
+              case "HEARTBEAT":
+                const newStatus = WebSocketMessage.status;
+
+                if (
+                  !this.currentStatuses[userId] ||
+                  this.currentStatuses[userId].status !== newStatus
+                ) {
+                  this.currentStatuses[userId] = {
+                    status: newStatus,
+                    updated: Date.now(),
+                  };
+
+                  const db = getDbConnection({
+                    payload: clerkAuth,
+                    bindings: env,
+                  });
+
+                  await db
+                    .update(user)
+                    .set({
+                      lastKnownStatus: newStatus,
+                      lastKnownStatusConfirmedAt: Date.now(),
+                      lastKnownStatusSwitchedAt: Date.now(),
+                      updatedAt: Date.now(),
+                    })
+                    .where(eq(user.userId, userId));
+                  break;
+                }
+
+                const intervalMs = Number(
+                  env.DURABLE_OBJECT_HEARTBEAT_UPDATE_INTERVAL_MS,
                 );
-              }
 
-              const message = JSON.parse(messageData);
+                if (
+                  this.currentStatuses[userId].updated + intervalMs <
+                  Date.now()
+                ) {
+                  this.currentStatuses[userId] = {
+                    status: newStatus,
+                    updated: Date.now(),
+                  };
 
-              const clerkAuth = await verifyWebSocketRequest({
-                token: message.token,
-                jwksUrl: env.CLERK_JWKS_URL,
-                KV: env.GLOBAL_KV,
-              });
+                  const db = getDbConnection({
+                    payload: clerkAuth,
+                    bindings: env,
+                  });
 
-              const WebSocketMessage: WebSocketMessage = message;
-              // Handle different types of WebSocket messages
-              switch (WebSocketMessage.type) {
-                case "HEARTBEAT":
-                  console.log(`Heartbeat status: ${message.status}`);
+                  await db
+                    .update(user)
+                    .set({
+                      lastKnownStatusConfirmedAt: Date.now(),
+                      updatedAt: Date.now(),
+                    })
+                    .where(eq(user.userId, userId));
                   break;
-                case "CHAT_MESSAGE":
-                  console.log(`Chat message: ${message.text}`);
-                  break;
-                default:
-                  console.error("Unknown message type");
-              }
-            } catch (e) {
-              console.log(e);
-              ws.send("Error: while processing ws message");
+                }
+
+                break;
+
+              default:
+                console.error("Unknown message type");
             }
           },
-          onClose: () => {
-            console.log("Connection closed");
+          onClose: (event, ws) => {
+            const userId = Object.keys(this.connections).find(
+              (key) => this.connections[key] === ws,
+            );
+
+            if (userId) {
+              delete this.connections[userId];
+            }
           },
-          onError: (err) => {
-            console.error("Error encountered");
+          onError: (err, ws) => {
+            ws.send("An error occurred while processing a websocket message.");
+
+            console.error("WebSocket error: ", err);
           },
         };
       }),

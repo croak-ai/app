@@ -6,13 +6,13 @@ import verifyWebSocketRequest from "./verify-websocket-request";
 export const websocketForwarder = new Hono<HonoConfig>();
 
 websocketForwarder.get("*", async (c) => {
-  const auth: any = await verifyWebSocketRequest({
+  const auth = await verifyWebSocketRequest({
     token: c.req.query("token"),
     jwksUrl: c.env.CLERK_JWKS_URL,
     KV: c.env.GLOBAL_KV,
   });
 
-  const orgId: string = auth.payload.org_id;
+  const orgId = auth.org_id;
 
   if (!orgId) {
     throw new HTTPException(401, {
