@@ -8,6 +8,20 @@
       "when": 1710869064515,
       "tag": "0000_majestic_steel_serpent",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1710981485975,
+      "tag": "0001_woozy_rockslide",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1711051127205,
+      "tag": "0002_hot_leo",
+      "breakpoints": true
     }
   ]
 }

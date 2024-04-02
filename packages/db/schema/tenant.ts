@@ -108,7 +108,7 @@ export const conversationSummary = sqliteTable("conversationSummary", {
   channelId: text("channelId").notNull(),
   conversationId: text("conversationId").notNull(),
   summaryText: text("summaryText", { length: 500 }).notNull(),
-  summaryEmbedding: blob("summaryEmbedding").notNull(),
+  summaryEmbedding: text("summaryEmbedding").notNull(),
   createdAt: integer("createdAt").notNull(),
   updatedAt: integer("updatedAt").notNull(),
 });
@@ -132,10 +132,6 @@ export const conversationMessage = sqliteTable("conversationMessage", {
   id: text("id").$defaultFn(createId).primaryKey(),
   messageId: text("messageId").notNull(),
   conversationId: text("conversationId").notNull(),
-});
-
-export const testTable = sqliteTable("testTable", {
-  id: text("id").$defaultFn(createId).primaryKey(),
 });
 
 export const meeting = sqliteTable("meeting", {

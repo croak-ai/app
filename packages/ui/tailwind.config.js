@@ -98,6 +98,8 @@ module.exports = {
     require("@tailwindcss/typography"),
     /* prettier-ignore */
     require("@tailwindcss/aspect-ratio"),
+    /* prettier-ignore */
+    require('tailwind-scrollbar'),
     addVariablesForColors,
   ],
 };

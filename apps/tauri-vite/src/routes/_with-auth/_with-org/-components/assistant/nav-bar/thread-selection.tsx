@@ -27,10 +27,7 @@ interface ThreadSelectionProps {
 
 export default function ThreadSelection(Props: ThreadSelectionProps) {
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(Props.threadId);
-  console.log("value: ", value);
-  /* Pull previously selected thread from local storage here */
-
+  const [activeThreadId, setActiveThreadId] = useState(Props.threadId);
   const threads = trpc.retrieveThreadList.retrieveThreadList.useQuery();
 
   return (
@@ -48,14 +45,10 @@ export default function ThreadSelection(Props: ThreadSelectionProps) {
           <CommandGroup>
             {threads.data?.map((thread) => (
               <CommandItem
-                className=""
-                /* Cant use currentValue because CMDK uses tolowercase
-              We can update to CMDK 1.0 but this breaks ShadCN for now */
                 key={thread.id}
-                value={thread.preview}
+                value={`${thread.preview}:${thread.threadId}`}
                 onSelect={() => {
-                  if (thread.preview !== value) {
-                    setValue(thread.preview);
+                  if (thread.threadId !== Props.threadId) {
                     Props.setThreadId(thread.threadId);
                     localStorage.setItem("threadId", thread.threadId);
                     setOpen(false);
@@ -64,12 +57,10 @@ export default function ThreadSelection(Props: ThreadSelectionProps) {
                 }}
               >
                 <p className="max-w-[21rem] truncate">{thread.preview}</p>
-                <CheckIcon
-                  className={cn(
-                    "ml-auto h-4 w-4",
-                    value === thread.threadId ? "opacity-100" : "opacity-0",
-                  )}
-                />
+
+                {Props.threadId === thread.threadId && (
+                  <CheckIcon className={cn("ml-auto h-4 w-4")} />
+                )}
               </CommandItem>
             ))}
           </CommandGroup>

@@ -43,7 +43,7 @@ export default function Assistant(Props: AssistantProps) {
         />
       ) : (
         <ChatBox
-          key={threadId}
+          key={Math.random().toString()}
           threadId={threadId}
           threadMessages={data || []}
           setThreadId={setThreadId}

@@ -23,7 +23,7 @@ the message
 /* Triggers the conversation grouping process */
 export async function groupMessage(
   db: DBClientType,
-  openAI: OpenAI,
+  openai: OpenAI,
   newMessage: DBMessage,
 ) {
   try {
@@ -73,7 +73,7 @@ export async function groupMessage(
 
     /* !!!Talk to Ben about how we should handle these OpenAI clients being created!!! */
 
-    const completion = await openAI.chat.completions.create({
+    const completion = await openai.chat.completions.create({
       messages: [
         {
           role: "system",
@@ -123,7 +123,6 @@ export async function groupMessage(
     }
 
     const AIResponseObject = validatedResponse.data;
-    console.log("AIResponseObject: ", AIResponseObject);
 
     /* Check if we should make a new conversation or add to an existing one */
     if (AIResponseObject.conversationId === "new") {

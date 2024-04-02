@@ -23,7 +23,6 @@ export const retrieveThreadMessages = router({
         { order: "asc" },
       );
 
-      console.log("MESSAGES: ", messages.data);
       if (!messages.data) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

@@ -1,29 +1,14 @@
-import {
-  DBClientType,
-  desc,
-  exists,
-  eq,
-  and,
-  isNotNull,
-  sql,
-} from "packages/db";
-import { DBMessage } from "../routes/message/create-message";
+import { DBClientType, desc, eq, sql } from "packages/db";
 import OpenAI from "openai";
 import { TRPCError } from "@trpc/server";
 import {
-  conversation,
   conversationMessage,
   message,
-  unSummarizedMessage,
   conversationSummary,
   conversationSummaryRef,
+  user,
 } from "packages/db/schema/tenant";
-import { string, z } from "zod";
 import { Ai as cloudflareAI } from "@cloudflare/ai";
-
-const zAIGroupingResponse = z.object({
-  conversationId: z.string(),
-});
 
 /* 
 Summarize messages function here. Pull last x UNSUMMARIZED 
@@ -37,26 +22,33 @@ messages.
 /* Triggers the conversation summarization process */
 export async function summarizeMessages(
   db: DBClientType,
-  openAI: OpenAI,
+  openai: OpenAI,
   cloudflareAI: cloudflareAI,
   conversationId: string,
   channelId: string,
 ) {
   try {
-    /* Fetch all messages in conversation */
+    /* 
+    Fetch all messages and participants in conversation.
+    Feed conversation messages to AI model to summarize.
+    Create embedding for AI generated summary. (BGE small 384 dimensions)
+    Insert summary into conversationSummary table.
+    Insert participants into conversationSummaryRef table.
+    */
     const fetchConversationMessages = db
       .select({
+        firstName: user.firstName,
+        lastName: user.lastName,
         userId: message.userId,
         message: message.message,
       })
       .from(conversationMessage)
       .innerJoin(message, eq(message.id, conversationMessage.messageId))
+
+      .innerJoin(user, eq(user.userId, message.userId))
       .where(eq(conversationMessage.conversationId, conversationId))
       .orderBy(desc(message.createdAt));
 
-    /* 
-    Fetch all participants in conversation
-    */
     const fetchConversationParticipants = db
       .selectDistinct({ userId: message.userId })
       .from(conversationMessage)
@@ -68,10 +60,7 @@ export async function summarizeMessages(
       fetchConversationParticipants,
     ]);
 
-    const conversationMessagesJSON = JSON.stringify(conversationMessages);
-
-    /* Load messages into AI for summarization */
-    const completion = await openAI.chat.completions.create({
+    const completion = await openai.chat.completions.create({
       messages: [
         {
           role: "system",
@@ -79,12 +68,13 @@ export async function summarizeMessages(
           group of messages in a conversation. Summaries should be as succint as the 
           level of detail provided in the conversation. If specific details are provided
           in the conversation you should mention them in your summary. However small talk
-          and irrelevant details should be omitted. 
+          and irrelevant details should be omitted. Summaries should be made in thirs person
+          and refer to participants by their first name.
 
           Use your own discretion on what you think should be kept or ommitted.
           Only respond with the summary of the conversation.
           
-          Group of messages: ${conversationMessagesJSON}
+          Group of messages: ${JSON.stringify(conversationMessages)}
           `,
         },
       ],
@@ -97,31 +87,22 @@ export async function summarizeMessages(
         message: "Request to OpenAI failed",
       });
     }
-
-    /* Parse and validate response */
     const AISummary = completion.choices[0].message.content;
 
-    //console.log(AISummary);
-
     /* Generate embedding for summary (BGE small 384 dimensions)*/
-    const embeddingObj = await cloudflareAI.run<"@cf/baai/bge-small-en-v1.5">(
+    const embedding = await cloudflareAI.run<"@cf/baai/bge-small-en-v1.5">(
       "@cf/baai/bge-small-en-v1.5",
       {
         text: AISummary,
       },
     );
 
-    /* Insert summary into vector tables using embedding */
-    /* We need to perform some manipulation here to convert this 64-bit array
-    into uint8array for efficient storage */
-
-    //console.log("shape: ", embeddingObj.shape);
-    //console.log("Data: ", embeddingObj.data[0]);
-
+    ////////////////////////////////////////////////////////////////////////////
+    // Use this if we want to store embeddings as bits in future
     // const float32VectorArray = new Float32Array(embeddingObj.data[0]);
     // const bitVectorArray = new Uint8Array(float32VectorArray.buffer);
     // const blob = new Blob(embeddingObj.data[0]);
-    const stringEmbedding = JSON.stringify(embeddingObj.data[0]);
+    ////////////////////////////////////////////////////////////////////////////
 
     const currentTime = Date.now();
 
@@ -131,7 +112,7 @@ export async function summarizeMessages(
         channelId,
         conversationId,
         summaryText: AISummary,
-        summaryEmbedding: stringEmbedding,
+        summaryEmbedding: JSON.stringify(embedding.data[0]),
         createdAt: currentTime,
         updatedAt: currentTime,
       })
@@ -145,7 +126,6 @@ export async function summarizeMessages(
       });
     }
 
-    /* Build an array of participant data */
     const participantData = conversationParticipants.map((participant) => ({
       userId: participant.userId,
       conversationSummaryId: conversationSummaryResult.id,
@@ -153,25 +133,33 @@ export async function summarizeMessages(
       updatedAt: currentTime,
     }));
 
-    /* Insert all participants into conversationSummaryRef table */
-    /* Eventually we will need to lump this into a promise.all with query below */
-    await db.insert(conversationSummaryRef).values(participantData);
+    const insertConversationRef = db
+      .insert(conversationSummaryRef)
+      .values(participantData);
 
-    /* rows in vss_summaries and conversationSummary need to share the same ID */
-    //Now this query is failing for some unknown reason
+    const vectorSQL = sql`INSERT INTO vss_summaries(rowid, summary_embedding)
+                      VALUES (${conversationSummaryResult.id}, 
+                      ${JSON.stringify(embedding.data[0])})`;
+    const insertVectorSummary = db.run(vectorSQL);
 
-    // const vectorSQL = sql`INSERT INTO vss_summaries(rowid, summary_embedding)
-    //                   VALUES (${conversationSummaryResult.id}, ${stringEmbedding})`;
+    const [conversationRef, vectorSummary] = await Promise.all([
+      insertConversationRef,
+      insertVectorSummary,
+    ]);
 
-    // const vss_summary_result = await db.run(vectorSQL);
-    // //console.log("Should be inserted");
-
-    // if (!vss_summary_result) {
-    //   throw new TRPCError({
-    //     code: "INTERNAL_SERVER_ERROR",
-    //     message: "Failed to insert conversation summary into vector table",
-    //   });
-    // }
+    if (!conversationRef) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message:
+          "Failed to insert conversation participants into conversationSummaryRef table",
+      });
+    }
+    if (!vectorSummary) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to insert conversation summary into vector table",
+      });
+    }
 
     return;
   } catch (error) {

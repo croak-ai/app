@@ -13,9 +13,9 @@ export async function createOrRetrieveAssistant() {
     const assistantData = await fs.promises.readFile(assistantPath, "utf8");
     const assistantDetails = JSON.parse(assistantData);
     const assistantId = assistantDetails.assistantId;
-    console.log("existing assistant detected");
 
     return await openai.beta.assistants.retrieve(assistantId);
+    console.log("existing assistant detected");
   } catch (error) {
     // Create new assistant config and write to local file
     // console.error(error);
@@ -24,29 +24,38 @@ export async function createOrRetrieveAssistant() {
     //In the future we can pull this config from a database.
     const assistantConfig: AssistantCreateParams = {
       name: "Managerial Chat Bot",
-      instructions: `You're a project managers assistant, helping supply project managers with information 
-      about the people or products they manage. One of your primary jobs will be to query an 
-      SQL database to find this information. The schema of this database will be given to you. 
-      Project managers will give you specific information and you are tasked with the job 
-      of creating queries to find this information. After querying the information 
-      communicate this information in a succinct and professional way.
+      instructions: `You are a project managers assistant tasked with gathering the information needed for a project manager.
+      to do their job effectively. You will be asked questions about the application and user activities on the application.
+
+      Your main task is to find the information needed to answer the questions asked by the project manager.
+
+      ALWAYS format ALL of your responses in Markdown format. Be sure to provide line breaks in Markdown format.
+
+      ALWAYS use only ONE function call to grab the data you require.
+
+      Provided below is the database schema for the application.
       
-      NOTE: When typing your responses using function results do NOT include anything enclosed 
-      by the metadata tags. For example, In "Can you give me the workspaceId of Ben !(userId = 888)!?" 
-      the metadata will be enclosed by a starting '!(' and ending ')!'.
-      
-      Provided below is the database schema (written using Drizzle) you will use to construct your queries
-      
-      export const user = sqliteTable("user", {
-        userId: text("userId", { length: 256 }).primaryKey(),
-        role: text("role", { length: 256 }).notNull(),
-        firstName: text("firstName", { length: 256 }),
-        lastName: text("lastName", { length: 256 }),
-        email: text("email", { length: 256 }).notNull().unique(),
-        imageUrl: text("imageUrl", { length: 10000 }),
-        createdAt: integer("createdAt").notNull(),
-        updatedAt: integer("updatedAt").notNull(),
-      });
+      export const user = sqliteTable(
+        "user",
+        {
+          internalId: integer("internalId").primaryKey(),
+          userId: text("userId", { length: 256 }).notNull().unique(),
+          role: text("role", { length: 256 }).notNull(),
+          firstName: text("firstName", { length: 1024 }),
+          lastName: text("lastName", { length: 1024 }),
+          fullName: text("fullName", { length: 1024 }),
+          email: text("email", { length: 256 }).notNull().unique(),
+          imageUrl: text("imageUrl", { length: 10000 }),
+          createdAt: integer("createdAt").notNull(),
+          updatedAt: integer("updatedAt").notNull(),
+        },
+        (table) => {
+          return {
+            emailIdx: index("email_idx").on(table.email),
+            userIdIdx: index("userId_idx").on(table.userId),
+          };
+        },
+      );
       
       export const workspace = sqliteTable(
         "workspace",
@@ -100,10 +109,12 @@ export async function createOrRetrieveAssistant() {
         id: text("id").$defaultFn(createId).primaryKey(),
         userId: text("userId", { length: 256 }).notNull(),
         threadId: text("threadId", { length: 256 }).notNull(),
+        preview: text("preview", { length: 256 }).notNull(),
         createdAt: integer("createdAt").notNull(),
         updatedAt: integer("updatedAt").notNull(),
       });
       
+      //Holds all messages sent in the application
       export const message = sqliteTable("message", {
         id: text("id").$defaultFn(createId).primaryKey(),
         channelId: text("channelId").notNull(),
@@ -119,16 +130,18 @@ export async function createOrRetrieveAssistant() {
         messageId: text("messageId").notNull(),
       });
       
+      //Summarization of all conversation messages
       export const conversationSummary = sqliteTable("conversationSummary", {
         id: integer("id").primaryKey({ autoIncrement: true }),
         channelId: text("channelId").notNull(),
         conversationId: text("conversationId").notNull(),
         summaryText: text("summaryText", { length: 500 }).notNull(),
-        summaryEmbedding: blob("summaryEmbedding").notNull(),
+        summaryEmbedding: text("summaryEmbedding").notNull(),
         createdAt: integer("createdAt").notNull(),
         updatedAt: integer("updatedAt").notNull(),
       });
       
+      //Links all users who participated in a conversation to the conversation summary
       export const conversationSummaryRef = sqliteTable("conversationSummaryRef", {
         id: text("id").$defaultFn(createId).primaryKey(),
         userId: text("userId").notNull(),
@@ -137,6 +150,7 @@ export async function createOrRetrieveAssistant() {
         updatedAt: integer("updatedAt").notNull(),
       });
       
+      //Messages are grouped by ideas and proximity into conversations
       export const conversation = sqliteTable("conversation", {
         id: text("id").$defaultFn(createId).primaryKey(),
         channelId: text("channelId").notNull(),
@@ -144,20 +158,20 @@ export async function createOrRetrieveAssistant() {
         updatedAt: integer("updatedAt").notNull(),
       });
       
+      //Links Messages with conversations
       export const conversationMessage = sqliteTable("conversationMessage", {
         id: text("id").$defaultFn(createId).primaryKey(),
         messageId: text("messageId").notNull(),
         conversationId: text("conversationId").notNull(),
       });
       
-      export const testTable = sqliteTable("testTable", {
-        id: text("id").$defaultFn(createId).primaryKey(),
-      });
-      
       export const meeting = sqliteTable("meeting", {
         id: text("id").$defaultFn(createId).primaryKey(),
+        name: text("name", { length: 256 }).notNull().unique(),
+        description: text("description", { length: 512 }).notNull(),
         recurringMeetingId: text("recurringMeetingId"),
-        scheduledAt: integer("scheduledAt").notNull(),
+        scheduledStartAt: integer("scheduledStartAt").notNull(),
+        scheduledEndAt: integer("scheduledEndAt").notNull(),
         startedAt: integer("startedAt"),
         endedAt: integer("endedAt"),
         createdAt: integer("createdAt").notNull(),
@@ -167,24 +181,17 @@ export async function createOrRetrieveAssistant() {
       
       export const recurringMeeting = sqliteTable("recurringMeeting", {
         id: text("id").$defaultFn(createId).primaryKey(),
-        frequency: text("frequency", { length: 256 }).notNull(),
-        interval: integer("interval").notNull(),
-        count: integer("count"),
-        until: integer("until"),
+        name: text("name", { length: 256 }).notNull().unique(),
+        daysOfWeek: text("daysOfWeek"), // "MONDAY", "TUESDAY", "WEDNESDAY", etc., applicable if weekly. Comma-separated for multiple days.
+        scheduledStart: integer("timeOfDay"), // integer from 0 to 2359, applicable if daily
+        scheduledDurationInMinutes: integer("durationInMinutes").notNull(),
+        until: integer("until"), // Unix timestamp indicating when the recurrence should end
         createdAt: integer("createdAt").notNull(),
         updatedAt: integer("updatedAt").notNull(),
         deletedAt: integer("deletedAt"),
       });
       
-      export const meetingParticipant = sqliteTable("meetingParticipant", {
-        id: text("id").$defaultFn(createId).primaryKey(),
-        meetingId: text("meetingId").notNull(),
-        userId: text("userId").notNull(),
-        createdAt: integer("createdAt").notNull(),
-        updatedAt: integer("updatedAt").notNull(),
-        deletedAt: integer("deletedAt"),
-      });
-      
+      //Holds all text messages sent during a meeting
       export const meetingMessage = sqliteTable("meetingMessage", {
         id: text("id").$defaultFn(createId).primaryKey(),
         meetingId: text("meetingId").notNull(),
@@ -195,6 +202,7 @@ export async function createOrRetrieveAssistant() {
         deletedAt: integer("deletedAt"),
       });
       
+      //Holds all messages transcribed during a meeting
       export const meetingTranscriptedMessage = sqliteTable(
         "meetingTranscriptedMessage",
         {
@@ -207,31 +215,53 @@ export async function createOrRetrieveAssistant() {
           deletedAt: integer("deletedAt"),
         },
       );
+      
+      //Links users who participated in the meeting to the meeting
+      export const meetingMember = sqliteTable("meetingMember", {
+        id: text("id").$defaultFn(createId).primaryKey(),
+        bIsHost: integer("bIsHost").notNull().default(0),
+        bIsRequiredToAttend: integer("bIsRequiredToAttend").notNull().default(1),
+        meetingId: text("meetingId").notNull(),
+        userId: text("userId").notNull(),
+        createdAt: integer("createdAt").notNull(),
+        updatedAt: integer("updatedAt").notNull(),
+        deletedAt: integer("deletedAt"),
+      });
+      
+      export const insertRecurringMeetingSchema = createInsertSchema(
+        recurringMeeting,
+        {},
+      );
+      
       `,
-      model: "gpt-4",
+      model: "gpt-4-turbo-preview",
       tools: [
         {
           type: "function",
           function: {
-            name: "query",
+            name: "runDatabaseQuery",
+            description: `ALWAYS Use this function to query the database directly. If a user asks you about things related to the application
+            and/or user activities on the application use this function to find information in the database and return it to them. 
+
+            ALWAYS use SQLites datetime function to convert unix dates to human readable format.
+            For example: Thhe UNIX time "1710869357208" will convert to "Tuesday, March 19, 2024 1:29".
+        `,
             parameters: {
               type: "object",
               properties: {
-                sql: {
+                query: {
                   type: "string",
-                  description:
-                    'SQL statement, e.g. "SELECT CustomerName, City FROM Customers;"',
+                  description: `SQL string to query the database, e.g. "SELECT * FROM table_name;".
+                  Assistant must provide this argument to run the function.`,
                 },
               },
-              required: ["sql"],
+              required: ["query"],
             },
-            description: `Query information in the SQL database. If a user asks you for
-            specific information run this function to look for what the user wants in the database`,
           },
         },
       ],
     };
-    //gpt-3.5-turbo-1106
+
     const assistant = await openai.beta.assistants.create(assistantConfig);
     const assistantObj = { assistantId: assistant.id, ...assistantConfig };
     await fs.promises.writeFile(assistantPath, JSON.stringify(assistantObj));

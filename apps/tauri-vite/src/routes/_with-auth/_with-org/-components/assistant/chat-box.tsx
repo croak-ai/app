@@ -5,15 +5,17 @@ import { Input } from "@acme/ui/components/ui/input";
 import { useState } from "react";
 import { trpc } from "@/utils/trpc";
 import OpenAI from "openai";
-import { useMutation } from "@tanstack/react-query";
 import { useUser } from "@clerk/clerk-react";
 import croakLogo from "@acme/ui/assets/croakLogo.png";
+import useStreamResponse from "./useStreamResponse";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { dark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 type Message = OpenAI.Beta.Threads.Messages.Message;
 type Messages = Message[];
-
 type MessageContentText = OpenAI.Beta.Threads.Messages.TextContentBlock;
-type Thread = OpenAI.Beta.Threads.Thread;
 
 interface ChatBoxProps {
   threadId: string;
@@ -21,42 +23,27 @@ interface ChatBoxProps {
   setThreadId: (thread: string) => void;
 }
 
-interface AIJson {
-  message: Message;
-  thread: Thread;
-}
-
-async function queryAssistant(body: string) {
-  return fetch("http://localhost:3001/assistant", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: body,
-  });
-}
-
 export default function ChatBox(Props: ChatBoxProps) {
   const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<Messages>(Props.threadMessages);
+  const [isLoading, setIsLoading] = useState(false);
 
+  const { startStream, isStreaming } = useStreamResponse({
+    setThreadId: Props.setThreadId,
+    setMessages,
+    setIsLoading,
+  });
   const { user } = useUser();
 
-  /* Create new thread in database */
+  /* Create new thread in database and openai */
   const createThread = trpc.createThread.createThread.useMutation();
 
-  /* Send message to AI server for procesing */
-  const sendMessage = useMutation({
-    mutationFn: (body: string) => queryAssistant(body),
-  });
-
-  /* Store the users message in the state and return its content */
+  /* Store userMessage and Initial assistant response message in state */
   function handleUserMessage() {
     setIsLoading(true);
     const currentTime = Date.now();
-    const message: Message = {
-      id: "1",
+    const userMessage: Message = {
+      id: Math.random().toString(),
       object: "thread.message",
       created_at: currentTime,
       thread_id: "",
@@ -79,61 +66,81 @@ export default function ChatBox(Props: ChatBoxProps) {
       incomplete_details: null,
       status: "in_progress",
     };
-    setInput("");
-    setMessages((prevMessages) => [...prevMessages, message]);
 
-    const messageContent = message.content[0] as MessageContentText;
+    const initialResponseMessage: Message = {
+      id: "new",
+      object: "thread.message",
+      created_at: currentTime,
+      thread_id: "",
+      role: "assistant",
+      content: [
+        {
+          type: "text",
+          text: {
+            value: "",
+            annotations: [],
+          },
+        },
+      ],
+      file_ids: [],
+      assistant_id: null,
+      run_id: null,
+      metadata: {},
+      completed_at: currentTime,
+      incomplete_at: currentTime,
+      incomplete_details: null,
+      status: "in_progress",
+    };
+
+    setInput("");
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      userMessage,
+      initialResponseMessage,
+    ]);
+
+    const messageContent = userMessage.content[0] as MessageContentText;
     return messageContent.text.value;
   }
 
-  /* Send user message to AI server, grab assistant response and add to messages state.
-  If the thread is newly created add the thread to the database, update thread state */
+  /* 
+  Handle new messages, Create new thread in DB if needed, 
+  begin streaming AI response 
+  */
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-
     try {
+      if (isLoading || isStreaming) return;
+      if (!input) return;
       const message = handleUserMessage();
 
-      /* Create request body with message and thread */
+      let newThreadId = "";
+      if (Props.threadId === "new") {
+        newThreadId = await createThread.mutateAsync({
+          zMessage: message,
+        });
+        localStorage.setItem("threadId", newThreadId);
+      }
+
       const body = JSON.stringify({
         message: message,
-        activeThread: Props.threadId,
+        thread: { id: newThreadId || Props.threadId, new: newThreadId },
       });
 
-      const AIResponse = await sendMessage.mutateAsync(body);
-
-      const AIJson: AIJson = await AIResponse.json();
-
-      if (!AIJson.message || !AIJson.thread) {
-        throw new Error("Latest message/thread doesn't exist or is undefined");
-      }
-
-      if (Props.threadId === "new") {
-        await createThread.mutateAsync({
-          zThreadId: AIJson.thread.id,
-          zPreview: message,
-          zCreatedAt: AIJson.thread.created_at,
-        });
-        Props.setThreadId(AIJson.thread.id);
-        localStorage.setItem("threadId", AIJson.thread.id);
-      }
-
-      setMessages((prevMessages) => [...prevMessages, AIJson.message]);
+      startStream(body);
     } catch (error) {
-      //Error handling here in future
       console.error("Error sending message to AI server:", error);
-    } finally {
-      setIsLoading(false);
     }
   }
 
   return (
-    <div className="flex w-full grow flex-col gap-6 overflow-y-auto rounded-sm p-4 sm:p-8">
-      <div className="flex grow flex-col justify-start gap-4 overflow-y-scroll rounded-lg border-slate-400 pr-2">
+    <div className="flex w-full grow flex-col gap-6 overflow-y-auto rounded-sm p-2">
+      <div className="flex grow flex-col justify-start gap-4 overflow-y-scroll rounded-lg border-slate-400 px-4 scrollbar-thin">
         {messages.map(({ id, role, content }) => {
           const messageContent = content[0] as MessageContentText;
           return (
-            <div>
+            /* Display user or assistant banner */
+            <div key={id}>
               {role === "user" ? (
                 <div className="my-1 flex items-center">
                   <img
@@ -141,7 +148,7 @@ export default function ChatBox(Props: ChatBoxProps) {
                     alt="User"
                     className="h-6 w-6 rounded-full"
                   />
-                  <span className="ml-1.5 text-sm">You</span>
+                  <span className="ml-1.5 font-semibold">You</span>
                 </div>
               ) : (
                 <div className="my-1 flex items-center">
@@ -150,31 +157,46 @@ export default function ChatBox(Props: ChatBoxProps) {
                     alt="Assistant"
                     className="h-6 w-6 rounded-full"
                   />
-                  <span className="ml-1.5 text-sm">Assistant</span>
+                  <span className="ml-1.5 font-semibold">Assistant</span>
                 </div>
               )}
 
-              <div
-                key={id}
-                className={cn(
-                  "max-w-lg rounded-xl bg-gray-500 px-4 py-2 text-white [overflow-wrap:anywhere]",
-                  role === "user" ? "self-start bg-primary" : "self-end",
-                )}
-              >
-                {messageContent.text.value}
-              </div>
+              {/* If loading after submitting form display loading dots */}
+              {isLoading && id === "new" ? (
+                <>
+                  <div className="flex space-x-1 self-end px-4 py-4">
+                    <div className="h-1 w-1 animate-bounce rounded-full bg-white"></div>
+                    <div className="h-1 w-1 animate-bounce rounded-full bg-white [animation-delay:0.15s]"></div>
+                    <div className="h-1 w-1 animate-bounce rounded-full bg-white [animation-delay:0.3s]"></div>
+                  </div>
+                </>
+              ) : (
+                <div
+                  key={id}
+                  className={cn(
+                    "list-item-white reactMarkDown prose inline-block max-w-lg rounded-xl px-4 py-2 text-white [overflow-wrap:anywhere]",
+                    role === "user"
+                      ? "self-start bg-slate-600"
+                      : "self-end bg-green-700",
+                  )}
+                >
+                  {/* <span
+                  className={cn(
+                    "animate-typing",
+                    isLoading === true && id === "new"
+                      ? "border-r-8 border-r-white"
+                      : "",
+                  )}
+                > */}
+
+                  <Markdown>{messageContent.text.value}</Markdown>
+
+                  {/* </span> */}
+                </div>
+              )}
             </div>
           );
         })}
-        {isLoading && (
-          <>
-            <div className="m-2 flex space-x-1 self-end">
-              <div className="h-2 w-2 animate-bounce rounded-full bg-white"></div>
-              <div className="h-2 w-2 animate-bounce rounded-full bg-white [animation-delay:-0.15s]"></div>
-              <div className="h-2 w-2 animate-bounce rounded-full bg-white [animation-delay:-0.3s]"></div>
-            </div>
-          </>
-        )}
         {messages.length === 0 && (
           <div className="flex grow items-center justify-center self-stretch">
             <svg
@@ -201,12 +223,13 @@ export default function ChatBox(Props: ChatBoxProps) {
           className="focus-visible:ring-0 focus-visible:ring-offset-0"
           type="text"
           autoFocus
-          placeholder="Send a message"
+          placeholder="Ask an assistant..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
         />
-        <Button type="submit">
-          {isLoading ? (
+        <Button type="submit" className="bg-green-700">
+          {/* Display loading spinner when loading or streaming */}
+          {isLoading || isStreaming ? (
             <div role="status">
               <svg
                 aria-hidden="true"
