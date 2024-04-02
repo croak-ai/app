@@ -8,6 +8,10 @@ import OpenAI from "openai";
 import { useUser } from "@clerk/clerk-react";
 import croakLogo from "@acme/ui/assets/croakLogo.png";
 import useStreamResponse from "./useStreamResponse";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { dark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 type Message = OpenAI.Beta.Threads.Messages.Message;
 type Messages = Message[];
@@ -170,7 +174,7 @@ export default function ChatBox(Props: ChatBoxProps) {
                 <div
                   key={id}
                   className={cn(
-                    "inline-block max-w-lg rounded-xl px-4 py-2 text-white [overflow-wrap:anywhere]",
+                    "list-item-white reactMarkDown prose inline-block max-w-lg rounded-xl px-4 py-2 text-white [overflow-wrap:anywhere]",
                     role === "user"
                       ? "self-start bg-slate-600"
                       : "self-end bg-green-700",
@@ -184,7 +188,9 @@ export default function ChatBox(Props: ChatBoxProps) {
                       : "",
                   )}
                 > */}
-                  {messageContent.text.value}
+
+                  <Markdown>{messageContent.text.value}</Markdown>
+
                   {/* </span> */}
                 </div>
               )}

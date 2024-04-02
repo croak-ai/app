@@ -1,15 +1,8 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import openai from "../ai/client";
 import { createOrRetrieveAssistant } from "../ai/helpers/createOrRetrieveAssistant";
-import { queryDatabase } from "../ai/functions/queryDatabase";
+import { runDatabaseQuery } from "../ai/functions/runDatabaseQuery";
 import { Readable, PassThrough } from "stream";
-import { ConsoleLogWriter } from "drizzle-orm";
-import { read } from "fs";
-import { threadId } from "worker_threads";
-import {
-  Message,
-  MessageDelta,
-} from "openai/resources/beta/threads/messages/messages";
 import { vectorQuery } from "../ai/functions/vectorQuery";
 
 type AssistantBody = {
@@ -41,8 +34,7 @@ export default async function assistant(fastify: FastifyInstance) {
       }
       //Map string name to function call
       const aiFunctionsByName: { [key: string]: Function } = {
-        queryDatabase,
-        vectorQuery,
+        runDatabaseQuery,
       };
 
       let functionName = "";
@@ -71,10 +63,9 @@ export default async function assistant(fastify: FastifyInstance) {
               runId = run.currentRun()?.id as string;
 
               if (!runId) {
-                reply.send("Run ID not found");
-                return;
+                readableStream.push("Run failed, please try again. END STREAM");
+                return reply.send(readableStream);
               }
-              //console.log("FUNCTION NAME:", functionName);
             }
           })
           /* Gather function arguments */
@@ -96,8 +87,10 @@ export default async function assistant(fastify: FastifyInstance) {
                 console.log("Function Name: ", functionName);
                 const aiFunction = aiFunctionsByName[functionName];
                 if (!aiFunction) {
-                  reply.send(
-                    "AI is choosing a tool, however our json object is not matching it correctly",
+                  console.log("function failed");
+                  await openai.beta.threads.runs.cancel(thread.id, runId);
+                  readableStream.push(
+                    "Run failed, Could not find AI function. please try again. END STREAM",
                   );
                   return;
                 }
@@ -120,7 +113,6 @@ export default async function assistant(fastify: FastifyInstance) {
                     ) {
                       const messageChunk = messageDelta.content[0].text?.value;
                       //process.stdout.write(messageChunk || " undefined ");
-                      // reply.send({ message: messageChunk, thread: thread });
                       readableStream.push(messageChunk);
                     }
                   })
@@ -131,7 +123,7 @@ export default async function assistant(fastify: FastifyInstance) {
               }
             } catch (e) {
               await openai.beta.threads.runs.cancel(thread.id, runId);
-              reply.send("Run failed, please try again.");
+              readableStream.push("Run failed, please try again. END STREAM");
             }
           })
           .on("end", async () => {
@@ -146,7 +138,7 @@ export default async function assistant(fastify: FastifyInstance) {
       } catch (e) {
         console.log(e);
         await openai.beta.threads.runs.cancel(thread.id, runId);
-        reply.send("Run failed, please try again.");
+        readableStream.push("Run failed, please try again. END STREAM");
       }
     },
   );
