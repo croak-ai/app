@@ -2,6 +2,7 @@ import { Clerk } from "@clerk/backend";
 import { getDbAuthToken } from "../db";
 import { createDbClient, eq, sql } from "@acme/db";
 import { user } from "@acme/db/schema/tenant";
+import { getClerkOrgMetadata } from "../clerk-org-metadata";
 
 type InsertUser = typeof user.$inferInsert;
 export const clerkSync = async ({
@@ -11,27 +12,23 @@ export const clerkSync = async ({
   organizationId: string;
   env: any;
 }) => {
-  const clerk = Clerk({ apiKey: env.CLERK_SECRET_KEY });
+  const clerk = Clerk({ secretKey: env.CLERK_SECRET_KEY });
 
-  const orgInfo = await clerk.organizations.getOrganization({
+  const clerkInfo = await getClerkOrgMetadata({
     organizationId: organizationId,
+    KV: env.GLOBAL_KV,
+    clerkSecretKey: env.CLERK_SECRET_KEY,
   });
 
-  const tursoGroupName = orgInfo.publicMetadata?.main_database_turso_group_name;
-  const tursoDbName = orgInfo.publicMetadata?.main_database_turso_db_name;
-  const tursoOrgName = orgInfo.publicMetadata?.main_database_turso_org_name;
+  const { main_database_turso_db_url, main_database_turso_group_name } =
+    clerkInfo;
 
-  if (!tursoGroupName || !tursoDbName || !tursoOrgName) {
-    throw new Error("Organization missing turso metadata");
-  }
-
-  const url = `libsql://${tursoDbName}-${tursoOrgName}.turso.io`;
   const token = getDbAuthToken({
     env: env,
-    groupName: tursoGroupName as string,
+    groupName: main_database_turso_group_name,
   });
 
-  const db = createDbClient(url, token);
+  const db = createDbClient(main_database_turso_db_url, token);
 
   let offset = 0;
   const limit = 100;

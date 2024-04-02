@@ -32,11 +32,7 @@ export const Route = createFileRoute("/_with-auth/_with-org")({
 
     if (
       !matchingOrganizationMembership.organization.publicMetadata
-        .main_database_turso_org_name ||
-      !matchingOrganizationMembership.organization.publicMetadata
-        .main_database_turso_group_name ||
-      !matchingOrganizationMembership.organization.publicMetadata
-        .main_database_turso_db_name
+        .database_created
     ) {
       throw redirect({
         to: "/onboard-new-org",

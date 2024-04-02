@@ -6,7 +6,7 @@ import verifyWebSocketRequest from "./verify-websocket-request";
 import { Bindings } from "../../config";
 import { WSContext } from "hono/ws";
 import { HeartbeatStatusType } from "./web-socket-req-messages-types";
-import getDbConnection from "./get-db-connection";
+import getDbConnection from "./get-durable-object-db-connection";
 import { user } from "@acme/db/schema/tenant";
 import { eq } from "drizzle-orm";
 
@@ -80,7 +80,7 @@ export class CroakDurableObject {
                     updated: Date.now(),
                   };
 
-                  const db = getDbConnection({
+                  const db = await getDbConnection({
                     payload: clerkAuth,
                     bindings: env,
                   });
@@ -110,7 +110,7 @@ export class CroakDurableObject {
                     updated: Date.now(),
                   };
 
-                  const db = getDbConnection({
+                  const db = await getDbConnection({
                     payload: clerkAuth,
                     bindings: env,
                   });
@@ -149,10 +149,20 @@ export class CroakDurableObject {
       }),
     );
 
-    this.app.get("/ws/increment", async (c) => {
-      const currentValue = ++this.value;
-      await this.state.storage?.put("value", this.value);
-      return c.text(currentValue.toString());
+    this.app.get("/ws/message-sent/:messageId", async (c) => {
+      // const messageId = c.req.param("messageId");
+      // const db = getDbConnection({
+      //   payload: c.request,
+      //   bindings: env,
+      // });
+      // await db
+      //   .update(user)
+      //   .set({
+      //     lastMessageSentAt: Date.now(),
+      //     updatedAt: Date.now(),
+      //   })
+      //   .where(eq(user.userId, c.request.sub));
+      // return c.text("Message sent");
     });
 
     this.app.get("/ws/decrement", async (c) => {

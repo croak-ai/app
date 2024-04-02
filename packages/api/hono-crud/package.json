@@ -17,6 +17,7 @@
   "dependencies": {
     "@acme/shared-functions": "*",
     "@clerk/backend": "^0.30.*",
+    "@clerk/clerk-sdk-node": "^4.13.12",
     "@cloudflare/ai": "^1.0.53",
     "@hono/clerk-auth": "^1.0.0",
     "@hono/trpc-server": "*",

@@ -8,6 +8,7 @@ import { Context } from "hono";
 import { HonoConfig } from "../../config";
 import { user } from "@acme/db/schema/tenant";
 import { createDbClient, eq } from "@acme/db";
+import { getClerkOrgMetadata } from "../clerk-org-metadata";
 
 export async function updateOrgUser(
   userMemberships: OrganizationMembership,
@@ -18,21 +19,21 @@ export async function updateOrgUser(
     for (const membership of userMemberships.data) {
       const userData = membership.public_user_data;
 
-      /* Get DB conection */
-      const tursoDbName =
-        membership.organization.public_metadata?.main_database_turso_db_name;
-      const tursoGroupName =
-        membership.organization.public_metadata?.main_database_turso_group_name;
-      const tursoOrgName =
-        membership.organization.public_metadata?.main_database_turso_org_name;
-
-      const url = `libsql://${tursoDbName}-${tursoOrgName}.turso.io`;
-      const token = getDbAuthToken({
-        env: c.env,
-        groupName: tursoGroupName as string,
+      const clerkInfo = await getClerkOrgMetadata({
+        organizationId: membership.organization.id,
+        KV: c.env.GLOBAL_KV,
+        clerkSecretKey: c.env.CLERK_SECRET_KEY,
       });
 
-      const db = createDbClient(url, token);
+      const { main_database_turso_db_url, main_database_turso_group_name } =
+        clerkInfo;
+
+      const token = getDbAuthToken({
+        env: c.env,
+        groupName: main_database_turso_group_name,
+      });
+
+      const db = createDbClient(main_database_turso_db_url, token);
 
       const updatedUser = {
         firstName: userData.first_name,

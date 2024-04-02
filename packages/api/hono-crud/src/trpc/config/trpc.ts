@@ -1,9 +1,9 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import { type Context } from "./context";
 import superjson from "superjson";
-import { getClerkOrgInfo } from "../../functions/clerk";
 import { getDbAuthToken } from "../../functions/db";
 import { createDbClient } from "@acme/db";
+import { getClerkOrgMetadata } from "../../functions/clerk-org-metadata";
 
 const t = initTRPC.context<Context>().create({
   transformer: superjson,
@@ -19,25 +19,22 @@ const isAuthed = t.middleware(({ next, ctx }) => {
   return next();
 });
 
-const isOrgDBConnected = t.middleware(({ next, ctx }) => {
-  const clerkInfo = getClerkOrgInfo({ auth: ctx.auth });
-
-  if (!clerkInfo) {
-    throw new TRPCError({
-      code: "UNAUTHORIZED",
-      message: "Organization not found in the context.",
-    });
-  }
-
-  const { tursoDbName, tursoGroupName, tursoOrgName } = clerkInfo;
-
-  const url = `libsql://${tursoDbName}-${tursoOrgName}.turso.io`;
-  const token = getDbAuthToken({
-    env: ctx.env,
-    groupName: tursoGroupName,
+const isOrgDBConnected = t.middleware(async ({ next, ctx }) => {
+  const clerkInfo = await getClerkOrgMetadata({
+    organizationId: ctx.auth.orgId,
+    KV: ctx.env.GLOBAL_KV,
+    clerkSecretKey: ctx.env.CLERK_SECRET_KEY,
   });
 
-  const db = createDbClient(url, token);
+  const { main_database_turso_db_url, main_database_turso_group_name } =
+    clerkInfo;
+
+  const token = getDbAuthToken({
+    env: ctx.env,
+    groupName: main_database_turso_group_name,
+  });
+
+  const db = createDbClient(main_database_turso_db_url, token);
 
   const newContext = {
     ...ctx,
