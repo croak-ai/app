@@ -1,6 +1,7 @@
 import { meeting, meetingMember } from "@acme/db/schema/tenant";
 import { protectedProcedureWithOrgDB, router } from "../../config/trpc";
 import { eq } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
 
 export const getUserMeetings = router({
   getUserMeetings: protectedProcedureWithOrgDB.query(async ({ ctx, input }) => {
@@ -8,7 +9,6 @@ export const getUserMeetings = router({
     // Get the meetings
 
     const userId = ctx.auth.userId;
-    console.log("ADS");
 
     const userMeetings = await ctx.db
       .select()

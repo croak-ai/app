@@ -6,8 +6,16 @@ import verifyWebSocketRequest from "./verify-websocket-request";
 export const websocketForwarder = new Hono<HonoConfig>();
 
 websocketForwarder.get("*", async (c) => {
+  const token = c.req.query("token");
+
+  if (!token) {
+    throw new HTTPException(401, {
+      message: "Unauthorized: Token not found in query",
+    });
+  }
+
   const auth = await verifyWebSocketRequest({
-    token: c.req.query("token"),
+    token,
     jwksUrl: c.env.CLERK_JWKS_URL,
     KV: c.env.GLOBAL_KV,
   });

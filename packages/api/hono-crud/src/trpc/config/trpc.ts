@@ -16,10 +16,18 @@ const isAuthed = t.middleware(({ next, ctx }) => {
   if (!ctx.auth.userId) {
     throw new TRPCError({ code: "UNAUTHORIZED", message: "Not authenticated" });
   }
-  return next();
+  // Update context with the new guaranteed userId
+  const updatedCtx = { ...ctx, auth: { ...ctx.auth, userId: ctx.auth.userId } };
+  return next({ ctx: updatedCtx });
 });
-
 const isOrgDBConnected = t.middleware(async ({ next, ctx }) => {
+  if (!ctx.auth.orgId) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "Organization ID not found in the context.",
+    });
+  }
+
   const clerkInfo = await getClerkOrgMetadata({
     organizationId: ctx.auth.orgId,
     KV: ctx.env.GLOBAL_KV,
@@ -36,13 +44,15 @@ const isOrgDBConnected = t.middleware(async ({ next, ctx }) => {
 
   const db = createDbClient(main_database_turso_db_url, token);
 
-  const newContext = {
+  // Update context with the new guaranteed orgId
+  const updatedCtx = {
     ...ctx,
     db,
+    auth: { ...ctx.auth, orgId: ctx.auth.orgId },
   };
 
   return next({
-    ctx: newContext,
+    ctx: updatedCtx,
   });
 });
 

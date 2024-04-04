@@ -3,7 +3,7 @@ import { Separator } from "@acme/ui/components/ui/separator";
 import Message from "./message";
 import { RouterInput, RouterOutput, trpc } from "@/utils/trpc";
 import { format } from "date-fns";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { useInView } from "react-intersection-observer";
 import SkeletonMessages from "./skeleton-messages";
 
@@ -117,7 +117,7 @@ export default function Messages({
         !messageInList(previousPageTargetElement.current)
       ) {
         console.log("scrolling to next page");
-        scrollToMessageById(nextPageTargetElement.current);
+        //scrollToMessageById(nextPageTargetElement.current);
       }
 
       // This happens if we "lose" the next page so we should fix the scroll
@@ -126,7 +126,7 @@ export default function Messages({
         !messageInList(nextPageTargetElement.current)
       ) {
         console.log("scrolling to previous page");
-        scrollToMessageById(previousPageTargetElement.current);
+        //scrollToMessageById(previousPageTargetElement.current);
       }
     }
 
@@ -197,7 +197,7 @@ export default function Messages({
       >
         <>
           <div ref={PreviousPageRef}>
-            {hasPreviousPage && <SkeletonMessages />}
+            {/* {hasPreviousPage && <SkeletonMessages />} */}
           </div>
           {Object.entries(groupedMessages).map(
             ([date, messages], groupIndex) => (
@@ -231,9 +231,7 @@ export default function Messages({
             ),
           )}
           {hasNextPage && (
-            <div ref={NextPageRef}>
-              <SkeletonMessages />
-            </div>
+            <div ref={NextPageRef}>{/* <SkeletonMessages /> */}</div>
           )}
         </>
       </div>

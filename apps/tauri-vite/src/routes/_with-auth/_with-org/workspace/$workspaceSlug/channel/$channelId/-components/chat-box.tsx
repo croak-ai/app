@@ -7,6 +7,10 @@ import { PlaygroundMilkdown as MessageBox } from "@/components/playground-editor
 import { ControlPanel as DevMessageBoxTools } from "@/components/playground/control-panel";
 import Messages from "./messages";
 import { useUser } from "@clerk/clerk-react";
+import { RouterOutput } from "@/utils/trpc";
+
+type GetMessages = RouterOutput["getMessages"]["getMessages"];
+type SingleMessage = GetMessages["messages"][0];
 
 const isInDevMode = () => {
   return process.env.NODE_ENV === "development";
@@ -30,63 +34,59 @@ export default function ChatBox({
   const { user } = useUser();
 
   const createMessage = trpc.createMessage.createMessage.useMutation({
-    // onMutate: async (opts) => {
-    //   await utils.getMessages.getMessages.cancel();
-    //   utils.getMessages.getMessages.setInfiniteData(
-    //     {
-    //       channelId: channelId,
-    //       limit: 100,
-    //       cursor: {
-    //         createdAt: Date.now(), // Use the current timestamp or the appropriate value
-    //         id: "cursor_id", // Replace "cursor_id" with the actual cursor ID you have
-    //         direction: "next", // or "previous", depending on your use case
-    //       },
-    //     },
-    //     (data) => {
-    //       if (!data) {
-    //         return {
-    //           pages: [],
-    //           pageParams: [],
-    //         };
-    //       }
+    onMutate: async (opts) => {
+      await utils.getMessages.getMessages.cancel();
+      utils.getMessages.getMessages.setInfiniteData(
+        {
+          channelId: channelId,
+          limit: 100,
+          cursor: {
+            createdAt: Date.now(),
+            id: "cursor_id",
+            direction: "older",
+          },
+        },
+        (data) => {
+          if (!data) {
+            return {
+              pages: [],
+              pageParams: [],
+            };
+          }
 
-    //       const newMessage = {
-    //         // Adjust the structure to match your expected message object structure
-    //         confirmed: false, // This is the new part
-    //         id: -1, // Mock ID for optimistic update
-    //         message: {
-    //           channelId: parseInt(opts.channelId), // Assuming channelId is a number in your data model
-    //           userId: "optimistic_user_id",
-    //           createdAt: Date.now(),
-    //           updatedAt: Date.now(),
-    //           id: Math.random(), // Assuming id is a number in your data model
-    //           deletedAt: null, // Assuming this field exists and is nullable
-    //           message: opts.messageContent,
-    //           messageInChannelNumber: 1, // Example value, adjust as necessary
-    //         },
-    //         user: {
-    //           userId: user?.id ?? "unknown", // Provide a default string value for userId if null
-    //           role: "some_role",
-    //           firstName: user?.firstName ?? "unknown",
-    //           lastName: user?.lastName ?? "name",
-    //           email: user?.primaryEmailAddress?.emailAddress ?? "unknown_email",
-    //           imageUrl: user?.imageUrl ?? "",
-    //           profileImageUrl: user?.imageUrl ?? "",
-    //           createdAt: Date.now(),
-    //           updatedAt: Date.now(),
-    //         },
-    //       };
+          const newMessage: SingleMessage = {
+            // Adjust the structure to match your expected message object structure
+            message: {
+              channelId: opts.channelId, // Assuming channelId is a number in your data model
+              userId: user?.id ?? "unknown",
+              createdAt: Date.now(),
+              updatedAt: Date.now(),
+              id: Math.random().toString(), // Assuming id is a number in your data model
+              deletedAt: null, // Assuming this field exists and is nullable
+              message: opts.messageContent,
+            },
+            user: {
+              userId: user?.id ?? "unknown",
+              firstName: user?.firstName ?? "unknown",
+              lastName: user?.lastName ?? "name",
+              imageUrl: user?.imageUrl ?? null,
+            },
+          };
 
-    //       return {
-    //         ...data,
-    //         pages: data.pages.map((page) => ({
-    //           ...page,
-    //           messages: [newMessage, ...page.messages],
-    //         })),
-    //       };
-    //     },
-    //   );
-    // },
+          return {
+            ...data,
+            pages: [
+              {
+                ...data.pages[0],
+                messages: [newMessage, ...data.pages[0].messages],
+              },
+              ...data.pages.slice(1),
+            ],
+          };
+        },
+      );
+    },
+
     onError: (input, variables, context) => {
       utils.getMessages.getMessages.setInfiniteData(
         {
@@ -104,9 +104,6 @@ export default function ChatBox({
         }),
       );
     },
-    // onSettled: () => {
-    //   utils.getMessages.getMessages.invalidate();
-    // },
   });
 
   const lockCodemirror = useRef(false);
@@ -132,6 +129,8 @@ export default function ChatBox({
   const sendMessage = useCallback(
     async (message: string) => {
       if (message.trim() === "") return;
+
+      console.log("ChannelId", channelId);
 
       await createMessage.mutate({
         workspaceSlug: workspaceSlug,
@@ -175,7 +174,7 @@ export default function ChatBox({
         }}
       />
     ),
-    [],
+    [channelId],
   );
 
   const MemoizedDevMessageBoxTools = useMemo(

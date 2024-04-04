@@ -445,7 +445,7 @@ importers:
   packages/hooks/websocket:
     dependencies:
       '@clerk/clerk-react':
-        specifier: ^4.30.4
+        specifier: ^4.30.7
         version: 4.30.7(react@17.0.2)
       '@tanstack/react-query':
         specifier: ^5.17.19
@@ -453,6 +453,9 @@ importers:
       react-dom:
         specifier: 18.2.0
         version: 18.2.0(react@17.0.2)
+      zod:
+        specifier: ^3.22.4
+        version: 3.22.4
     devDependencies:
       '@croak/hono-crud':
         specifier: '*'

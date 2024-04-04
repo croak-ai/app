@@ -1,14 +1,19 @@
 import { Hono } from "hono";
 import { upgradeWebSocket } from "hono/cloudflare-workers";
 import { cors } from "hono/cors";
-import { WebSocketMessage } from "./web-socket-req-messages-types";
+import { ChatMessage } from "./web-socket-req-messages-types";
 import verifyWebSocketRequest from "./verify-websocket-request";
 import { Bindings } from "../../config";
 import { WSContext } from "hono/ws";
-import { HeartbeatStatusType } from "./web-socket-req-messages-types";
-import getDbConnection from "./get-durable-object-db-connection";
-import { user } from "@acme/db/schema/tenant";
+import type {
+  ErrorMessageType,
+  HeartbeatStatusType,
+  WebSocketMessageType,
+} from "./web-socket-req-messages-types";
+
+import { user, message } from "@acme/db/schema/tenant";
 import { eq } from "drizzle-orm";
+import { getDbConnection } from "../../functions/db";
 
 type UserStatus = {
   status: HeartbeatStatusType;
@@ -19,7 +24,7 @@ export class CroakDurableObject {
   value: number = 0;
   state: DurableObjectState;
   app: Hono = new Hono();
-  connections: Record<string, WSContext> = {}; // Store active WebSocket connections mapped by userId
+  connections: Record<string, WSContext[]> = {}; // Store active WebSocket connections mapped by userId, allowing multiple connections per user
   currentStatuses: Record<string, UserStatus> = {}; // Store current status of each user
 
   constructor(state: DurableObjectState, env: Bindings) {
@@ -63,9 +68,20 @@ export class CroakDurableObject {
 
             const userId = clerkAuth.sub;
 
-            this.connections[userId] = ws;
+            const organizationId = clerkAuth.org_id;
 
-            const WebSocketMessage: WebSocketMessage = message;
+            if (!organizationId) {
+              throw new Error("Organization ID not found in the context.");
+            }
+
+            // Add connection to the user's list of connections
+            if (!this.connections[userId]) {
+              this.connections[userId] = [ws];
+            } else {
+              this.connections[userId].push(ws);
+            }
+
+            const WebSocketMessage: WebSocketMessageType = message;
             // Handle different types of WebSocket messages
             switch (WebSocketMessage.type) {
               case "HEARTBEAT":
@@ -81,8 +97,8 @@ export class CroakDurableObject {
                   };
 
                   const db = await getDbConnection({
-                    payload: clerkAuth,
-                    bindings: env,
+                    organizationId,
+                    env,
                   });
 
                   await db
@@ -111,8 +127,8 @@ export class CroakDurableObject {
                   };
 
                   const db = await getDbConnection({
-                    payload: clerkAuth,
-                    bindings: env,
+                    organizationId,
+                    env,
                   });
 
                   await db
@@ -132,16 +148,29 @@ export class CroakDurableObject {
             }
           },
           onClose: (event, ws) => {
-            const userId = Object.keys(this.connections).find(
-              (key) => this.connections[key] === ws,
+            const userId = Object.keys(this.connections).find((key) =>
+              this.connections[key].includes(ws),
             );
 
             if (userId) {
-              delete this.connections[userId];
+              // Remove the closed connection from the user's list of connections
+              const index = this.connections[userId].indexOf(ws);
+              if (index > -1) {
+                this.connections[userId].splice(index, 1);
+              }
+              // If the user has no more connections, delete the user from the connections record
+              if (this.connections[userId].length === 0) {
+                delete this.connections[userId];
+              }
             }
           },
           onError: (err, ws) => {
-            ws.send("An error occurred while processing a websocket message.");
+            const message: ErrorMessageType = {
+              type: "ERROR",
+              message:
+                "An error occurred while processing a websocket message.",
+            };
+            ws.send(JSON.stringify(message));
 
             console.error("WebSocket error: ", err);
           },
@@ -149,20 +178,17 @@ export class CroakDurableObject {
       }),
     );
 
-    this.app.get("/ws/message-sent/:messageId", async (c) => {
-      // const messageId = c.req.param("messageId");
-      // const db = getDbConnection({
-      //   payload: c.request,
-      //   bindings: env,
-      // });
-      // await db
-      //   .update(user)
-      //   .set({
-      //     lastMessageSentAt: Date.now(),
-      //     updatedAt: Date.now(),
-      //   })
-      //   .where(eq(user.userId, c.request.sub));
-      // return c.text("Message sent");
+    this.app.post("/ws/message-sent", async (c) => {
+      const json = await c.req.json();
+
+      const newMessageResult = ChatMessage.parse(json);
+
+      await Promise.all(
+        Object.values(this.connections).flatMap((wsList) =>
+          wsList.map((ws) => ws.send(JSON.stringify(newMessageResult))),
+        ),
+      );
+      return c.text("Message sent to all connections.");
     });
 
     this.app.get("/ws/decrement", async (c) => {

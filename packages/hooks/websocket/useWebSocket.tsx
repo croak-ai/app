@@ -1,4 +1,4 @@
-import {
+import React, {
   createContext,
   useContext,
   useEffect,
@@ -9,9 +9,13 @@ import {
 } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import { WebSocketMessage } from "@croak/hono-crud/src/hono-routes/websocket/web-socket-req-messages-types";
+import type { WebSocketMessageType } from "@croak/hono-crud/src/hono-routes/websocket/web-socket-req-messages-types";
+import { RouterOutput, trpc } from "./utils";
 
+type GetMessages = RouterOutput["getMessages"]["getMessages"];
+type SingleMessage = GetMessages["messages"][0];
 interface WebSocketContextType {
-  sendMessage: (message: WebSocketMessage) => void;
+  sendMessage: (message: WebSocketMessageType) => void;
 }
 
 const WebSocketContext = createContext<WebSocketContextType | undefined>(
@@ -25,7 +29,8 @@ export const WebSocketProvider = ({
   children: ReactNode;
   url: string;
 }) => {
-  const { getToken } = useAuth();
+  const { getToken, userId } = useAuth();
+  const utils = trpc.useUtils();
   const socketRef = useRef<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [reconnectAttempts, setReconnectAttempts] = useState(0);
@@ -34,7 +39,7 @@ export const WebSocketProvider = ({
   const heartbeatInterval = 20000; // Interval for sending heartbeat messages, in milliseconds
 
   const sendMessage = useCallback(
-    async (message: WebSocketMessage) => {
+    async (message: WebSocketMessageType) => {
       const token = await getToken(); // Assuming getToken is an async function that fetches the current token
       if (!token) {
         console.error("No token available for WebSocket connection.");
@@ -75,7 +80,55 @@ export const WebSocketProvider = ({
 
       ws.onmessage = (event) => {
         const message = event.data;
-        console.log("Message from server:", message);
+
+        const parsedMessage = WebSocketMessage.parse(JSON.parse(message));
+
+        if (parsedMessage.type === "CHAT_MESSAGE") {
+          if (parsedMessage.user.userId === userId) {
+            return; // If the user ID of the message is the same as the authenticated user's ID, do nothing.
+          }
+
+          utils.getMessages.getMessages.setInfiniteData(
+            {
+              channelId: parsedMessage.newMessage.channelId,
+              limit: 100,
+              cursor: {
+                createdAt: Date.now(),
+                id: "cursor_id",
+                direction: "older",
+              },
+            },
+            (data) => {
+              if (!data) {
+                return {
+                  pages: [],
+                  pageParams: [],
+                };
+              }
+
+              const newMessage: SingleMessage = {
+                message: parsedMessage.newMessage,
+                user: {
+                  userId: parsedMessage.user.userId,
+                  firstName: parsedMessage.user.firstName ?? null,
+                  lastName: parsedMessage.user.lastName ?? null,
+                  imageUrl: parsedMessage.user.imageUrl ?? null,
+                },
+              };
+
+              return {
+                ...data,
+                pages: [
+                  {
+                    ...data.pages[0],
+                    messages: [newMessage, ...data.pages[0].messages],
+                  },
+                  ...data.pages.slice(1),
+                ],
+              };
+            },
+          );
+        }
       };
 
       ws.onopen = () => {
