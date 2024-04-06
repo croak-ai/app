@@ -36,7 +36,7 @@ CREATE TABLE `conversationSummary` (
 	`channelId` text NOT NULL,
 	`conversationId` text NOT NULL,
 	`summaryText` text(500) NOT NULL,
-	`summaryEmbedding` blob NOT NULL,
+	`summaryEmbedding` text NOT NULL,
 	`createdAt` integer NOT NULL,
 	`updatedAt` integer NOT NULL
 );
@@ -116,10 +116,6 @@ CREATE TABLE `recurringMeeting` (
 	`deletedAt` integer
 );
 --> statement-breakpoint
-CREATE TABLE `testTable` (
-	`id` text PRIMARY KEY NOT NULL
-);
---> statement-breakpoint
 CREATE TABLE `unSummarizedMessage` (
 	`id` text PRIMARY KEY NOT NULL,
 	`messageId` text NOT NULL
@@ -134,6 +130,9 @@ CREATE TABLE `user` (
 	`fullName` text(1024),
 	`email` text(256) NOT NULL,
 	`imageUrl` text(10000),
+	`lastKnownStatus` text,
+	`lastKnownStatusConfirmedAt` integer,
+	`lastKnownStatusSwitchedAt` integer,
 	`createdAt` integer NOT NULL,
 	`updatedAt` integer NOT NULL
 );
@@ -160,26 +159,6 @@ CREATE TABLE `workspaceMember` (
 	`deletedAt` integer
 );
 --> statement-breakpoint
-
-CREATE VIRTUAL TABLE user_fts USING fts5(firstName, lastName, fullName, email, content="user", content_rowid="internalId");
---> statement-breakpoint
-
-CREATE TRIGGER user_ai AFTER INSERT ON user BEGIN
-    INSERT INTO user_fts(rowid, firstName, lastName, fullName, email) VALUES (new.internalId, new.firstName, new.lastName, new.fullName, new.email);
-END;    
---> statement-breakpoint
-
-CREATE TRIGGER user_ad AFTER DELETE ON user BEGIN
-    INSERT INTO user_fts(user_fts, rowid, firstName, lastName, fullName, email) VALUES('delete', old.internalId, old.firstName, old.lastName, old.fullName, old.email);
-END;
---> statement-breakpoint
-
-CREATE TRIGGER user_au AFTER UPDATE ON user BEGIN
-    INSERT INTO user_fts(user_fts, rowid, firstName, lastName, fullName, email) VALUES('delete', old.internalId, old.firstName, old.lastName, old.fullName, old.email);
-    INSERT INTO user_fts(rowid, firstName, lastName, fullName, email) VALUES (new.internalId, new.firstName, new.lastName, new.fullName, new.email);
-END;
---> statement-breakpoint
-
 CREATE UNIQUE INDEX `channel_workspaceId_slug_unique` ON `channel` (`workspaceId`,`slug`);--> statement-breakpoint
 CREATE UNIQUE INDEX `meeting_name_unique` ON `meeting` (`name`);--> statement-breakpoint
 CREATE UNIQUE INDEX `recurringMeeting_name_unique` ON `recurringMeeting` (`name`);--> statement-breakpoint

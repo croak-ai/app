@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1711196690724,
-      "tag": "0000_smooth_terror",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1712029119527,
-      "tag": "0001_mature_vengeance",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1710981485975,
-      "tag": "0001_woozy_rockslide",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1711051127205,
-      "tag": "0002_hot_leo",
+      "when": 1712439005035,
+      "tag": "0000_green_slyde",
       "breakpoints": true
     }
   ]

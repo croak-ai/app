@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "dfef18e2-8b80-4038-bb16-ab116b6c4d97",
+  "id": "56d9d727-c332-4cab-9d1c-6de60f2c1832",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "assistantThread": {
@@ -229,7 +229,7 @@
         },
         "summaryEmbedding": {
           "name": "summaryEmbedding",
-          "type": "blob",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -713,22 +713,6 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "testTable": {
-      "name": "testTable",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
     "unSummarizedMessage": {
       "name": "unSummarizedMessage",
       "columns": {
@@ -807,6 +791,27 @@
         "imageUrl": {
           "name": "imageUrl",
           "type": "text(10000)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "lastKnownStatus": {
+          "name": "lastKnownStatus",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "lastKnownStatusConfirmedAt": {
+          "name": "lastKnownStatusConfirmedAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "lastKnownStatusSwitchedAt": {
+          "name": "lastKnownStatusSwitchedAt",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
