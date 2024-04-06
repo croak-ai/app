@@ -3,7 +3,7 @@ import { Separator } from "@acme/ui/components/ui/separator";
 import Message from "./message";
 import { RouterInput, RouterOutput, trpc } from "@/utils/trpc";
 import { format } from "date-fns";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { useInView } from "react-intersection-observer";
 import SkeletonMessages from "./skeleton-messages";
 
@@ -117,7 +117,7 @@ export default function Messages({
         !messageInList(previousPageTargetElement.current)
       ) {
         console.log("scrolling to next page");
-        scrollToMessageById(nextPageTargetElement.current);
+        //scrollToMessageById(nextPageTargetElement.current);
       }
 
       // This happens if we "lose" the next page so we should fix the scroll
@@ -126,7 +126,7 @@ export default function Messages({
         !messageInList(nextPageTargetElement.current)
       ) {
         console.log("scrolling to previous page");
-        scrollToMessageById(previousPageTargetElement.current);
+        //scrollToMessageById(previousPageTargetElement.current);
       }
     }
 
@@ -197,12 +197,13 @@ export default function Messages({
       >
         <>
           <div ref={PreviousPageRef}>
-            {hasPreviousPage && <SkeletonMessages />}
+            {/* {hasPreviousPage && <SkeletonMessages />} */}
           </div>
+          <div className="h-6 flex-shrink-0"></div>
           {Object.entries(groupedMessages).map(
             ([date, messages], groupIndex) => (
               <div key={groupIndex} className="messages-section">
-                <Separator />
+                <Separator className="my-8" />
                 <div className="sticky top-0 flex w-full items-center justify-center">
                   <div className="flex-1"></div>
                   <div className="mx-2">
@@ -231,9 +232,7 @@ export default function Messages({
             ),
           )}
           {hasNextPage && (
-            <div ref={NextPageRef}>
-              <SkeletonMessages />
-            </div>
+            <div ref={NextPageRef}>{/* <SkeletonMessages /> */}</div>
           )}
         </>
       </div>

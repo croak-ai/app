@@ -1,5 +1,4 @@
-import OrgLayout from "@/routes/_with-auth/_with-org/-components/org-layout";
-import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_with-auth/_with-org")({
   beforeLoad: async ({ context }) => {
@@ -26,20 +25,11 @@ export const Route = createFileRoute("/_with-auth/_with-org")({
 
     if (
       !matchingOrganizationMembership.organization.publicMetadata
-        .main_database_turso_org_name ||
-      !matchingOrganizationMembership.organization.publicMetadata
-        .main_database_turso_group_name ||
-      !matchingOrganizationMembership.organization.publicMetadata
-        .main_database_turso_db_name
+        .database_created
     ) {
       throw redirect({
         to: "/onboard-new-org",
       });
     }
   },
-  component: () => (
-    <OrgLayout>
-      <Outlet />
-    </OrgLayout>
-  ),
 });

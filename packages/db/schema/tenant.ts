@@ -8,6 +8,16 @@ import {
 } from "drizzle-orm/sqlite-core";
 import { createId } from "@paralleldrive/cuid2";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { z } from "zod";
+
+export const LastKnownStatusEnum = z.enum([
+  "ONLINE",
+  "OFFLINE",
+  "AWAY",
+  "DO_NOT_DISTURB",
+  "INVISIBLE",
+  "MOBILE_ONLINE",
+]);
 
 export const user = sqliteTable(
   "user",
@@ -20,6 +30,11 @@ export const user = sqliteTable(
     fullName: text("fullName", { length: 1024 }),
     email: text("email", { length: 256 }).notNull().unique(),
     imageUrl: text("imageUrl", { length: 10000 }),
+    lastKnownStatus: text("lastKnownStatus", {
+      enum: LastKnownStatusEnum._def.values,
+    }),
+    lastKnownStatusConfirmedAt: integer("lastKnownStatusConfirmedAt"),
+    lastKnownStatusSwitchedAt: integer("lastKnownStatusSwitchedAt"),
     createdAt: integer("createdAt").notNull(),
     updatedAt: integer("updatedAt").notNull(),
   },
@@ -193,6 +208,12 @@ export const meetingMember = sqliteTable("meetingMember", {
   updatedAt: integer("updatedAt").notNull(),
   deletedAt: integer("deletedAt"),
 });
+
+export const insertUserSchema = createInsertSchema(user);
+export const selectUserSchema = createSelectSchema(user);
+
+export const insertMessageSchema = createInsertSchema(message);
+export const selectMessageSchema = createSelectSchema(message);
 
 export const insertRecurringMeetingSchema = createInsertSchema(
   recurringMeeting,

@@ -22,6 +22,7 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   );
 
   useEffect(() => {
+    console.log("ASDASD");
     // Check if the current theme is 'dark'
     if (theme === "dark") {
       document.body.classList.add("dark");

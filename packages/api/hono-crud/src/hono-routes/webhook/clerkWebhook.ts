@@ -16,6 +16,7 @@ import { eq } from "@acme/db";
 import { getDbAuthToken } from "../../functions/db";
 import { fetchUserMemberships } from "../../functions/webhook/fetchUserMemberships";
 import { updateOrgUser } from "../../functions/webhook/updateOrgUser";
+import { getClerkOrgMetadata } from "../../functions/clerk-org-metadata";
 
 /*
 This route handles organization membership webhook events from Clerk.
@@ -45,21 +46,21 @@ clerkWebhook.post("/organizationMembership", async (c) => {
       updatedAt: event.data.updated_at,
     };
 
-    /* Get DB conection */
-    const tursoDbName =
-      event.data.organization.public_metadata?.main_database_turso_db_name;
-    const tursoGroupName =
-      event.data.organization.public_metadata?.main_database_turso_group_name;
-    const tursoOrgName =
-      event.data.organization.public_metadata?.main_database_turso_org_name;
-
-    const url = `libsql://${tursoDbName}-${tursoOrgName}.turso.io`;
-    const token = getDbAuthToken({
-      env: c.env,
-      groupName: tursoGroupName as string,
+    const clerkInfo = await getClerkOrgMetadata({
+      organizationId: event.data.organization.id,
+      KV: c.env.GLOBAL_KV,
+      clerkSecretKey: c.env.CLERK_SECRET_KEY,
     });
 
-    const db = createDbClient(url, token);
+    const { main_database_turso_db_url, main_database_turso_group_name } =
+      clerkInfo;
+
+    const token = getDbAuthToken({
+      env: c.env,
+      groupName: main_database_turso_group_name,
+    });
+
+    const db = createDbClient(main_database_turso_db_url, token);
 
     switch (event.type) {
       /* Create user */

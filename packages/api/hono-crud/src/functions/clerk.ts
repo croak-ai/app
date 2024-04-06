@@ -17,33 +17,3 @@ export const userHasRole = ({
     return false;
   }
 };
-
-interface getClerkInfoReturn {
-  orgId: string;
-  tursoGroupName: string;
-  tursoDbName: string;
-  tursoOrgName: string;
-}
-
-export const getClerkOrgInfo = ({
-  auth,
-}: {
-  auth: SignedInAuthObject | SignedOutAuthObject;
-}): getClerkInfoReturn | undefined => {
-  const orgId = auth?.orgId;
-
-  const sessionClaims = JSON.parse(JSON.stringify(auth.sessionClaims));
-
-  const tursoGroupName =
-    sessionClaims?.org_public_metadata?.main_database_turso_group_name;
-  const tursoDbName =
-    sessionClaims?.org_public_metadata?.main_database_turso_db_name;
-  const tursoOrgName =
-    sessionClaims?.org_public_metadata?.main_database_turso_org_name;
-
-  if (!orgId || !tursoGroupName || !tursoDbName || !tursoOrgName) {
-    return undefined;
-  }
-
-  return { orgId, tursoGroupName, tursoDbName, tursoOrgName };
-};

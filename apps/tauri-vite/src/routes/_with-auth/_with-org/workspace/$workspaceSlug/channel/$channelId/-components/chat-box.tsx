@@ -7,6 +7,15 @@ import { PlaygroundMilkdown as MessageBox } from "@/components/playground-editor
 import { ControlPanel as DevMessageBoxTools } from "@/components/playground/control-panel";
 import Messages from "./messages";
 import { useUser } from "@clerk/clerk-react";
+import { RouterOutput } from "@/utils/trpc";
+import { useWebSocket } from "@croak/hooks-websocket/useWebSocket";
+import {
+  ChatMessage,
+  WebSocketMessageType,
+} from "@croak/hono-crud/src/hono-routes/websocket/web-socket-req-messages-types";
+
+type GetMessages = RouterOutput["getMessages"]["getMessages"];
+type SingleMessage = GetMessages["messages"][0];
 
 const isInDevMode = () => {
   return process.env.NODE_ENV === "development";
@@ -24,89 +33,97 @@ export default function ChatBox({
   initialCursor: Cursor;
 }) {
   const utils = trpc.useUtils();
+  const { addMessageHandler, removeMessageHandler, websocketId } =
+    useWebSocket();
 
   const [devModeEnabled, setDevModeEnabled] = useState(false);
   const [messagesHeight, setMessagesHeight] = useState(500); // Default height
   const { user } = useUser();
 
-  const createMessage = trpc.createMessage.createMessage.useMutation({
-    // onMutate: async (opts) => {
-    //   await utils.getMessages.getMessages.cancel();
-    //   utils.getMessages.getMessages.setInfiniteData(
-    //     {
-    //       channelId: channelId,
-    //       limit: 100,
-    //       cursor: {
-    //         createdAt: Date.now(), // Use the current timestamp or the appropriate value
-    //         id: "cursor_id", // Replace "cursor_id" with the actual cursor ID you have
-    //         direction: "next", // or "previous", depending on your use case
-    //       },
-    //     },
-    //     (data) => {
-    //       if (!data) {
-    //         return {
-    //           pages: [],
-    //           pageParams: [],
-    //         };
-    //       }
-
-    //       const newMessage = {
-    //         // Adjust the structure to match your expected message object structure
-    //         confirmed: false, // This is the new part
-    //         id: -1, // Mock ID for optimistic update
-    //         message: {
-    //           channelId: parseInt(opts.channelId), // Assuming channelId is a number in your data model
-    //           userId: "optimistic_user_id",
-    //           createdAt: Date.now(),
-    //           updatedAt: Date.now(),
-    //           id: Math.random(), // Assuming id is a number in your data model
-    //           deletedAt: null, // Assuming this field exists and is nullable
-    //           message: opts.messageContent,
-    //           messageInChannelNumber: 1, // Example value, adjust as necessary
-    //         },
-    //         user: {
-    //           userId: user?.id ?? "unknown", // Provide a default string value for userId if null
-    //           role: "some_role",
-    //           firstName: user?.firstName ?? "unknown",
-    //           lastName: user?.lastName ?? "name",
-    //           email: user?.primaryEmailAddress?.emailAddress ?? "unknown_email",
-    //           imageUrl: user?.imageUrl ?? "",
-    //           profileImageUrl: user?.imageUrl ?? "",
-    //           createdAt: Date.now(),
-    //           updatedAt: Date.now(),
-    //         },
-    //       };
-
-    //       return {
-    //         ...data,
-    //         pages: data.pages.map((page) => ({
-    //           ...page,
-    //           messages: [newMessage, ...page.messages],
-    //         })),
-    //       };
-    //     },
-    //   );
-    // },
-    onError: (input, variables, context) => {
+  const updateMessagesCache = useCallback(
+    (newMessage: SingleMessage) => {
       utils.getMessages.getMessages.setInfiniteData(
         {
-          channelId: variables.channelId,
+          channelId: channelId,
           limit: 100,
-          cursor: {
-            createdAt: Date.now(), // Use the current timestamp or the appropriate value
-            id: "cursor_id", // Replace "cursor_id" with the actual cursor ID you have
-            direction: "older", // or "previous", depending on your use case
-          },
+          cursor: initialCursor,
         },
-        () => ({
-          pages: [],
-          pageParams: [],
-        }),
+        (data) => {
+          if (!data) {
+            return {
+              pages: [],
+              pageParams: [],
+            };
+          }
+
+          return {
+            ...data,
+            pages: data.pages.map((page, pageIndex) =>
+              pageIndex === 0
+                ? {
+                    ...page,
+                    messages: [newMessage, ...page.messages],
+                  }
+                : page,
+            ),
+          };
+        },
       );
     },
-    // onSettled: () => {
-    //   utils.getMessages.getMessages.invalidate();
-    // },
+    [channelId, initialCursor, utils],
+  );
+
+  useEffect(() => {
+    const handleMessage = (message: WebSocketMessageType) => {
+      const chatMessage = ChatMessage.safeParse(message);
+
+      if (!chatMessage.success) {
+        return;
+      }
+
+      if (chatMessage.data.websocketId === websocketId) {
+        return;
+      }
+
+      if (chatMessage.data.newMessage.channelId === channelId) {
+        const data = { message: chatMessage.data.newMessage, user: null };
+        updateMessagesCache(data);
+      }
+    };
+
+    addMessageHandler(handleMessage);
+
+    return () => removeMessageHandler(handleMessage);
+  }, [
+    addMessageHandler,
+    removeMessageHandler,
+    channelId,
+    workspaceSlug,
+    updateMessagesCache,
+  ]);
+
+  const createMessage = trpc.createMessage.createMessage.useMutation({
+    onMutate: async (opts) => {
+      await utils.getMessages.getMessages.cancel();
+      const newMessage: SingleMessage = {
+        message: {
+          channelId: opts.channelId,
+          userId: user?.id ?? "unknown",
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+          id: Math.random().toString(),
+          deletedAt: null,
+          message: opts.messageContent,
+        },
+        user: {
+          userId: user?.id ?? "unknown",
+          firstName: user?.firstName ?? "unknown",
+          lastName: user?.lastName ?? "name",
+          imageUrl: user?.imageUrl ?? null,
+        },
+      };
+      updateMessagesCache(newMessage);
+    },
   });
 
   const lockCodemirror = useRef(false);
@@ -133,7 +150,10 @@ export default function ChatBox({
     async (message: string) => {
       if (message.trim() === "") return;
 
+      console.log("ChannelId", channelId);
+
       await createMessage.mutate({
+        websocketId: websocketId,
         workspaceSlug: workspaceSlug,
         channelId: channelId,
         messageContent: message,
@@ -175,7 +195,7 @@ export default function ChatBox({
         }}
       />
     ),
-    [],
+    [channelId],
   );
 
   const MemoizedDevMessageBoxTools = useMemo(
@@ -199,9 +219,7 @@ export default function ChatBox({
           initialCursor={initialCursor}
           isInitialCursorAtBottom={true}
         />
-
         {devModeEnabled && MemoizedDevMessageBoxTools}
-
         <div className="playground-wrapper my-2">{MemoizedMessageBox}</div>
         {isInDevMode() && (
           <div className="flex items-center justify-end">

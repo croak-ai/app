@@ -3,7 +3,7 @@
 import { assistantThread } from "@acme/db/schema/tenant";
 import { protectedProcedureWithOrgDB, router } from "../../config/trpc";
 import { TRPCError } from "@trpc/server";
-import { eq, desc } from "packages/db";
+import { eq, desc } from "@acme/db";
 
 export const retrieveThreadList = router({
   retrieveThreadList: protectedProcedureWithOrgDB.query(async ({ ctx }) => {

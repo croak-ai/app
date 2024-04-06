@@ -130,7 +130,7 @@ export default async function migrateGroups({
       spinner.text = `Waiting 3 Seconds before migrating database (waiting for turso to initialize stuff) ${group.groupName}...`;
 
       await new Promise((resolve) => setTimeout(resolve, 3000));
-      return migrateDatabase({
+      return await migrateDatabase({
         name: emptyDatabaseName,
         secret: group.token,
       });

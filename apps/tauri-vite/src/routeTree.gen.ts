@@ -60,7 +60,9 @@ const WithAuthOnboardNewOrgRouteRoute = WithAuthOnboardNewOrgRouteImport.update(
 const WithAuthWithOrgRouteRoute = WithAuthWithOrgRouteImport.update({
   id: '/_with-org',
   getParentRoute: () => WithAuthRouteRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/_with-auth/_with-org/route.lazy').then((d) => d.Route),
+)
 
 const WithAuthWithOrgWorkspaceRouteRoute =
   WithAuthWithOrgWorkspaceRouteImport.update({

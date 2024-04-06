@@ -29,7 +29,17 @@ export const getMessages = router({
       const { channelId, cursor, limit } = input;
 
       let queryBuilder = ctx.db
-        .select()
+        .select({
+          user: {
+            userId: user.userId,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            imageUrl: user.imageUrl,
+          },
+          message: {
+            ...message,
+          },
+        })
         .from(message)
         .leftJoin(user, eq(user.userId, message.userId));
 

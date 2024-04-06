@@ -5,6 +5,12 @@ import {
   getEmptyDatabaseName,
 } from "@acme/shared-functions";
 import { clerkSync } from "../../../functions/cron/clerk-sync";
+import { Clerk } from "@clerk/backend";
+import { createClient } from "@tursodatabase/api";
+import {
+  OrgMetadata,
+  updateClerkOrgMetadataKV,
+} from "../../../functions/clerk-org-metadata";
 
 const zInput = z.object({ group: z.string() });
 
@@ -13,8 +19,6 @@ export const createNewTursoDB = router({
     .input(zInput)
     .mutation(async ({ ctx, input }) => {
       try {
-        console.log(input.group);
-
         if (ctx.auth.orgRole !== "admin") {
           throw new Error("You must be an admin to create a new database.");
         }
@@ -40,60 +44,45 @@ export const createNewTursoDB = router({
 
         const emptyDatabaseName = getEmptyDatabaseName({ groupName: group });
 
-        const newDatabaseResponse = await fetch(
-          `https://api.turso.tech/v1/organizations/${tursoOrgName}/databases`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${tursoToken}`,
-            },
-            body: JSON.stringify({
-              name: newDatabaseName,
-              group: group,
-              seed: {
-                Type: "database",
-                Name: emptyDatabaseName,
-              },
-            }),
+        const turso = createClient({
+          org: tursoOrgName,
+          token: tursoToken,
+        });
+
+        const database = await turso.databases.create(newDatabaseName, {
+          group: group,
+          seed: {
+            type: "database",
+            name: emptyDatabaseName,
           },
-        );
+        });
 
-        if (!newDatabaseResponse.ok) {
-          if (newDatabaseResponse.status === 409) {
-            throw new Error(`Database already exists. Please Contact Support.`);
-          }
-          throw new Error(`HTTP error! status: ${newDatabaseResponse.status}`);
-        }
+        console.log(`Created a new Database! -> ${JSON.stringify(database)}`);
 
-        const newDatabaseData = await newDatabaseResponse.json();
+        const clerkClient = Clerk({ secretKey: ctx.env.CLERK_SECRET_KEY });
 
-        console.log(
-          `Created a new Database! -> ${JSON.stringify(newDatabaseData)}`,
-        );
+        const orgMetadata: OrgMetadata = {
+          main_database_turso_org_name: tursoOrgName,
+          main_database_turso_group_name: group,
+          main_database_turso_db_name: database.name,
+          main_database_turso_db_url: `libsql://${database.hostname}`,
+          main_database_turso_db_id: database.id,
+        };
 
-        const clerkUpdateResponse = await fetch(
-          `https://api.clerk.dev/v1/organizations/${orgId}`,
-          {
-            method: "PATCH",
-            headers: {
-              Authorization: `Bearer ${clerkToken}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              public_metadata: {
-                main_database_turso_org_name: tursoOrgName,
-                main_database_turso_group_name: group,
-                main_database_turso_db_name: newDatabaseName,
-              },
-            }),
+        await clerkClient.organizations.updateOrganizationMetadata(orgId, {
+          publicMetadata: {
+            database_created: "true",
           },
-        );
+          privateMetadata: {
+            ...orgMetadata,
+          },
+        });
 
-        if (!clerkUpdateResponse.ok) {
-          throw new Error(
-            `Error updating Clerk metadata. HTTP status: ${clerkUpdateResponse.status}`,
-          );
-        }
+        await updateClerkOrgMetadataKV({
+          clerkSecretKey: clerkToken,
+          KV: ctx.env.GLOBAL_KV,
+          organizationId: orgId,
+        });
 
         const { totalInsertedRows } = await clerkSync({
           organizationId: orgId,

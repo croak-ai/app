@@ -1,8 +1,13 @@
 {
   "version": "5",
   "dialect": "sqlite",
+<<<<<<< HEAD
   "id": "fcd95a14-b842-4f1d-9266-5c6207a0c6b8",
   "prevId": "0f302221-85b8-4a28-8996-d8dc9e7e21d9",
+=======
+  "id": "2daf18ce-cf3c-4164-a7b0-1db062169905",
+  "prevId": "dfef18e2-8b80-4038-bb16-ab116b6c4d97",
+>>>>>>> websockets
   "tables": {
     "assistantThread": {
       "name": "assistantThread",
@@ -713,6 +718,25 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
+<<<<<<< HEAD
+=======
+    "testTable": {
+      "name": "testTable",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+>>>>>>> websockets
     "unSummarizedMessage": {
       "name": "unSummarizedMessage",
       "columns": {
@@ -795,6 +819,30 @@
           "notNull": false,
           "autoincrement": false
         },
+<<<<<<< HEAD
+=======
+        "lastKnownStatus": {
+          "name": "lastKnownStatus",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "lastKnownStatusConfirmedAt": {
+          "name": "lastKnownStatusConfirmedAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "lastKnownStatusSwitchedAt": {
+          "name": "lastKnownStatusSwitchedAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+>>>>>>> websockets
         "createdAt": {
           "name": "createdAt",
           "type": "integer",
