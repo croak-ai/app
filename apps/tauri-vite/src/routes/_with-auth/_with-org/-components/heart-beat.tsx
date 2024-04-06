@@ -7,13 +7,14 @@ interface HeartBeatProps {
 }
 
 const HeartBeat: React.FC<HeartBeatProps> = ({ children }) => {
-  const { sendMessage } = useWebSocket();
+  const { sendMessage, websocketId } = useWebSocket();
   const [status, setStatus] = useState<"ONLINE" | "AWAY">("ONLINE");
   const heartbeatInterval = 20000; // 20 seconds
   const idleTimeout = 60000; // 1 minute
 
   const sendHeartbeat = () => {
     sendMessage({
+      websocketId,
       type: "HEARTBEAT",
       status: status,
     });
