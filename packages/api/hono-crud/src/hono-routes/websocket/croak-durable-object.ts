@@ -24,7 +24,7 @@ export class CroakDurableObject {
   value: number = 0;
   state: DurableObjectState;
   app: Hono = new Hono();
-  connections: Record<string, WSContext[]> = {}; // Store active WebSocket connections mapped by userId, allowing multiple connections per user
+  connections: Record<string, Record<string, WSContext>> = {}; // userId -> websocketId -> WSContext
   currentStatuses: Record<string, UserStatus> = {}; // Store current status of each user
 
   constructor(state: DurableObjectState, env: Bindings) {
@@ -42,7 +42,23 @@ export class CroakDurableObject {
     );
     this.app.get(
       "/ws/connect",
-      upgradeWebSocket((c) => {
+      upgradeWebSocket(async (c) => {
+        const token = c.req.query("token");
+
+        if (!token) {
+          throw new Error("Unauthorized: Token not found in query");
+        }
+
+        const clerkAuth = await verifyWebSocketRequest({
+          token,
+          jwksUrl: env.CLERK_JWKS_URL,
+          KV: env.GLOBAL_KV,
+        });
+
+        if (!clerkAuth.org_id) {
+          throw new Error("Unauthorized: Organization ID not found in token");
+        }
+
         return {
           onMessage: async (event, ws) => {
             let messageData = event.data;
@@ -60,8 +76,10 @@ export class CroakDurableObject {
 
             const message = JSON.parse(messageData);
 
+            const { token, websocketId } = message;
+
             const clerkAuth = await verifyWebSocketRequest({
-              token: message.token,
+              token,
               jwksUrl: env.CLERK_JWKS_URL,
               KV: env.GLOBAL_KV,
             });
@@ -76,9 +94,11 @@ export class CroakDurableObject {
 
             // Add connection to the user's list of connections
             if (!this.connections[userId]) {
-              this.connections[userId] = [ws];
-            } else {
-              this.connections[userId].push(ws);
+              this.connections[userId] = {};
+            }
+            // Check if the websocketId already exists to avoid duplicates
+            if (!this.connections[userId][websocketId]) {
+              this.connections[userId][websocketId] = ws;
             }
 
             const WebSocketMessage: WebSocketMessageType = message;
@@ -149,17 +169,24 @@ export class CroakDurableObject {
           },
           onClose: (event, ws) => {
             const userId = Object.keys(this.connections).find((key) =>
-              this.connections[key].includes(ws),
+              Object.values(this.connections[key]).some(
+                (connection) => connection === ws,
+              ),
             );
 
             if (userId) {
-              // Remove the closed connection from the user's list of connections
-              const index = this.connections[userId].indexOf(ws);
-              if (index > -1) {
-                this.connections[userId].splice(index, 1);
+              // Find the websocketId for the closed connection
+              const websocketId = Object.keys(this.connections[userId]).find(
+                (id) => this.connections[userId][id] === ws,
+              );
+
+              // Remove the closed connection using websocketId
+              if (websocketId) {
+                delete this.connections[userId][websocketId];
               }
+
               // If the user has no more connections, delete the user from the connections record
-              if (this.connections[userId].length === 0) {
+              if (Object.keys(this.connections[userId]).length === 0) {
                 delete this.connections[userId];
               }
             }
@@ -183,12 +210,13 @@ export class CroakDurableObject {
 
       const newMessageResult = ChatMessage.parse(json);
 
-      await Promise.all(
-        Object.values(this.connections).flatMap((wsList) =>
-          wsList.map((ws) => ws.send(JSON.stringify(newMessageResult))),
-        ),
-      );
-      return c.text("Message sent to all connections.");
+      Object.values(this.connections).forEach((wsList) => {
+        Object.values(wsList).forEach((ws) => {
+          ws.send(JSON.stringify(newMessageResult));
+          console.log("Message sent to connection.");
+        });
+      });
+      return c.text("Message sent to all connections");
     });
 
     this.app.get("/ws/decrement", async (c) => {

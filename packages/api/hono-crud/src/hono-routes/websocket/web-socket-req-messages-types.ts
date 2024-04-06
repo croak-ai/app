@@ -9,12 +9,19 @@ export const MessageUserInfo = z.object({
   imageUrl: z.string().optional(),
 });
 
+// Something you might notice is every message has a "websocketId" field. This is used to identify the websocket connection that sent the message.
+// This is not secure field and should never be used for authentication.
+// The purpose of it is to help identify for the frontend which websocket connection sent the message.
+// This is useful for when you have multiple websocket connections open under the same user and you want to know which one sent the message.
+
 export const HeartbeatMessage = z.object({
+  websocketId: z.string(),
   type: z.literal("HEARTBEAT"),
   status: LastKnownStatusEnum,
 });
 
 export const ChatMessage = z.object({
+  websocketId: z.string(),
   type: z.literal("CHAT_MESSAGE"),
   newMessage: selectMessageSchema,
   user: MessageUserInfo,
@@ -22,6 +29,7 @@ export const ChatMessage = z.object({
 });
 
 export const ErrorMessage = z.object({
+  websocketId: z.string().optional(),
   type: z.literal("ERROR"),
   message: z.string(),
 });

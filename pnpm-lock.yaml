@@ -174,8 +174,8 @@ importers:
         specifier: ^5.17.21
         version: 5.28.6(@tanstack/react-query@5.28.6)(react@18.2.0)
       '@tanstack/react-router':
-        specifier: ^1.16.0
-        version: 1.22.3(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^1.26.9
+        version: 1.26.9(react-dom@18.2.0)(react@18.2.0)
       '@tanstack/router-cli':
         specifier: ^1.16.1
         version: 1.20.5
@@ -209,6 +209,9 @@ importers:
       react-dom:
         specifier: ^18.2.0
         version: 18.2.0(react@18.2.0)
+      react-idle-timer:
+        specifier: ^5.7.2
+        version: 5.7.2(react-dom@18.2.0)(react@18.2.0)
       react-intersection-observer:
         specifier: ^9.8.0
         version: 9.8.1(react-dom@18.2.0)(react@18.2.0)
@@ -221,6 +224,9 @@ importers:
       superjson:
         specifier: ^2.2.1
         version: 2.2.1
+      uuid:
+        specifier: ^9.0.1
+        version: 9.0.1
       vite-tsconfig-paths:
         specifier: ^4.3.1
         version: 4.3.2(typescript@5.4.3)(vite@5.2.6)
@@ -246,6 +252,9 @@ importers:
       '@types/react-infinite-scroller':
         specifier: ^1.2.5
         version: 1.2.5
+      '@types/uuid':
+        specifier: ^9.0.8
+        version: 9.0.8
       '@vitejs/plugin-react':
         specifier: ^4.2.1
         version: 4.2.1(vite@5.2.6)
@@ -5090,6 +5099,11 @@ packages:
     engines: {node: '>=12'}
     dev: false
 
+  /@tanstack/history@1.26.3:
+    resolution: {integrity: sha512-NhRgiyTdNy7lw2iL1gggj6Znz5wWi8c2yFE1zCfn0G6CPRDZZ//Stgd7bPOs6XIp24YeCFrIq4J3HAhbo8jyZg==}
+    engines: {node: '>=12'}
+    dev: false
+
   /@tanstack/query-core@5.28.6:
     resolution: {integrity: sha512-hnhotV+DnQtvtR3jPvbQMPNMW4KEK0J4k7c609zJ8muiNknm+yoDyMHmxTWM5ZnlZpsz0zOxYFr+mzRJNHWJsA==}
     dev: false
@@ -5135,6 +5149,21 @@ packages:
       react-dom: '>=16'
     dependencies:
       '@tanstack/history': 1.15.13
+      '@tanstack/react-store': 0.2.1(react-dom@18.2.0)(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      tiny-invariant: 1.3.3
+      tiny-warning: 1.0.3
+    dev: false
+
+  /@tanstack/react-router@1.26.9(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-7UlNKRpk71Uh6ZsN4OQkZSXJw8u7n7gKKipmxWB9iPsvczymOoJ78JYgR26y3awpqXvbEjdCb7hbxSxZt2xfbA==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      react: '>=16.8'
+      react-dom: '>=16.8'
+    dependencies:
+      '@tanstack/history': 1.26.3
       '@tanstack/react-store': 0.2.1(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
@@ -5941,6 +5970,10 @@ packages:
   /@types/unist@3.0.2:
     resolution: {integrity: sha512-dqId9J8K/vGi5Zr7oo212BGii5m3q5Hxlkwy3WpYuKPklmBEvsbMYYyLxAQpSffdLl/gdW0XUpKWFvYmyoWCoQ==}
     dev: false
+
+  /@types/uuid@9.0.8:
+    resolution: {integrity: sha512-jg+97EGIcY9AGHJJRaaPVgetKDsrTgbRjQ5Msgjh/DQKEFl0DtyRr/VCOyD1T2R1MNeWPK/u7JoGhlDZnKBAfA==}
+    dev: true
 
   /@types/wrap-ansi@3.0.0:
     resolution: {integrity: sha512-ltIpx+kM7g/MLRZfkbL7EsCEjfzCcScLpkg37eXEtx5kmrAKBkTJwd1GIAjDSL8wTpM6Hzn5YO4pSb91BEwu1g==}
@@ -11484,6 +11517,16 @@ packages:
       react: ^16.8.0 || ^17 || ^18
     dependencies:
       react: 17.0.2
+    dev: false
+
+  /react-idle-timer@5.7.2(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-+BaPfc7XEUU5JFkwZCx6fO1bLVK+RBlFH+iY4X34urvIzZiZINP6v2orePx3E6pAztJGE7t4DzvL7if2SL/0GQ==}
+    peerDependencies:
+      react: '>=16'
+      react-dom: '>=16'
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
     dev: false
 
   /react-intersection-observer@9.8.1(react-dom@18.2.0)(react@18.2.0):

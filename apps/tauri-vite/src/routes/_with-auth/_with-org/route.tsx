@@ -1,11 +1,4 @@
-import OrgLayout from "@/routes/_with-auth/_with-org/-components/org-layout";
-import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
-import { WebSocketProvider } from "@croak/hooks-websocket/useWebSocket";
-const VITE_HONO_WS_URL = import.meta.env.VITE_HONO_WS_URL;
-
-if (!VITE_HONO_WS_URL) {
-  throw new Error("Missing VITE_HONO_WS_URL");
-}
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_with-auth/_with-org")({
   beforeLoad: async ({ context }) => {
@@ -39,11 +32,4 @@ export const Route = createFileRoute("/_with-auth/_with-org")({
       });
     }
   },
-  component: () => (
-    <WebSocketProvider url={VITE_HONO_WS_URL}>
-      <OrgLayout>
-        <Outlet />
-      </OrgLayout>
-    </WebSocketProvider>
-  ),
 });

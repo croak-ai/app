@@ -16,6 +16,7 @@ import {
 
 export const zCreateMessage = z.object({
   channelId: z.string().min(1).max(256),
+  websocketId: z.string().min(1).max(256),
   workspaceSlug: z.string().min(2).max(256),
   messageContent: z.string().min(2).max(60000),
 });
@@ -99,6 +100,7 @@ export const createMessage = router({
       };
 
       const body: ChatMessageType = {
+        websocketId: input.websocketId,
         type: "CHAT_MESSAGE",
         newMessage: newMessageResult,
         user,
