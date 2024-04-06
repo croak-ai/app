@@ -64,7 +64,7 @@ export default function Message({ message, previousMessage }: MessageProps) {
 
   return (
     <div className="flex items-start gap-4 pt-4">
-      <Avatar className="h-8 w-8">
+      <Avatar className="mt-3 h-8 w-8">
         {effectiveAvatarSrc && (
           <AvatarImage alt={effectiveDisplayName} src={effectiveAvatarSrc} />
         )}
@@ -74,11 +74,13 @@ export default function Message({ message, previousMessage }: MessageProps) {
       </Avatar>
       <div className="grid gap-1 text-sm">
         <div className="flex items-center gap-1 font-medium text-primary">
-          <UserPopoverCard userId={userId} side="top">
-            <Button variant={"link"} className="m-0 inline border-none p-0">
-              {effectiveDisplayName}
-            </Button>
-          </UserPopoverCard>
+          <div className="mt-[-1px]">
+            <UserPopoverCard userId={userId} side="top">
+              <Button variant={"link"} className="m-0 inline border-none p-0">
+                {effectiveDisplayName}
+              </Button>
+            </UserPopoverCard>
+          </div>
           <span className="text-xs text-gray-500 dark:text-gray-400">
             {new Date(createdAt).toLocaleTimeString()}
           </span>

@@ -33,7 +33,6 @@ export const WebSocketProvider = ({
   const { getToken } = useAuth();
   const webSocketManager = WebSocketManager.getInstance();
   const [isConnected, setIsConnected] = useState(false); // State to track connection status
-  const [reconnectAttempts, setReconnectAttempts] = useState(0); // Track reconnect attempts
   const websocketId = webSocketManager.getWebSocketId();
 
   useEffect(() => {
@@ -45,17 +44,10 @@ export const WebSocketProvider = ({
 
           socket.onopen = () => {
             setIsConnected(true);
-            setReconnectAttempts(0); // Reset reconnect attempts on successful connection
           };
 
           socket.onclose = () => {
             setIsConnected(false);
-            if (reconnectAttempts < 5) {
-              setTimeout(() => {
-                setReconnectAttempts(reconnectAttempts + 1);
-                connectWebSocket(); // Attempt to reconnect
-              }, 1000 * reconnectAttempts); // Exponential backoff
-            }
           };
         };
 
@@ -68,7 +60,7 @@ export const WebSocketProvider = ({
     return () => {
       webSocketManager.disconnect();
     };
-  }, [reconnectAttempts]);
+  }, []);
 
   const sendMessage = useCallback(async (message: WebSocketMessageType) => {
     const token = await getToken();
@@ -93,10 +85,8 @@ export const WebSocketProvider = ({
     [],
   );
 
-  if (!isConnected && reconnectAttempts >= 5) {
-    return <div>Failed to connect to websocket after 5 attempts</div>;
-  } else if (!isConnected) {
-    return <div>Connecting to websocket</div>;
+  if (!isConnected) {
+    return <div>Connecting</div>;
   }
 
   return (

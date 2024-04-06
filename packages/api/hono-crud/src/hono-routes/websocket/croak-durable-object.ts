@@ -213,10 +213,9 @@ export class CroakDurableObject {
       Object.values(this.connections).forEach((wsList) => {
         Object.values(wsList).forEach((ws) => {
           ws.send(JSON.stringify(newMessageResult));
-          console.log("Message sent to connection.");
         });
       });
-      return c.text("Message sent to all connections");
+      return c.text("Message sent to all connections.");
     });
 
     this.app.get("/ws/decrement", async (c) => {

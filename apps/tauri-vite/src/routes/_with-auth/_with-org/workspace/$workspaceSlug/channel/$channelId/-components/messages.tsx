@@ -199,10 +199,11 @@ export default function Messages({
           <div ref={PreviousPageRef}>
             {/* {hasPreviousPage && <SkeletonMessages />} */}
           </div>
+          <div className="h-6 flex-shrink-0"></div>
           {Object.entries(groupedMessages).map(
             ([date, messages], groupIndex) => (
               <div key={groupIndex} className="messages-section">
-                <Separator />
+                <Separator className="my-8" />
                 <div className="sticky top-0 flex w-full items-center justify-center">
                   <div className="flex-1"></div>
                   <div className="mx-2">
