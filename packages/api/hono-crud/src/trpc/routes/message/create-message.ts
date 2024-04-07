@@ -99,29 +99,26 @@ export const createMessage = router({
         imageUrl: ctx.auth.user?.imageUrl ?? undefined,
       };
 
-      const cloudflareAI = new Ai(ctx.env.cloudflareAI);
-      const openAI = new OpenAI({ apiKey: ctx.env.OPENAI_API_KEY });
-      /* 
-      In both of these functions the token count of the messages
-      we are throwing into the AI matter.
-      In the future we will need to find some way to make sure the
-      content of the messages we are pulling does not exceed the count
-      */
+      const body: ChatMessageType = {
+        websocketId: input.websocketId,
+        type: "CHAT_MESSAGE",
+        newMessage: newMessageResult,
+        user,
+        orgId: ctx.auth.orgId,
+      };
 
-      /* Group message into conversation */
-      const conversationId = await groupMessage(
-        ctx.db,
-        openAI,
-        newMessageResult,
-      );
+      const response = await obj.fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
 
-      await summarizeMessages(
-        ctx.db,
-        openAI,
-        cloudflareAI,
-        conversationId,
-        input.channelId,
-      );
+      // const [unSummarizedMessageResult] = await ctx.db
+      //   .insert(unSummarizedMessage)
+      //   .values({
+      //     messageId: newMessageResult.id,
+      //   })
+      //   .returning();
 
       // if (!unSummarizedMessageResult) {
       //   throw new TRPCError({

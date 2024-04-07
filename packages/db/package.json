@@ -8,7 +8,7 @@
     "clean": "rm -rf .turbo node_modules",
     "with-env": "dotenv -e ../../.env --",
     "cli": "pnpm ts-node ./cli",
-    "generate": "drizzle-kit generate:sqlite"
+    "generate": "drizzle-kit generate:sqlite && pnpm ts-node ./sql-assistant-generator.ts"
   },
   "dependencies": {
     "@acme/shared-functions": "*",

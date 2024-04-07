@@ -1,4 +1,3 @@
-"use client";
 import { cn } from "@acme/ui/lib/utils";
 import { Button } from "@acme/ui/components/ui/button";
 import { Input } from "@acme/ui/components/ui/input";
@@ -8,10 +7,7 @@ import OpenAI from "openai";
 import { useUser } from "@clerk/clerk-react";
 import croakLogo from "@acme/ui/assets/croakLogo.png";
 import useStreamResponse from "./useStreamResponse";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { dark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 
 type Message = OpenAI.Beta.Threads.Messages.Message;
 type Messages = Message[];

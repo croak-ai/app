@@ -18,7 +18,6 @@ export const LastKnownStatusEnum = z.enum([
   "INVISIBLE",
   "MOBILE_ONLINE",
 ]);
-
 export const user = sqliteTable(
   "user",
   {

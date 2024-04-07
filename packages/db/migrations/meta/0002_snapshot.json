@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "66f31f9f-3ebf-47a3-87cd-4cb46f5ed628",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "5b3aeb60-29b6-43e8-8d3f-54484c01a5b5",
+  "prevId": "64dd2b73-c8c1-4956-a76e-b2ba5ccf4f1c",
   "tables": {
     "assistantThread": {
       "name": "assistantThread",
