@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "66f31f9f-3ebf-47a3-87cd-4cb46f5ed628",
+  "id": "24ffda4c-349e-4391-8650-900bba131fa4",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "assistantThread": {
@@ -193,6 +193,51 @@
       },
       "indexes": {},
       "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "conversationNeedsSummary": {
+      "name": "conversationNeedsSummary",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "conversationId": {
+          "name": "conversationId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "conversationNeedsSummary_conversationId_unique": {
+          "name": "conversationNeedsSummary_conversationId_unique",
+          "columns": [
+            "conversationId"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "conversationNeedsSummary_conversationId_conversation_id_fk": {
+          "name": "conversationNeedsSummary_conversationId_conversation_id_fk",
+          "tableFrom": "conversationNeedsSummary",
+          "tableTo": "conversation",
+          "columnsFrom": [
+            "conversationId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
@@ -713,8 +758,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "unSummarizedMessage": {
-      "name": "unSummarizedMessage",
+    "unGroupedMessage": {
+      "name": "unGroupedMessage",
       "columns": {
         "id": {
           "name": "id",
@@ -731,8 +776,30 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
+      "indexes": {
+        "unGroupedMessage_messageId_unique": {
+          "name": "unGroupedMessage_messageId_unique",
+          "columns": [
+            "messageId"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "unGroupedMessage_messageId_message_id_fk": {
+          "name": "unGroupedMessage_messageId_message_id_fk",
+          "tableFrom": "unGroupedMessage",
+          "tableTo": "message",
+          "columnsFrom": [
+            "messageId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
@@ -751,6 +818,13 @@
           "type": "text(256)",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false
+        },
+        "discordId": {
+          "name": "discordId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
           "autoincrement": false
         },
         "role": {
@@ -836,6 +910,13 @@
           "name": "user_userId_unique",
           "columns": [
             "userId"
+          ],
+          "isUnique": true
+        },
+        "user_discordId_unique": {
+          "name": "user_discordId_unique",
+          "columns": [
+            "discordId"
           ],
           "isUnique": true
         },

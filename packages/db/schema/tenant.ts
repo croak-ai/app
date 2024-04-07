@@ -23,6 +23,7 @@ export const user = sqliteTable(
   {
     internalId: integer("internalId").primaryKey(),
     userId: text("userId", { length: 256 }).notNull().unique(),
+    discordUserId: integer("discordId").unique(),
     role: text("role", { length: 256 }).notNull(),
     firstName: text("firstName", { length: 1024 }),
     lastName: text("lastName", { length: 1024 }),
@@ -112,11 +113,6 @@ export const message = sqliteTable("message", {
   deletedAt: integer("deletedAt"),
 });
 
-export const unSummarizedMessage = sqliteTable("unSummarizedMessage", {
-  id: text("id").$defaultFn(createId).primaryKey(),
-  messageId: text("messageId").notNull(),
-});
-
 export const conversationSummary = sqliteTable("conversationSummary", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   channelId: text("channelId").notNull(),
@@ -141,6 +137,25 @@ export const conversation = sqliteTable("conversation", {
   createdAt: integer("createdAt").notNull(),
   updatedAt: integer("updatedAt").notNull(),
 });
+
+export const unGroupedMessage = sqliteTable("unGroupedMessage", {
+  id: text("id").$defaultFn(createId).primaryKey(),
+  messageId: text("messageId")
+    .references(() => message.id, { onDelete: "cascade" })
+    .notNull()
+    .unique(),
+});
+
+export const conversationNeedingSummary = sqliteTable(
+  "conversationNeedsSummary",
+  {
+    id: text("id").$defaultFn(createId).primaryKey(),
+    conversationId: text("conversationId")
+      .references(() => conversation.id, { onDelete: "cascade" })
+      .notNull()
+      .unique(),
+  },
+);
 
 export const conversationMessage = sqliteTable("conversationMessage", {
   id: text("id").$defaultFn(createId).primaryKey(),

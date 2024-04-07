@@ -31,6 +31,12 @@ CREATE TABLE "conversationMessage" (
 	"conversationId" text NOT NULL
 );
 
+CREATE TABLE "conversationNeedsSummary" (
+	"id" text PRIMARY KEY NOT NULL,
+	"conversationId" text NOT NULL,
+	FOREIGN KEY ("conversationId") REFERENCES "conversation"("id") ON UPDATE no action ON DELETE cascade
+);
+
 CREATE TABLE "conversationSummary" (
 	"id" integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	"channelId" text NOT NULL,
@@ -116,14 +122,16 @@ CREATE TABLE "recurringMeeting" (
 	"deletedAt" integer
 );
 
-CREATE TABLE "unSummarizedMessage" (
+CREATE TABLE "unGroupedMessage" (
 	"id" text PRIMARY KEY NOT NULL,
-	"messageId" text NOT NULL
+	"messageId" text NOT NULL,
+	FOREIGN KEY ("messageId") REFERENCES "message"("id") ON UPDATE no action ON DELETE cascade
 );
 
 CREATE TABLE "user" (
 	"internalId" integer PRIMARY KEY NOT NULL,
 	"userId" text(256) NOT NULL,
+	"discordId" integer,
 	"role" text(256) NOT NULL,
 	"firstName" text(1024),
 	"lastName" text(1024),
@@ -159,47 +167,15 @@ CREATE TABLE "workspaceMember" (
 	"deletedAt" integer
 );
 
-
-CREATE VIRTUAL TABLE user_fts USING fts5(firstName, lastName, fullName, email, content="user", content_rowid="internalId");
-
-
-CREATE TRIGGER user_ai AFTER INSERT ON user BEGIN
-    INSERT INTO user_fts(rowid, firstName, lastName, fullName, email) VALUES (new.internalId, new.firstName, new.lastName, new.fullName, new.email);
-END;    
-
-
-CREATE TRIGGER user_ad AFTER DELETE ON user BEGIN
-    INSERT INTO user_fts(user_fts, rowid, firstName, lastName, fullName, email) VALUES('delete', old.internalId, old.firstName, old.lastName, old.fullName, old.email);
-END;
-
-
-CREATE TRIGGER user_au AFTER UPDATE ON user BEGIN
-    INSERT INTO user_fts(user_fts, rowid, firstName, lastName, fullName, email) VALUES('delete', old.internalId, old.firstName, old.lastName, old.fullName, old.email);
-    INSERT INTO user_fts(rowid, firstName, lastName, fullName, email) VALUES (new.internalId, new.firstName, new.lastName, new.fullName, new.email);
-END;
-
-
-
-create virtual table vss_summaries using vss0(
-  summary_embedding(384),
-);
-
-
-
 CREATE UNIQUE INDEX "channel_workspaceId_slug_unique" ON "channel" ("workspaceId","slug");
+CREATE UNIQUE INDEX "conversationNeedsSummary_conversationId_unique" ON "conversationNeedsSummary" ("conversationId");
 CREATE UNIQUE INDEX "meeting_name_unique" ON "meeting" ("name");
 CREATE UNIQUE INDEX "recurringMeeting_name_unique" ON "recurringMeeting" ("name");
+CREATE UNIQUE INDEX "unGroupedMessage_messageId_unique" ON "unGroupedMessage" ("messageId");
 CREATE UNIQUE INDEX "user_userId_unique" ON "user" ("userId");
+CREATE UNIQUE INDEX "user_discordId_unique" ON "user" ("discordId");
 CREATE UNIQUE INDEX "user_email_unique" ON "user" ("email");
 CREATE INDEX "email_idx" ON "user" ("email");
 CREATE INDEX "userId_idx" ON "user" ("userId");
 CREATE UNIQUE INDEX "workspace_slug_unique" ON "workspace" ("slug");
 CREATE INDEX "slug_idx" ON "workspace" ("slug");
-
-CREATE TABLE "test" (
-	"id" integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	"name" text(256) NOT NULL
-);
-
-
-DROP TABLE "test";

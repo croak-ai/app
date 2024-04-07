@@ -7,7 +7,7 @@ import { UserPopoverCard } from "@/components/user/user-card";
 import { Button } from "@acme/ui/components/ui/button";
 
 interface Message {
-  userId: string;
+  userId: string | null;
   firstName?: string | null;
   lastName?: string | null;
   imageUrl?: string | null;
@@ -17,9 +17,15 @@ interface Message {
 
 interface MessageProps {
   message: Message;
-  previousMessage?: Message;
+  previousMessageUserId?: {
+    userId: string | null;
+    createdAt: number;
+  };
 }
-export default function Message({ message, previousMessage }: MessageProps) {
+export default function Message({
+  message,
+  previousMessageUserId,
+}: MessageProps) {
   const {
     userId,
     firstName,
@@ -29,16 +35,27 @@ export default function Message({ message, previousMessage }: MessageProps) {
     message: content,
   } = message;
 
-  const effectiveDisplayName =
-    `${firstName || ""} ${lastName || ""}`.trim() || userId;
+  let effectiveDisplayName = "Unknown User";
+
+  if (userId) {
+    effectiveDisplayName = "Unknonw Name";
+  }
+
+  if (firstName || lastName) {
+    effectiveDisplayName = `${firstName || ""} ${lastName || ""}`.trim();
+  }
 
   const effectiveAvatarSrc = imageUrl || "";
 
   const effectiveFallback = firstName ? firstName[0] : "?";
 
   let hideUsername = false;
-  if (previousMessage && previousMessage.userId === userId) {
-    const previousMessageCreatedAt = new Date(previousMessage.createdAt);
+  if (
+    previousMessageUserId &&
+    previousMessageUserId.userId &&
+    previousMessageUserId.userId === userId
+  ) {
+    const previousMessageCreatedAt = new Date(previousMessageUserId.createdAt);
     const currentMessageCreatedAt = new Date(createdAt);
     if (
       currentMessageCreatedAt.getTime() - previousMessageCreatedAt.getTime() <
@@ -75,11 +92,15 @@ export default function Message({ message, previousMessage }: MessageProps) {
       <div className="grid gap-1 text-sm">
         <div className="flex items-center gap-1 font-medium text-primary">
           <div className="mt-[-1px]">
-            <UserPopoverCard userId={userId} side="top">
-              <Button variant={"link"} className="m-0 inline border-none p-0">
-                {effectiveDisplayName}
-              </Button>
-            </UserPopoverCard>
+            {userId ? (
+              <UserPopoverCard userId={userId} side="top">
+                <Button variant={"link"} className="m-0 inline border-none p-0">
+                  {effectiveDisplayName}
+                </Button>
+              </UserPopoverCard>
+            ) : (
+              effectiveDisplayName
+            )}
           </div>
           <span className="text-xs text-gray-500 dark:text-gray-400">
             {new Date(createdAt).toLocaleTimeString()}

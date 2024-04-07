@@ -31,6 +31,12 @@ CREATE TABLE `conversationMessage` (
 	`conversationId` text NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE `conversationNeedsSummary` (
+	`id` text PRIMARY KEY NOT NULL,
+	`conversationId` text NOT NULL,
+	FOREIGN KEY (`conversationId`) REFERENCES `conversation`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
 CREATE TABLE `conversationSummary` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`channelId` text NOT NULL,
@@ -116,14 +122,16 @@ CREATE TABLE `recurringMeeting` (
 	`deletedAt` integer
 );
 --> statement-breakpoint
-CREATE TABLE `unSummarizedMessage` (
+CREATE TABLE `unGroupedMessage` (
 	`id` text PRIMARY KEY NOT NULL,
-	`messageId` text NOT NULL
+	`messageId` text NOT NULL,
+	FOREIGN KEY (`messageId`) REFERENCES `message`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `user` (
 	`internalId` integer PRIMARY KEY NOT NULL,
 	`userId` text(256) NOT NULL,
+	`discordId` integer,
 	`role` text(256) NOT NULL,
 	`firstName` text(1024),
 	`lastName` text(1024),
@@ -160,6 +168,11 @@ CREATE TABLE `workspaceMember` (
 );
 --> statement-breakpoint
 
+create virtual table vss_summaries using vss0(
+  summary_embedding(384),
+);
+--> statement-breakpoint
+
 CREATE VIRTUAL TABLE user_fts USING fts5(firstName, lastName, fullName, email, content="user", content_rowid="internalId");
 --> statement-breakpoint
 
@@ -179,17 +192,44 @@ CREATE TRIGGER user_au AFTER UPDATE ON user BEGIN
 END;
 --> statement-breakpoint
 
+CREATE TRIGGER after_message_insert
+AFTER INSERT ON `message`
+FOR EACH ROW
+BEGIN
+    INSERT OR IGNORE INTO `unGroupedMessage` (`messageId`)
+    SELECT NEW.`id`;
+END;
+--> statement-breakpoint
 
-create virtual table vss_summaries using vss0(
-  summary_embedding(384),
-);
+CREATE TRIGGER after_message_update
+AFTER UPDATE ON `message`
+FOR EACH ROW
+BEGIN
+
+    -- Insert into unGroupedMessage if not exists
+    INSERT OR IGNORE INTO `unGroupedMessage` (`messageId`)
+    SELECT NEW.`id`;
+   
+
+    -- Add the conversation to conversationNeedsSummary
+    -- We do not need insert into conversationNeedsSummary if the conversation already exists already exists
+    INSERT OR IGNORE INTO `conversationNeedsSummary` (`conversationId`)
+    SELECT `conversationId` FROM `conversationMessage` WHERE `messageId` = OLD.`id`;
+
+    -- Remove from conversationMessage
+    DELETE FROM `conversationMessage` WHERE `messageId` = OLD.`id`;
+
+END;
 --> statement-breakpoint
 
 
 CREATE UNIQUE INDEX `channel_workspaceId_slug_unique` ON `channel` (`workspaceId`,`slug`);--> statement-breakpoint
+CREATE UNIQUE INDEX `conversationNeedsSummary_conversationId_unique` ON `conversationNeedsSummary` (`conversationId`);--> statement-breakpoint
 CREATE UNIQUE INDEX `meeting_name_unique` ON `meeting` (`name`);--> statement-breakpoint
 CREATE UNIQUE INDEX `recurringMeeting_name_unique` ON `recurringMeeting` (`name`);--> statement-breakpoint
+CREATE UNIQUE INDEX `unGroupedMessage_messageId_unique` ON `unGroupedMessage` (`messageId`);--> statement-breakpoint
 CREATE UNIQUE INDEX `user_userId_unique` ON `user` (`userId`);--> statement-breakpoint
+CREATE UNIQUE INDEX `user_discordId_unique` ON `user` (`discordId`);--> statement-breakpoint
 CREATE UNIQUE INDEX `user_email_unique` ON `user` (`email`);--> statement-breakpoint
 CREATE INDEX `email_idx` ON `user` (`email`);--> statement-breakpoint
 CREATE INDEX `userId_idx` ON `user` (`userId`);--> statement-breakpoint
