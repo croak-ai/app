@@ -49,7 +49,7 @@ export default function MeetingList({
                   <div className="font-semibold">{meeting.meeting.name}</div>
                   <div className="text-xs">
                     {formatDistanceToNow(
-                      new Date(meeting.meeting.scheduledStart),
+                      new Date(meeting.meeting.scheduledStart * 1000),
                       {
                         addSuffix: true,
                       },
@@ -62,8 +62,11 @@ export default function MeetingList({
               </div>
               <div className="line-clamp-2 text-xs text-muted-foreground">
                 Scheduled:{" "}
-                {new Date(meeting.meeting.scheduledStart).toLocaleString()} -{" "}
-                {new Date(meeting.meeting.scheduledEnd).toLocaleString()}
+                {new Date(
+                  meeting.meeting.scheduledStart * 1000,
+                ).toLocaleString()}{" "}
+                -{" "}
+                {new Date(meeting.meeting.scheduledEnd * 1000).toLocaleString()}
               </div>
               <div className="flex items-center gap-2">
                 {meeting.meetingMember.bIsRequiredToAttend === 1 && (

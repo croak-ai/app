@@ -68,7 +68,7 @@ export const createMessage = router({
       ////////////////////////////////////////////////////////
       // Create the message
 
-      const currentTime = Date.now();
+      const currentTime = Date.now() / 1000;
 
       const [newMessageResult] = await ctx.db
         .insert(message)
@@ -76,8 +76,6 @@ export const createMessage = router({
           userId: ctx.auth.userId,
           message: input.messageContent,
           channelId: input.channelId,
-          createdAt: currentTime,
-          updatedAt: currentTime,
         })
         .returning();
 

@@ -59,8 +59,6 @@ export const clerkSync = async ({
           userId: userData.userId,
           role: membership.role as string, // Assuming role is always present and can be cast to string
           email: userData.identifier,
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
           firstName: userData.firstName,
           lastName: userData.lastName,
           fullName: `${userData.firstName} ${userData.lastName}`,
@@ -82,7 +80,7 @@ export const clerkSync = async ({
             lastName: sql`EXCLUDED.lastName`,
             fullName: sql`EXCLUDED.fullName`,
             imageUrl: sql`EXCLUDED.imageUrl`,
-            updatedAt: Date.now(),
+            updatedAt: Date.now() / 1000,
           },
         });
       totalInsertedRows += result.rowsAffected;

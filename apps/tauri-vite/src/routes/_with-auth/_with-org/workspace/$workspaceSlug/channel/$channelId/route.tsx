@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import ChatBoxProvider from "./-components/chat-box-provider";
 import ChatBox from "./-components/chat-box";
 import { RouterInput } from "@/utils/trpc";
-import Spinner from "@/components/Spinner";
 
 type Cursor = RouterInput["getMessages"]["getMessages"]["cursor"];
 
@@ -27,7 +26,7 @@ function Channel() {
 
   let initialCursor: Cursor = {
     id: "0",
-    createdAt: 0,
+    createdAt: new Date(),
     direction: "older",
     includeCursorInResult: true,
   };
@@ -35,7 +34,7 @@ function Channel() {
   if (newestMessage) {
     initialCursor = {
       id: newestMessage.message.message.id.toString(),
-      createdAt: newestMessage.message.message.createdAt,
+      createdAt: new Date(newestMessage.message.message.createdAt * 1000),
       direction: "older",
       includeCursorInResult: true,
     };

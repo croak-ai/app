@@ -48,8 +48,8 @@ export async function createOrRetrieveAssistant() {
             Sometimes you may not know exactly how to write the query, in this case try your best by searching through data that might have what the user is asking for.
             Typically, this looks like searching through messages, but using joins to narrow down the messages to query for.
 
-            In the database, dates are stored in UNIX epoch in milliseconds, however strftime gets UNIX epoch in seconds so you will need to multiply by 1000. For example: (strftime('%s', 'now') + 0) * 1000;
-            Also, if the user asks for a date the query needs to be in a range, so you will need two where clauses for every SQL query that interacts with dates.
+            In the database, dates are stored in UNIX epoch in seconds, you can use strftime('%s', 'now'); to get the current time.
+            Also, if the user asks for information involving dates you will likely need a range of dates. 
 
             Be extremely generous with the queries. We allow a limit of 10000 rows. However, if you think the query doesn't need it you can lower the limit.
 

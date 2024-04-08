@@ -38,10 +38,8 @@ export const createMeeting = router({
       const newMeeting: newMeetingType = {
         name: input.zName,
         description: input.zDescription,
-        scheduledStart: input.zScheduledStart.getTime(),
-        scheduledEnd: input.zScheduledEnd.getTime(),
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
+        scheduledStart: input.zScheduledStart.getTime() / 1000,
+        scheduledEnd: input.zScheduledEnd.getTime() / 1000,
       };
 
       const newMeetingRes = await ctx.db

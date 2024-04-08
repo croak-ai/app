@@ -55,8 +55,10 @@ export default function Message({
     previousMessageUserId.userId &&
     previousMessageUserId.userId === userId
   ) {
-    const previousMessageCreatedAt = new Date(previousMessageUserId.createdAt);
-    const currentMessageCreatedAt = new Date(createdAt);
+    const previousMessageCreatedAt = new Date(
+      previousMessageUserId.createdAt * 1000,
+    );
+    const currentMessageCreatedAt = new Date(createdAt * 1000);
     if (
       currentMessageCreatedAt.getTime() - previousMessageCreatedAt.getTime() <
       3 * 60 * 1000
@@ -103,7 +105,7 @@ export default function Message({
             )}
           </div>
           <span className="text-xs text-gray-500 dark:text-gray-400">
-            {new Date(createdAt).toLocaleTimeString()}
+            {new Date(createdAt * 1000).toLocaleTimeString()}
           </span>
         </div>
         <div className={opacity}>{content}</div>

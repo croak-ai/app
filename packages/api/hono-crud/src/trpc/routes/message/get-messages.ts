@@ -4,7 +4,7 @@ import { message, user } from "@acme/db/schema/tenant";
 import { asc, desc, eq, and, gt, lt, or, lte, gte } from "drizzle-orm";
 
 const zCursor = z.object({
-  createdAt: z.number(),
+  createdAt: z.date(),
   id: z.string(),
   direction: z.enum(["older", "newer"]),
   includeCursorInResult: z.boolean().optional(),
@@ -44,14 +44,17 @@ export const getMessages = router({
         .leftJoin(user, eq(user.userId, message.userId));
 
       const { createdAt, id, direction, includeCursorInResult } = cursor;
+
+      const createdAtEpoch = createdAt.getTime() / 1000;
+
       if (direction === "older") {
         queryBuilder = queryBuilder
           .where(
             and(
               eq(message.channelId, channelId),
               or(
-                lt(message.createdAt, createdAt),
-                and(lte(message.createdAt, createdAt), lt(message.id, id)),
+                lt(message.createdAt, createdAtEpoch),
+                and(lte(message.createdAt, createdAtEpoch), lt(message.id, id)),
                 includeCursorInResult ? eq(message.id, id) : undefined,
               ),
             ),
@@ -65,8 +68,8 @@ export const getMessages = router({
             and(
               eq(message.channelId, channelId),
               or(
-                gt(message.createdAt, createdAt),
-                and(gte(message.createdAt, createdAt), gt(message.id, id)),
+                gt(message.createdAt, createdAtEpoch),
+                and(gte(message.createdAt, createdAtEpoch), gt(message.id, id)),
                 includeCursorInResult ? eq(message.id, id) : undefined,
               ),
             ),
@@ -123,7 +126,7 @@ export const getMessages = router({
       }
 
       newerCursor = {
-        createdAt: firstMessage.message.createdAt,
+        createdAt: new Date(firstMessage.message.createdAt * 1000), // Convert seconds to milliseconds
         id: firstMessage.message.id.toString(),
         direction: "newer",
       };
@@ -137,7 +140,7 @@ export const getMessages = router({
       }
 
       olderCursor = {
-        createdAt: lastMessage.message.createdAt,
+        createdAt: new Date(lastMessage.message.createdAt * 1000), // Convert seconds to milliseconds
         id: lastMessage.message.id.toString(),
         direction: "older",
       };

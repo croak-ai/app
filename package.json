@@ -10,6 +10,7 @@
     "clean:workspaces": "turbo clean",
     "db:cli": "pnpm -F db cli",
     "db:generate": "pnpm -F db generate",
+    "db:discord": "pnpm -F db discord",
     "dev": "turbo dev --parallel",
     "format": "prettier --write \"**/*.{js,cjs,mjs,ts,tsx,md,json}\" --ignore-path .gitignore",
     "lint": "turbo lint && manypkg check",

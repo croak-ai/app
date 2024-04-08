@@ -60,7 +60,7 @@ interface DiscordData {
 const generateInserts = (discordData: DiscordData) => {
   const inserts = discordData.messages
     .map((message) => {
-      const timestamp = new Date(message.timestamp).getTime();
+      const timestamp = new Date(message.timestamp).getTime() / 1000;
       // Escape single quotes by replacing them with two single quotes
       const escapedContent = message.content.replace(/'/g, "''");
       // Escape new lines by replacing them with \n
@@ -74,14 +74,35 @@ const generateInserts = (discordData: DiscordData) => {
   return inserts;
 };
 
+const generateUpdates = (discordData: DiscordData) => {
+  const uniqueUserIds = [
+    ...new Set(discordData.messages.map((message) => message.author.id)),
+  ];
+  const updates = uniqueUserIds
+    .map((userId) => {
+      const userName = discordData.messages.find(
+        (message) => message.author.id === userId,
+      )?.author.name;
+      return `-- This user's name is ${userName}\nUPDATE message SET userId = 'userId-here' WHERE userId = '${userId}';\n`;
+    })
+    .join("");
+
+  return `-- Update channelId for all messages\nUPDATE message SET channelId = 'channelId-here' WHERE channelId = '${discordData.channel.id}';\n\n${updates}`;
+};
+
 const discordDataPath = path.join(__dirname, "discord-data.json");
 const discordData: DiscordData = JSON.parse(
   fs.readFileSync(discordDataPath, "utf8"),
 );
 
 const inserts = generateInserts(discordData);
+const updates = generateUpdates(discordData);
 
 const insertsFilePath = path.join(__dirname, "inserts.sql");
 fs.writeFileSync(insertsFilePath, inserts);
 
+const updatesFilePath = path.join(__dirname, "updates.sql");
+fs.writeFileSync(updatesFilePath, updates);
+
 console.log(`Generated inserts.sql file at ${insertsFilePath}`);
+console.log(`Generated updates.sql file at ${updatesFilePath}`);

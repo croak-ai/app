@@ -3,8 +3,8 @@ CREATE TABLE `assistantThread` (
 	`userId` text(256) NOT NULL,
 	`threadId` text(256) NOT NULL,
 	`preview` text(256) NOT NULL,
-	`createdAt` integer NOT NULL,
-	`updatedAt` integer NOT NULL
+	`createdAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
+	`updatedAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE `channel` (
@@ -13,27 +13,28 @@ CREATE TABLE `channel` (
 	`description` text(512) NOT NULL,
 	`workspaceId` text NOT NULL,
 	`channelType` text(256) NOT NULL,
-	`createdAt` integer NOT NULL,
-	`updatedAt` integer NOT NULL,
+	`createdAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
+	`updatedAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
 	`deletedAt` integer
 );
 --> statement-breakpoint
 CREATE TABLE `conversation` (
 	`id` text PRIMARY KEY NOT NULL,
 	`channelId` text NOT NULL,
-	`createdAt` integer NOT NULL,
-	`updatedAt` integer NOT NULL
+	`createdAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
+	`updatedAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE `conversationMessage` (
 	`id` text PRIMARY KEY NOT NULL,
 	`messageId` text NOT NULL,
-	`conversationId` text NOT NULL
+	`conversationId` text NOT NULL,
+	`createdAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
+	`updatedAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE `conversationNeedsSummary` (
-	`id` text PRIMARY KEY NOT NULL,
-	`conversationId` text NOT NULL,
+	`conversationId` text PRIMARY KEY NOT NULL,
 	FOREIGN KEY (`conversationId`) REFERENCES `conversation`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
@@ -43,16 +44,16 @@ CREATE TABLE `conversationSummary` (
 	`conversationId` text NOT NULL,
 	`summaryText` text(500) NOT NULL,
 	`summaryEmbedding` text NOT NULL,
-	`createdAt` integer NOT NULL,
-	`updatedAt` integer NOT NULL
+	`createdAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
+	`updatedAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE `conversationSummaryRef` (
 	`id` text PRIMARY KEY NOT NULL,
 	`userId` text NOT NULL,
 	`conversationSummaryId` integer NOT NULL,
-	`createdAt` integer NOT NULL,
-	`updatedAt` integer NOT NULL
+	`createdAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
+	`updatedAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE `meeting` (
@@ -64,8 +65,8 @@ CREATE TABLE `meeting` (
 	`scheduledEndAt` integer NOT NULL,
 	`startedAt` integer,
 	`endedAt` integer,
-	`createdAt` integer NOT NULL,
-	`updatedAt` integer NOT NULL,
+	`createdAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
+	`updatedAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
 	`deletedAt` integer
 );
 --> statement-breakpoint
@@ -75,8 +76,8 @@ CREATE TABLE `meetingMember` (
 	`bIsRequiredToAttend` integer DEFAULT 1 NOT NULL,
 	`meetingId` text NOT NULL,
 	`userId` text NOT NULL,
-	`createdAt` integer NOT NULL,
-	`updatedAt` integer NOT NULL,
+	`createdAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
+	`updatedAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
 	`deletedAt` integer
 );
 --> statement-breakpoint
@@ -85,8 +86,8 @@ CREATE TABLE `meetingMessage` (
 	`meetingId` text NOT NULL,
 	`userId` text NOT NULL,
 	`message` text(60000) NOT NULL,
-	`createdAt` integer NOT NULL,
-	`updatedAt` integer NOT NULL,
+	`createdAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
+	`updatedAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
 	`deletedAt` integer
 );
 --> statement-breakpoint
@@ -95,8 +96,8 @@ CREATE TABLE `meetingTranscriptedMessage` (
 	`meetingId` text NOT NULL,
 	`userId` text NOT NULL,
 	`message` text(60000) NOT NULL,
-	`createdAt` integer NOT NULL,
-	`updatedAt` integer NOT NULL,
+	`createdAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
+	`updatedAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
 	`deletedAt` integer
 );
 --> statement-breakpoint
@@ -105,8 +106,8 @@ CREATE TABLE `message` (
 	`channelId` text NOT NULL,
 	`userId` text NOT NULL,
 	`message` text(60000) NOT NULL,
-	`createdAt` integer NOT NULL,
-	`updatedAt` integer NOT NULL,
+	`createdAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
+	`updatedAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
 	`deletedAt` integer
 );
 --> statement-breakpoint
@@ -117,14 +118,13 @@ CREATE TABLE `recurringMeeting` (
 	`timeOfDay` integer,
 	`durationInMinutes` integer NOT NULL,
 	`until` integer,
-	`createdAt` integer NOT NULL,
-	`updatedAt` integer NOT NULL,
+	`createdAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
+	`updatedAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
 	`deletedAt` integer
 );
 --> statement-breakpoint
 CREATE TABLE `unGroupedMessage` (
-	`id` text PRIMARY KEY NOT NULL,
-	`messageId` text NOT NULL,
+	`messageId` text PRIMARY KEY NOT NULL,
 	FOREIGN KEY (`messageId`) REFERENCES `message`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
@@ -141,8 +141,8 @@ CREATE TABLE `user` (
 	`lastKnownStatus` text,
 	`lastKnownStatusConfirmedAt` integer,
 	`lastKnownStatusSwitchedAt` integer,
-	`createdAt` integer NOT NULL,
-	`updatedAt` integer NOT NULL
+	`createdAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
+	`updatedAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE `workspace` (
@@ -150,8 +150,8 @@ CREATE TABLE `workspace` (
 	`name` text(256) NOT NULL,
 	`slug` text(256) NOT NULL,
 	`description` text(512) NOT NULL,
-	`createdAt` integer NOT NULL,
-	`updatedAt` integer NOT NULL,
+	`createdAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
+	`updatedAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
 	`deletedAt` integer
 );
 --> statement-breakpoint
@@ -162,8 +162,8 @@ CREATE TABLE `workspaceMember` (
 	`bCanManageChannels` integer DEFAULT 0,
 	`bCanManageWorkspaceMembers` integer DEFAULT 0,
 	`bCanManageWorkspaceSettings` integer DEFAULT 0,
-	`createdAt` integer NOT NULL,
-	`updatedAt` integer NOT NULL,
+	`createdAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
+	`updatedAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
 	`deletedAt` integer
 );
 --> statement-breakpoint
@@ -222,12 +222,9 @@ BEGIN
 END;
 --> statement-breakpoint
 
-
 CREATE UNIQUE INDEX `channel_workspaceId_slug_unique` ON `channel` (`workspaceId`,`slug`);--> statement-breakpoint
-CREATE UNIQUE INDEX `conversationNeedsSummary_conversationId_unique` ON `conversationNeedsSummary` (`conversationId`);--> statement-breakpoint
 CREATE UNIQUE INDEX `meeting_name_unique` ON `meeting` (`name`);--> statement-breakpoint
 CREATE UNIQUE INDEX `recurringMeeting_name_unique` ON `recurringMeeting` (`name`);--> statement-breakpoint
-CREATE UNIQUE INDEX `unGroupedMessage_messageId_unique` ON `unGroupedMessage` (`messageId`);--> statement-breakpoint
 CREATE UNIQUE INDEX `user_userId_unique` ON `user` (`userId`);--> statement-breakpoint
 CREATE UNIQUE INDEX `user_discordId_unique` ON `user` (`discordId`);--> statement-breakpoint
 CREATE UNIQUE INDEX `user_email_unique` ON `user` (`email`);--> statement-breakpoint

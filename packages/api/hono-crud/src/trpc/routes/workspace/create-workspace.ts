@@ -30,8 +30,6 @@ export const createWorkspace = router({
         name: input.zName,
         description: input.zDescription,
         slug: input.zSlug,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
       };
 
       const newWorkspaceRes = await ctx.db
@@ -57,8 +55,6 @@ export const createWorkspace = router({
         bCanManageChannels: 1,
         bCanManageWorkspaceMembers: 1,
         bCanManageWorkspaceSettings: 1,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
       });
 
       return newlyCreatedWorkspace;
