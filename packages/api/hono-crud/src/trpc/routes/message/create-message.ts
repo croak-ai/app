@@ -21,15 +21,6 @@ export const zCreateMessage = z.object({
   messageContent: z.string().min(2).max(60000),
 });
 
-export type DBMessage = {
-  id: string;
-  userId: string;
-  message: string;
-  channelId: string;
-  createdAt: number;
-  updatedAt: number;
-};
-
 export const createMessage = router({
   createMessage: protectedProcedureWithOrgDB
     .input(zCreateMessage)

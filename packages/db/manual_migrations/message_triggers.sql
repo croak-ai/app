@@ -16,7 +16,6 @@ BEGIN
     INSERT OR IGNORE INTO `unGroupedMessage` (`messageId`)
     SELECT NEW.`id`;
    
-
     -- Add the conversation to conversationNeedsSummary
     -- We do not need insert into conversationNeedsSummary if the conversation already exists already exists
     INSERT OR IGNORE INTO `conversationNeedsSummary` (`conversationId`)

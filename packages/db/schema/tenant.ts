@@ -198,8 +198,12 @@ export const conversationNeedingSummary = sqliteTable(
 
 export const conversationMessage = sqliteTable("conversationMessage", {
   id: text("id").$defaultFn(createId).primaryKey(),
-  messageId: text("messageId").notNull(),
-  conversationId: text("conversationId").notNull(),
+  messageId: text("messageId")
+    .notNull()
+    .references(() => message.id, { onDelete: "cascade" }),
+  conversationId: text("conversationId")
+    .notNull()
+    .references(() => conversation.id, { onDelete: "cascade" }),
   createdAt: integer("createdAt")
     .notNull()
     .default(sql`(strftime('%s', 'now'))`),
