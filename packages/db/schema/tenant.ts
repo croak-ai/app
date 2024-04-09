@@ -9,6 +9,7 @@ import {
 import { createId } from "@paralleldrive/cuid2";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
+import { sql } from "drizzle-orm";
 
 export const LastKnownStatusEnum = z.enum([
   "ONLINE",
@@ -18,12 +19,12 @@ export const LastKnownStatusEnum = z.enum([
   "INVISIBLE",
   "MOBILE_ONLINE",
 ]);
-
 export const user = sqliteTable(
   "user",
   {
     internalId: integer("internalId").primaryKey(),
     userId: text("userId", { length: 256 }).notNull().unique(),
+    discordUserId: integer("discordId").unique(),
     role: text("role", { length: 256 }).notNull(),
     firstName: text("firstName", { length: 1024 }),
     lastName: text("lastName", { length: 1024 }),
@@ -35,8 +36,12 @@ export const user = sqliteTable(
     }),
     lastKnownStatusConfirmedAt: integer("lastKnownStatusConfirmedAt"),
     lastKnownStatusSwitchedAt: integer("lastKnownStatusSwitchedAt"),
-    createdAt: integer("createdAt").notNull(),
-    updatedAt: integer("updatedAt").notNull(),
+    createdAt: integer("createdAt")
+      .notNull()
+      .default(sql`(strftime('%s', 'now'))`),
+    updatedAt: integer("updatedAt")
+      .notNull()
+      .default(sql`(strftime('%s', 'now'))`),
   },
   (table) => {
     return {
@@ -53,8 +58,12 @@ export const workspace = sqliteTable(
     name: text("name", { length: 256 }).notNull(),
     slug: text("slug", { length: 256 }).notNull().unique(),
     description: text("description", { length: 512 }).notNull(),
-    createdAt: integer("createdAt").notNull(),
-    updatedAt: integer("updatedAt").notNull(),
+    createdAt: integer("createdAt")
+      .notNull()
+      .default(sql`(strftime('%s', 'now'))`),
+    updatedAt: integer("updatedAt")
+      .notNull()
+      .default(sql`(strftime('%s', 'now'))`),
     deletedAt: integer("deletedAt"),
   },
   (table) => {
@@ -71,8 +80,12 @@ export const channel = sqliteTable(
     description: text("description", { length: 512 }).notNull(),
     workspaceId: text("workspaceId").notNull(),
     channelType: text("channelType", { length: 256 }).notNull(),
-    createdAt: integer("createdAt").notNull(),
-    updatedAt: integer("updatedAt").notNull(),
+    createdAt: integer("createdAt")
+      .notNull()
+      .default(sql`(strftime('%s', 'now'))`),
+    updatedAt: integer("updatedAt")
+      .notNull()
+      .default(sql`(strftime('%s', 'now'))`),
     deletedAt: integer("deletedAt"),
   },
   (t) => ({
@@ -89,8 +102,12 @@ export const workspaceMember = sqliteTable("workspaceMember", {
   bCanManageWorkspaceSettings: integer("bCanManageWorkspaceSettings").default(
     0,
   ),
-  createdAt: integer("createdAt").notNull(),
-  updatedAt: integer("updatedAt").notNull(),
+  createdAt: integer("createdAt")
+    .notNull()
+    .default(sql`(strftime('%s', 'now'))`),
+  updatedAt: integer("updatedAt")
+    .notNull()
+    .default(sql`(strftime('%s', 'now'))`),
   deletedAt: integer("deletedAt"),
 });
 
@@ -99,8 +116,12 @@ export const assistantThread = sqliteTable("assistantThread", {
   userId: text("userId", { length: 256 }).notNull(),
   threadId: text("threadId", { length: 256 }).notNull(),
   preview: text("preview", { length: 256 }).notNull(),
-  createdAt: integer("createdAt").notNull(),
-  updatedAt: integer("updatedAt").notNull(),
+  createdAt: integer("createdAt")
+    .notNull()
+    .default(sql`(strftime('%s', 'now'))`),
+  updatedAt: integer("updatedAt")
+    .notNull()
+    .default(sql`(strftime('%s', 'now'))`),
 });
 
 export const message = sqliteTable("message", {
@@ -108,14 +129,13 @@ export const message = sqliteTable("message", {
   channelId: text("channelId").notNull(),
   userId: text("userId").notNull(),
   message: text("message", { length: 60000 }).notNull(),
-  createdAt: integer("createdAt").notNull(),
-  updatedAt: integer("updatedAt").notNull(),
+  createdAt: integer("createdAt")
+    .notNull()
+    .default(sql`(strftime('%s', 'now'))`),
+  updatedAt: integer("updatedAt")
+    .notNull()
+    .default(sql`(strftime('%s', 'now'))`),
   deletedAt: integer("deletedAt"),
-});
-
-export const unSummarizedMessage = sqliteTable("unSummarizedMessage", {
-  id: text("id").$defaultFn(createId).primaryKey(),
-  messageId: text("messageId").notNull(),
 });
 
 export const conversationSummary = sqliteTable("conversationSummary", {
@@ -124,30 +144,80 @@ export const conversationSummary = sqliteTable("conversationSummary", {
   conversationId: text("conversationId").notNull(),
   summaryText: text("summaryText", { length: 500 }).notNull(),
   summaryEmbedding: text("summaryEmbedding").notNull(),
-  createdAt: integer("createdAt").notNull(),
-  updatedAt: integer("updatedAt").notNull(),
+  createdAt: integer("createdAt")
+    .notNull()
+    .default(sql`(strftime('%s', 'now'))`),
+  updatedAt: integer("updatedAt")
+    .notNull()
+    .default(sql`(strftime('%s', 'now'))`),
 });
 
 export const conversationSummaryRef = sqliteTable("conversationSummaryRef", {
   id: text("id").$defaultFn(createId).primaryKey(),
   userId: text("userId").notNull(),
   conversationSummaryId: integer("conversationSummaryId").notNull(),
-  createdAt: integer("createdAt").notNull(),
-  updatedAt: integer("updatedAt").notNull(),
+  createdAt: integer("createdAt")
+    .notNull()
+    .default(sql`(strftime('%s', 'now'))`),
+  updatedAt: integer("updatedAt")
+    .notNull()
+    .default(sql`(strftime('%s', 'now'))`),
 });
 
 export const conversation = sqliteTable("conversation", {
   id: text("id").$defaultFn(createId).primaryKey(),
   channelId: text("channelId").notNull(),
-  createdAt: integer("createdAt").notNull(),
-  updatedAt: integer("updatedAt").notNull(),
+  summary: text("summary", { length: 10000 }),
+  createdAt: integer("createdAt")
+    .notNull()
+    .default(sql`(strftime('%s', 'now'))`),
+  updatedAt: integer("updatedAt")
+    .notNull()
+    .default(sql`(strftime('%s', 'now'))`),
 });
 
-export const conversationMessage = sqliteTable("conversationMessage", {
-  id: text("id").$defaultFn(createId).primaryKey(),
-  messageId: text("messageId").notNull(),
-  conversationId: text("conversationId").notNull(),
+export const unGroupedMessage = sqliteTable("unGroupedMessage", {
+  messageId: text("messageId")
+    .references(() => message.id, { onDelete: "cascade" })
+    .primaryKey(),
+  createdAt: integer("createdAt")
+    .notNull()
+    .default(sql`(strftime('%s', 'now'))`),
 });
+
+export const conversationNeedingSummary = sqliteTable(
+  "conversationNeedsSummary",
+  {
+    conversationId: text("conversationId")
+      .references(() => conversation.id, { onDelete: "cascade" })
+      .primaryKey(),
+    createdAt: integer("createdAt")
+      .notNull()
+      .default(sql`(strftime('%s', 'now'))`),
+  },
+);
+
+export const conversationMessage = sqliteTable(
+  "conversationMessage",
+  {
+    id: text("id").$defaultFn(createId).primaryKey(),
+    messageId: text("messageId")
+      .notNull()
+      .references(() => message.id, { onDelete: "cascade" }),
+    conversationId: text("conversationId")
+      .notNull()
+      .references(() => conversation.id, { onDelete: "cascade" }),
+    createdAt: integer("createdAt")
+      .notNull()
+      .default(sql`(strftime('%s', 'now'))`),
+    updatedAt: integer("updatedAt")
+      .notNull()
+      .default(sql`(strftime('%s', 'now'))`),
+  },
+  (t) => ({
+    unq: unique().on(t.messageId, t.conversationId),
+  }),
+);
 
 export const meeting = sqliteTable("meeting", {
   id: text("id").$defaultFn(createId).primaryKey(),
@@ -158,8 +228,12 @@ export const meeting = sqliteTable("meeting", {
   scheduledEnd: integer("scheduledEndAt").notNull(),
   startedAt: integer("startedAt"),
   endedAt: integer("endedAt"),
-  createdAt: integer("createdAt").notNull(),
-  updatedAt: integer("updatedAt").notNull(),
+  createdAt: integer("createdAt")
+    .notNull()
+    .default(sql`(strftime('%s', 'now'))`),
+  updatedAt: integer("updatedAt")
+    .notNull()
+    .default(sql`(strftime('%s', 'now'))`),
   deletedAt: integer("deletedAt"),
 });
 
@@ -170,8 +244,12 @@ export const recurringMeeting = sqliteTable("recurringMeeting", {
   scheduledStart: integer("timeOfDay"), // integer from 0 to 2359, applicable if daily
   scheduledDurationInMinutes: integer("durationInMinutes").notNull(),
   until: integer("until"), // Unix timestamp indicating when the recurrence should end
-  createdAt: integer("createdAt").notNull(),
-  updatedAt: integer("updatedAt").notNull(),
+  createdAt: integer("createdAt")
+    .notNull()
+    .default(sql`(strftime('%s', 'now'))`),
+  updatedAt: integer("updatedAt")
+    .notNull()
+    .default(sql`(strftime('%s', 'now'))`),
   deletedAt: integer("deletedAt"),
 });
 
@@ -180,8 +258,12 @@ export const meetingMessage = sqliteTable("meetingMessage", {
   meetingId: text("meetingId").notNull(),
   userId: text("userId").notNull(),
   message: text("message", { length: 60000 }).notNull(),
-  createdAt: integer("createdAt").notNull(),
-  updatedAt: integer("updatedAt").notNull(),
+  createdAt: integer("createdAt")
+    .notNull()
+    .default(sql`(strftime('%s', 'now'))`),
+  updatedAt: integer("updatedAt")
+    .notNull()
+    .default(sql`(strftime('%s', 'now'))`),
   deletedAt: integer("deletedAt"),
 });
 
@@ -192,8 +274,12 @@ export const meetingTranscriptedMessage = sqliteTable(
     meetingId: text("meetingId").notNull(),
     userId: text("userId").notNull(),
     message: text("message", { length: 60000 }).notNull(),
-    createdAt: integer("createdAt").notNull(),
-    updatedAt: integer("updatedAt").notNull(),
+    createdAt: integer("createdAt")
+      .notNull()
+      .default(sql`(strftime('%s', 'now'))`),
+    updatedAt: integer("updatedAt")
+      .notNull()
+      .default(sql`(strftime('%s', 'now'))`),
     deletedAt: integer("deletedAt"),
   },
 );
@@ -204,8 +290,12 @@ export const meetingMember = sqliteTable("meetingMember", {
   bIsRequiredToAttend: integer("bIsRequiredToAttend").notNull().default(1),
   meetingId: text("meetingId").notNull(),
   userId: text("userId").notNull(),
-  createdAt: integer("createdAt").notNull(),
-  updatedAt: integer("updatedAt").notNull(),
+  createdAt: integer("createdAt")
+    .notNull()
+    .default(sql`(strftime('%s', 'now'))`),
+  updatedAt: integer("updatedAt")
+    .notNull()
+    .default(sql`(strftime('%s', 'now'))`),
   deletedAt: integer("deletedAt"),
 });
 

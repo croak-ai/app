@@ -1,0 +1,2 @@
+ALTER TABLE conversationNeedsSummary ADD `createdAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL;--> statement-breakpoint
+ALTER TABLE unGroupedMessage ADD `createdAt` integer DEFAULT (strftime('%s', 'now')) NOT NULL;

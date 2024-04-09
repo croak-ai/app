@@ -109,8 +109,8 @@ export default function ChatBox({
         message: {
           channelId: opts.channelId,
           userId: user?.id ?? "unknown",
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
+          createdAt: Date.now() / 1000,
+          updatedAt: Date.now() / 1000,
           id: Math.random().toString(),
           deletedAt: null,
           message: opts.messageContent,

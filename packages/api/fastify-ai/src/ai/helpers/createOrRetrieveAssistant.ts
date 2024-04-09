@@ -24,215 +24,17 @@ export async function createOrRetrieveAssistant() {
     //In the future we can pull this config from a database.
     const assistantConfig: AssistantCreateParams = {
       name: "Managerial Chat Bot",
-      instructions: `You are a project managers assistant tasked with gathering the information needed for a project manager.
-      to do their job effectively. You will be asked questions about the application and user activities on the application.
+      instructions: `
+      You are an assistant for an app called "croak". Croak is just like Slack, users message and chat with each other.
 
-      Your main task is to find the information needed to answer the questions asked by the project manager.
+      You will be asked questions from users on croak. You will need to find the information needed to answer the questions asked by the user.
 
-      ALWAYS format ALL of your responses in Markdown format. Be sure to provide line breaks in Markdown format.
+      You have access to the entire database of croak, including all messages, channels, users, and workspaces.
 
-      ALWAYS use only ONE function call to grab the data you require.
+      If you can't answer the question ask the user for more information needed to answer the question. Or simply say "I don't know".
 
-      Provided below is the database schema for the application.
-      
-      export const user = sqliteTable(
-        "user",
-        {
-          internalId: integer("internalId").primaryKey(),
-          userId: text("userId", { length: 256 }).notNull().unique(),
-          role: text("role", { length: 256 }).notNull(),
-          firstName: text("firstName", { length: 1024 }),
-          lastName: text("lastName", { length: 1024 }),
-          fullName: text("fullName", { length: 1024 }),
-          email: text("email", { length: 256 }).notNull().unique(),
-          imageUrl: text("imageUrl", { length: 10000 }),
-          createdAt: integer("createdAt").notNull(),
-          updatedAt: integer("updatedAt").notNull(),
-        },
-        (table) => {
-          return {
-            emailIdx: index("email_idx").on(table.email),
-            userIdIdx: index("userId_idx").on(table.userId),
-          };
-        },
-      );
-      
-      export const workspace = sqliteTable(
-        "workspace",
-        {
-          id: text("id").$defaultFn(createId).primaryKey(),
-          name: text("name", { length: 256 }).notNull(),
-          slug: text("slug", { length: 256 }).notNull().unique(),
-          description: text("description", { length: 512 }).notNull(),
-          createdAt: integer("createdAt").notNull(),
-          updatedAt: integer("updatedAt").notNull(),
-          deletedAt: integer("deletedAt"),
-        },
-        (table) => {
-          return {
-            slugIdx: index("slug_idx").on(table.slug),
-          };
-        },
-      );
-      export const channel = sqliteTable(
-        "channel",
-        {
-          id: text("id").$defaultFn(createId).primaryKey(),
-          slug: text("slug", { length: 256 }).notNull(),
-          description: text("description", { length: 512 }).notNull(),
-          workspaceId: text("workspaceId").notNull(),
-          channelType: text("channelType", { length: 256 }).notNull(),
-          createdAt: integer("createdAt").notNull(),
-          updatedAt: integer("updatedAt").notNull(),
-          deletedAt: integer("deletedAt"),
-        },
-        (t) => ({
-          unq: unique().on(t.workspaceId, t.slug),
-        }),
-      );
-      
-      export const workspaceMember = sqliteTable("workspaceMember", {
-        id: text("id").$defaultFn(createId).primaryKey(),
-        workspaceId: text("workspaceId").notNull(),
-        userId: text("userId").notNull(),
-        bCanManageChannels: integer("bCanManageChannels").default(0),
-        bCanManageWorkspaceMembers: integer("bCanManageWorkspaceMembers").default(0),
-        bCanManageWorkspaceSettings: integer("bCanManageWorkspaceSettings").default(
-          0,
-        ),
-        createdAt: integer("createdAt").notNull(),
-        updatedAt: integer("updatedAt").notNull(),
-        deletedAt: integer("deletedAt"),
-      });
-      
-      export const assistantThread = sqliteTable("assistantThread", {
-        id: text("id").$defaultFn(createId).primaryKey(),
-        userId: text("userId", { length: 256 }).notNull(),
-        threadId: text("threadId", { length: 256 }).notNull(),
-        preview: text("preview", { length: 256 }).notNull(),
-        createdAt: integer("createdAt").notNull(),
-        updatedAt: integer("updatedAt").notNull(),
-      });
-      
-      //Holds all messages sent in the application
-      export const message = sqliteTable("message", {
-        id: text("id").$defaultFn(createId).primaryKey(),
-        channelId: text("channelId").notNull(),
-        userId: text("userId").notNull(),
-        message: text("message", { length: 60000 }).notNull(),
-        createdAt: integer("createdAt").notNull(),
-        updatedAt: integer("updatedAt").notNull(),
-        deletedAt: integer("deletedAt"),
-      });
-      
-      export const unSummarizedMessage = sqliteTable("unSummarizedMessage", {
-        id: text("id").$defaultFn(createId).primaryKey(),
-        messageId: text("messageId").notNull(),
-      });
-      
-      //Summarization of all conversation messages
-      export const conversationSummary = sqliteTable("conversationSummary", {
-        id: integer("id").primaryKey({ autoIncrement: true }),
-        channelId: text("channelId").notNull(),
-        conversationId: text("conversationId").notNull(),
-        summaryText: text("summaryText", { length: 500 }).notNull(),
-        summaryEmbedding: text("summaryEmbedding").notNull(),
-        createdAt: integer("createdAt").notNull(),
-        updatedAt: integer("updatedAt").notNull(),
-      });
-      
-      //Links all users who participated in a conversation to the conversation summary
-      export const conversationSummaryRef = sqliteTable("conversationSummaryRef", {
-        id: text("id").$defaultFn(createId).primaryKey(),
-        userId: text("userId").notNull(),
-        conversationSummaryId: integer("conversationSummaryId").notNull(),
-        createdAt: integer("createdAt").notNull(),
-        updatedAt: integer("updatedAt").notNull(),
-      });
-      
-      //Messages are grouped by ideas and proximity into conversations
-      export const conversation = sqliteTable("conversation", {
-        id: text("id").$defaultFn(createId).primaryKey(),
-        channelId: text("channelId").notNull(),
-        createdAt: integer("createdAt").notNull(),
-        updatedAt: integer("updatedAt").notNull(),
-      });
-      
-      //Links Messages with conversations
-      export const conversationMessage = sqliteTable("conversationMessage", {
-        id: text("id").$defaultFn(createId).primaryKey(),
-        messageId: text("messageId").notNull(),
-        conversationId: text("conversationId").notNull(),
-      });
-      
-      export const meeting = sqliteTable("meeting", {
-        id: text("id").$defaultFn(createId).primaryKey(),
-        name: text("name", { length: 256 }).notNull().unique(),
-        description: text("description", { length: 512 }).notNull(),
-        recurringMeetingId: text("recurringMeetingId"),
-        scheduledStartAt: integer("scheduledStartAt").notNull(),
-        scheduledEndAt: integer("scheduledEndAt").notNull(),
-        startedAt: integer("startedAt"),
-        endedAt: integer("endedAt"),
-        createdAt: integer("createdAt").notNull(),
-        updatedAt: integer("updatedAt").notNull(),
-        deletedAt: integer("deletedAt"),
-      });
-      
-      export const recurringMeeting = sqliteTable("recurringMeeting", {
-        id: text("id").$defaultFn(createId).primaryKey(),
-        name: text("name", { length: 256 }).notNull().unique(),
-        daysOfWeek: text("daysOfWeek"), // "MONDAY", "TUESDAY", "WEDNESDAY", etc., applicable if weekly. Comma-separated for multiple days.
-        scheduledStart: integer("timeOfDay"), // integer from 0 to 2359, applicable if daily
-        scheduledDurationInMinutes: integer("durationInMinutes").notNull(),
-        until: integer("until"), // Unix timestamp indicating when the recurrence should end
-        createdAt: integer("createdAt").notNull(),
-        updatedAt: integer("updatedAt").notNull(),
-        deletedAt: integer("deletedAt"),
-      });
-      
-      //Holds all text messages sent during a meeting
-      export const meetingMessage = sqliteTable("meetingMessage", {
-        id: text("id").$defaultFn(createId).primaryKey(),
-        meetingId: text("meetingId").notNull(),
-        userId: text("userId").notNull(),
-        message: text("message", { length: 60000 }).notNull(),
-        createdAt: integer("createdAt").notNull(),
-        updatedAt: integer("updatedAt").notNull(),
-        deletedAt: integer("deletedAt"),
-      });
-      
-      //Holds all messages transcribed during a meeting
-      export const meetingTranscriptedMessage = sqliteTable(
-        "meetingTranscriptedMessage",
-        {
-          id: text("id").$defaultFn(createId).primaryKey(),
-          meetingId: text("meetingId").notNull(),
-          userId: text("userId").notNull(),
-          message: text("message", { length: 60000 }).notNull(),
-          createdAt: integer("createdAt").notNull(),
-          updatedAt: integer("updatedAt").notNull(),
-          deletedAt: integer("deletedAt"),
-        },
-      );
-      
-      //Links users who participated in the meeting to the meeting
-      export const meetingMember = sqliteTable("meetingMember", {
-        id: text("id").$defaultFn(createId).primaryKey(),
-        bIsHost: integer("bIsHost").notNull().default(0),
-        bIsRequiredToAttend: integer("bIsRequiredToAttend").notNull().default(1),
-        meetingId: text("meetingId").notNull(),
-        userId: text("userId").notNull(),
-        createdAt: integer("createdAt").notNull(),
-        updatedAt: integer("updatedAt").notNull(),
-        deletedAt: integer("deletedAt"),
-      });
-      
-      export const insertRecurringMeetingSchema = createInsertSchema(
-        recurringMeeting,
-        {},
-      );
-      
+      Always format ALL of your responses in Markdown format. Be sure to provide line breaks in Markdown format.
+
       `,
       model: "gpt-4-turbo-preview",
       tools: [
@@ -243,8 +45,120 @@ export async function createOrRetrieveAssistant() {
             description: `ALWAYS Use this function to query the database directly. If a user asks you about things related to the application
             and/or user activities on the application use this function to find information in the database and return it to them. 
 
-            ALWAYS use SQLites datetime function to convert unix dates to human readable format.
-            For example: Thhe UNIX time "1710869357208" will convert to "Tuesday, March 19, 2024 1:29".
+            Sometimes you may not know exactly how to write the query, in this case try your best by searching through data that might have what the user is asking for.
+            Typically, this looks like searching through messages, but using joins to narrow down the messages to query for.
+
+            In the database, dates are stored in UNIX epoch in seconds, you can use strftime('%s', 'now'); to get the current time.
+            Also, if the user asks for information involving dates you will likely need a range of dates. 
+
+            Be extremely generous with the queries. We allow a limit of 10000 rows. However, if you think the query doesn't need it you can lower the limit.
+
+            Database Schema:
+
+                  
+            CREATE TABLE "channel" (
+              "id" text PRIMARY KEY NOT NULL,
+              "slug" text(256) NOT NULL,
+              "description" text(512) NOT NULL,
+              "workspaceId" text NOT NULL,
+              "channelType" text(256) NOT NULL,
+              "createdAt" integer NOT NULL,
+              "updatedAt" integer NOT NULL,
+              "deletedAt" integer
+            );
+            
+            CREATE TABLE "message" (
+              "id" text PRIMARY KEY NOT NULL,
+              "channelId" text NOT NULL,
+              "userId" text NOT NULL,
+              "message" text(60000) NOT NULL,
+              "createdAt" integer NOT NULL,
+              "updatedAt" integer NOT NULL,
+              "deletedAt" integer
+            );
+            
+            CREATE TABLE "user" (
+              "internalId" integer PRIMARY KEY NOT NULL,
+              "userId" text(256) NOT NULL,
+              "role" text(256) NOT NULL,
+              "firstName" text(1024),
+              "lastName" text(1024),
+              "fullName" text(1024),
+              "email" text(256) NOT NULL,
+              "imageUrl" text(10000),
+              "lastKnownStatus" text,
+              "lastKnownStatusConfirmedAt" integer,
+              "lastKnownStatusSwitchedAt" integer,
+              "createdAt" integer NOT NULL,
+              "updatedAt" integer NOT NULL
+            );
+            
+            CREATE TABLE "workspace" (
+              "id" text PRIMARY KEY NOT NULL,
+              "name" text(256) NOT NULL,
+              "slug" text(256) NOT NULL,
+              "description" text(512) NOT NULL,
+              "createdAt" integer NOT NULL,
+              "updatedAt" integer NOT NULL,
+              "deletedAt" integer
+            );
+            
+            CREATE TABLE "workspaceMember" (
+              "id" text PRIMARY KEY NOT NULL,
+              "workspaceId" text NOT NULL,
+              "userId" text NOT NULL,
+              "bCanManageChannels" integer DEFAULT 0,
+              "bCanManageWorkspaceMembers" integer DEFAULT 0,
+              "bCanManageWorkspaceSettings" integer DEFAULT 0,
+              "createdAt" integer NOT NULL,
+              "updatedAt" integer NOT NULL,
+              "deletedAt" integer
+            );
+            
+            
+            CREATE VIRTUAL TABLE user_fts USING fts5(firstName, lastName, fullName, email, content="user", content_rowid="internalId");
+            
+            
+            CREATE TRIGGER user_ai AFTER INSERT ON user BEGIN
+                INSERT INTO user_fts(rowid, firstName, lastName, fullName, email) VALUES (new.internalId, new.firstName, new.lastName, new.fullName, new.email);
+            END;    
+            
+            
+            CREATE TRIGGER user_ad AFTER DELETE ON user BEGIN
+                INSERT INTO user_fts(user_fts, rowid, firstName, lastName, fullName, email) VALUES('delete', old.internalId, old.firstName, old.lastName, old.fullName, old.email);
+            END;
+            
+            
+            CREATE TRIGGER user_au AFTER UPDATE ON user BEGIN
+                INSERT INTO user_fts(user_fts, rowid, firstName, lastName, fullName, email) VALUES('delete', old.internalId, old.firstName, old.lastName, old.fullName, old.email);
+                INSERT INTO user_fts(rowid, firstName, lastName, fullName, email) VALUES (new.internalId, new.firstName, new.lastName, new.fullName, new.email);
+            END;
+            
+            
+            
+            create virtual table vss_summaries using vss0(
+              summary_embedding(384),
+            );
+            
+            
+            
+            CREATE UNIQUE INDEX "channel_workspaceId_slug_unique" ON "channel" ("workspaceId","slug");
+            CREATE UNIQUE INDEX "meeting_name_unique" ON "meeting" ("name");
+            CREATE UNIQUE INDEX "recurringMeeting_name_unique" ON "recurringMeeting" ("name");
+            CREATE UNIQUE INDEX "user_userId_unique" ON "user" ("userId");
+            CREATE UNIQUE INDEX "user_email_unique" ON "user" ("email");
+            CREATE INDEX "email_idx" ON "user" ("email");
+            CREATE INDEX "userId_idx" ON "user" ("userId");
+            CREATE UNIQUE INDEX "workspace_slug_unique" ON "workspace" ("slug");
+            CREATE INDEX "slug_idx" ON "workspace" ("slug");
+            
+            CREATE TABLE "test" (
+              "id" integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+              "name" text(256) NOT NULL
+            );
+            
+            
+            DROP TABLE "test";
         `,
             parameters: {
               type: "object",

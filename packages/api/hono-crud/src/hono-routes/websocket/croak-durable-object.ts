@@ -11,9 +11,11 @@ import type {
   WebSocketMessageType,
 } from "./web-socket-req-messages-types";
 
-import { user, message } from "@acme/db/schema/tenant";
-import { eq } from "drizzle-orm";
+import { user, unGroupedMessage, message } from "@acme/db/schema/tenant";
+import { eq, asc } from "drizzle-orm";
 import { getDbConnection } from "../../functions/db";
+import { SingularMessage, groupMessage } from "./groupMessage";
+import { DBClientType } from "@acme/db";
 
 type UserStatus = {
   status: HeartbeatStatusType;
@@ -21,18 +23,14 @@ type UserStatus = {
 };
 
 export class CroakDurableObject {
-  value: number = 0;
   state: DurableObjectState;
   app: Hono = new Hono();
   connections: Record<string, Record<string, WSContext>> = {}; // userId -> websocketId -> WSContext
   currentStatuses: Record<string, UserStatus> = {}; // Store current status of each user
+  isProcessingMessages: boolean = false;
 
   constructor(state: DurableObjectState, env: Bindings) {
     this.state = state;
-    this.state.blockConcurrencyWhile(async () => {
-      const stored = await this.state.storage?.get<number>("value");
-      this.value = stored || 0;
-    });
     this.app.use(
       "*",
       cors({
@@ -215,17 +213,93 @@ export class CroakDurableObject {
           ws.send(JSON.stringify(newMessageResult));
         });
       });
+
+      return c.text("Message sent to all connections.");
+
+      const { orgId } = newMessageResult;
+
+      const db = await getDbConnection({
+        organizationId: orgId,
+        env,
+      });
+
+      const unGroupedMessages = await db
+        .select({
+          id: message.id,
+          userId: message.userId,
+          channelId: message.channelId,
+          message: message.message,
+          createdAt: message.createdAt,
+          nameOfUser: user.fullName,
+        })
+        .from(unGroupedMessage)
+        .orderBy(asc(message.createdAt))
+        .innerJoin(message, eq(unGroupedMessage.messageId, message.id))
+        .leftJoin(user, eq(message.userId, user.userId)) // This join should allow access to user.fullName
+        .limit(1);
+
+      if (unGroupedMessages.length === 0) {
+        return;
+      }
+
+      const newMessage = unGroupedMessages[0];
+
+      if (!this.isProcessingMessages) {
+        this.processMessages({
+          db,
+          env,
+          newMessage,
+        });
+      }
+
       return c.text("Message sent to all connections.");
     });
+  }
 
-    this.app.get("/ws/decrement", async (c) => {
-      const currentValue = --this.value;
-      await this.state.storage?.put("value", this.value);
-      return c.text(currentValue.toString());
+  async processMessages({
+    db,
+    env,
+    newMessage,
+  }: {
+    db: DBClientType;
+    env: Bindings;
+    newMessage: SingularMessage;
+  }) {
+    this.isProcessingMessages = true;
+
+    await groupMessage({
+      db,
+      env,
+      newMessage,
     });
 
-    this.app.get("/", async (c) => {
-      return c.text(this.value.toString());
+    const unGroupedMessages = await db
+      .select({
+        id: message.id,
+        userId: message.userId,
+        channelId: message.channelId,
+        message: message.message,
+        createdAt: message.createdAt,
+        nameOfUser: user.fullName,
+      })
+      .from(unGroupedMessage)
+      .orderBy(asc(message.createdAt))
+      .innerJoin(message, eq(unGroupedMessage.messageId, message.id))
+      .leftJoin(user, eq(message.userId, user.userId)) // This join should allow access to user.fullName
+      .limit(1);
+
+    if (unGroupedMessages.length === 0) {
+      this.isProcessingMessages = false;
+      return;
+    }
+
+    const updatedNewMessage = unGroupedMessages[0];
+
+    console.log(`Processing message ${updatedNewMessage.id}`);
+    this.processMessages({
+      db,
+      env,
+      newMessage: updatedNewMessage,
     });
   }
 

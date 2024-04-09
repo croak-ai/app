@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "d19e7e5f-f817-4412-ada4-7a440e8aa6c5",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "c5fe6f4f-94e7-4970-b14d-abc0e64b3456",
+  "prevId": "d19e7e5f-f817-4412-ada4-7a440e8aa6c5",
   "tables": {
     "assistantThread": {
       "name": "assistantThread",
@@ -227,6 +227,14 @@
           "primaryKey": true,
           "notNull": true,
           "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%s', 'now'))"
         }
       },
       "indexes": {},
@@ -790,6 +798,14 @@
           "primaryKey": true,
           "notNull": true,
           "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%s', 'now'))"
         }
       },
       "indexes": {},

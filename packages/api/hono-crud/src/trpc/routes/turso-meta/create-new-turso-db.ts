@@ -55,6 +55,7 @@ export const createNewTursoDB = router({
             type: "database",
             name: emptyDatabaseName,
           },
+          schema: "", // Add this line, adjust the value according to your needs or API documentation
         });
 
         console.log(`Created a new Database! -> ${JSON.stringify(database)}`);

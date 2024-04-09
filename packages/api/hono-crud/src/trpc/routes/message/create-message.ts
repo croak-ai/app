@@ -1,4 +1,4 @@
-import { message, unSummarizedMessage } from "@acme/db/schema/tenant";
+import { message } from "@acme/db/schema/tenant";
 import { protectedProcedureWithOrgDB, router } from "../../config/trpc";
 import { z } from "zod";
 
@@ -20,15 +20,6 @@ export const zCreateMessage = z.object({
   workspaceSlug: z.string().min(2).max(256),
   messageContent: z.string().min(2).max(60000),
 });
-
-export type DBMessage = {
-  id: string;
-  userId: string;
-  message: string;
-  channelId: string;
-  createdAt: number;
-  updatedAt: number;
-};
 
 export const createMessage = router({
   createMessage: protectedProcedureWithOrgDB
@@ -68,7 +59,7 @@ export const createMessage = router({
       ////////////////////////////////////////////////////////
       // Create the message
 
-      const currentTime = Date.now();
+      const currentTime = Date.now() / 1000;
 
       const [newMessageResult] = await ctx.db
         .insert(message)
@@ -76,8 +67,6 @@ export const createMessage = router({
           userId: ctx.auth.userId,
           message: input.messageContent,
           channelId: input.channelId,
-          createdAt: currentTime,
-          updatedAt: currentTime,
         })
         .returning();
 
@@ -99,29 +88,26 @@ export const createMessage = router({
         imageUrl: ctx.auth.user?.imageUrl ?? undefined,
       };
 
-      const cloudflareAI = new Ai(ctx.env.cloudflareAI);
-      const openAI = new OpenAI({ apiKey: ctx.env.OPENAI_API_KEY });
-      /* 
-      In both of these functions the token count of the messages
-      we are throwing into the AI matter.
-      In the future we will need to find some way to make sure the
-      content of the messages we are pulling does not exceed the count
-      */
+      const body: ChatMessageType = {
+        websocketId: input.websocketId,
+        type: "CHAT_MESSAGE",
+        newMessage: newMessageResult,
+        user,
+        orgId: ctx.auth.orgId,
+      };
 
-      /* Group message into conversation */
-      const conversationId = await groupMessage(
-        ctx.db,
-        openAI,
-        newMessageResult,
-      );
+      const response = await obj.fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
 
-      await summarizeMessages(
-        ctx.db,
-        openAI,
-        cloudflareAI,
-        conversationId,
-        input.channelId,
-      );
+      // const [unSummarizedMessageResult] = await ctx.db
+      //   .insert(unSummarizedMessage)
+      //   .values({
+      //     messageId: newMessageResult.id,
+      //   })
+      //   .returning();
 
       // if (!unSummarizedMessageResult) {
       //   throw new TRPCError({

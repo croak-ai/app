@@ -51,7 +51,7 @@ const ResizableWindows: React.FC<MailProps> = ({
         collapsible={true}
         defaultSize={defaultLayout[1]}
         minSize={15}
-        maxSize={30}
+        maxSize={70}
         onCollapse={() => {
           setAICollapsed(true);
         }}

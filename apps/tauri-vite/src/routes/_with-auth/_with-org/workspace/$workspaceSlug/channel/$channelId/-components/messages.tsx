@@ -117,7 +117,7 @@ export default function Messages({
         !messageInList(previousPageTargetElement.current)
       ) {
         console.log("scrolling to next page");
-        //scrollToMessageById(nextPageTargetElement.current);
+        scrollToMessageById(nextPageTargetElement.current);
       }
 
       // This happens if we "lose" the next page so we should fix the scroll
@@ -126,7 +126,7 @@ export default function Messages({
         !messageInList(nextPageTargetElement.current)
       ) {
         console.log("scrolling to previous page");
-        //scrollToMessageById(previousPageTargetElement.current);
+        scrollToMessageById(previousPageTargetElement.current);
       }
     }
 
@@ -167,7 +167,10 @@ export default function Messages({
   const groupMessagesByDate = (messages: Messages) => {
     return messages.reduce(
       (acc: { [key: string]: typeof messages }, message) => {
-        const date = format(new Date(message.message.createdAt), "yyyy-MM-dd");
+        const date = format(
+          new Date(message.message.createdAt * 1000),
+          "yyyy-MM-dd",
+        );
         if (!acc[date]) {
           acc[date] = [];
         }
@@ -197,7 +200,7 @@ export default function Messages({
       >
         <>
           <div ref={PreviousPageRef}>
-            {/* {hasPreviousPage && <SkeletonMessages />} */}
+            {hasPreviousPage && <SkeletonMessages />}
           </div>
           <div className="h-6 flex-shrink-0"></div>
           {Object.entries(groupedMessages).map(
@@ -212,7 +215,10 @@ export default function Messages({
                       size={"sm"}
                       className="date-separator my-4"
                     >
-                      {format(new Date(messages[0].message.createdAt), "PPP")}
+                      {format(
+                        new Date(messages[0].message.createdAt * 1000),
+                        "PPP",
+                      )}
                     </Button>
                   </div>
                   <div className="flex-1"></div>
@@ -223,8 +229,18 @@ export default function Messages({
                   .map((message, messageIndex, arr) => (
                     <div key={message.message.id} data-key={message.message.id}>
                       <Message
-                        message={{ ...message.message, ...message.user }}
-                        previousMessage={arr[messageIndex - 1]?.message}
+                        message={{
+                          userId: message.message.userId,
+                          firstName: message.user?.firstName,
+                          lastName: message.user?.lastName,
+                          imageUrl: message.user?.imageUrl,
+                          createdAt: message.message.createdAt,
+                          message: message.message.message,
+                        }}
+                        previousMessageUserId={{
+                          userId: arr[messageIndex - 1]?.message.userId,
+                          createdAt: arr[messageIndex - 1]?.message.createdAt,
+                        }}
                       />
                     </div>
                   ))}
@@ -232,7 +248,9 @@ export default function Messages({
             ),
           )}
           {hasNextPage && (
-            <div ref={NextPageRef}>{/* <SkeletonMessages /> */}</div>
+            <div ref={NextPageRef}>
+              <SkeletonMessages />{" "}
+            </div>
           )}
         </>
       </div>

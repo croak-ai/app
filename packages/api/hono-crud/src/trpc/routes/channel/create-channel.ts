@@ -58,8 +58,6 @@ export const createChannel = router({
           channelType: input.zChannelTypes,
           workspaceId: workspace.foundWorkspace.workspace.id,
           description: input.zDescription,
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
         })
         .returning({
           insertedId: channel.id,

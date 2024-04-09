@@ -5,8 +5,29 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1712439005035,
-      "tag": "0000_green_slyde",
+      "when": 1712531749537,
+      "tag": "0000_past_nomad",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1712532396487,
+      "tag": "0001_premium_jack_power",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1712635259326,
+      "tag": "0002_open_deadpool",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1712641633831,
+      "tag": "0003_tough_norrin_radd",
       "breakpoints": true
     }
   ]
