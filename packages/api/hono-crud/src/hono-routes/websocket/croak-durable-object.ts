@@ -214,6 +214,8 @@ export class CroakDurableObject {
         });
       });
 
+      return c.text("Message sent to all connections.");
+
       const { orgId } = newMessageResult;
 
       const db = await getDbConnection({
