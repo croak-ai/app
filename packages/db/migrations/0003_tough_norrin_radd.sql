@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `conversationMessage_messageId_conversationId_unique` ON `conversationMessage` (`messageId`,`conversationId`);

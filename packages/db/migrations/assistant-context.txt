@@ -235,3 +235,7 @@ CREATE INDEX "slug_idx" ON "workspace" ("slug");
 
 ALTER TABLE conversationNeedsSummary ADD "createdAt" integer DEFAULT (strftime('%s', 'now')) NOT NULL;
 ALTER TABLE unGroupedMessage ADD "createdAt" integer DEFAULT (strftime('%s', 'now')) NOT NULL;
+
+ALTER TABLE conversation ADD "summary" text(10000);
+
+CREATE UNIQUE INDEX "conversationMessage_messageId_conversationId_unique" ON "conversationMessage" ("messageId","conversationId");

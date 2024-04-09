@@ -1,0 +1,1 @@
+ALTER TABLE conversation ADD `summary` text(10000);--> statement-breakpoint

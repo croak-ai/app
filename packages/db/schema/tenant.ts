@@ -167,6 +167,7 @@ export const conversationSummaryRef = sqliteTable("conversationSummaryRef", {
 export const conversation = sqliteTable("conversation", {
   id: text("id").$defaultFn(createId).primaryKey(),
   channelId: text("channelId").notNull(),
+  summary: text("summary", { length: 10000 }),
   createdAt: integer("createdAt")
     .notNull()
     .default(sql`(strftime('%s', 'now'))`),
@@ -196,21 +197,27 @@ export const conversationNeedingSummary = sqliteTable(
   },
 );
 
-export const conversationMessage = sqliteTable("conversationMessage", {
-  id: text("id").$defaultFn(createId).primaryKey(),
-  messageId: text("messageId")
-    .notNull()
-    .references(() => message.id, { onDelete: "cascade" }),
-  conversationId: text("conversationId")
-    .notNull()
-    .references(() => conversation.id, { onDelete: "cascade" }),
-  createdAt: integer("createdAt")
-    .notNull()
-    .default(sql`(strftime('%s', 'now'))`),
-  updatedAt: integer("updatedAt")
-    .notNull()
-    .default(sql`(strftime('%s', 'now'))`),
-});
+export const conversationMessage = sqliteTable(
+  "conversationMessage",
+  {
+    id: text("id").$defaultFn(createId).primaryKey(),
+    messageId: text("messageId")
+      .notNull()
+      .references(() => message.id, { onDelete: "cascade" }),
+    conversationId: text("conversationId")
+      .notNull()
+      .references(() => conversation.id, { onDelete: "cascade" }),
+    createdAt: integer("createdAt")
+      .notNull()
+      .default(sql`(strftime('%s', 'now'))`),
+    updatedAt: integer("updatedAt")
+      .notNull()
+      .default(sql`(strftime('%s', 'now'))`),
+  },
+  (t) => ({
+    unq: unique().on(t.messageId, t.conversationId),
+  }),
+);
 
 export const meeting = sqliteTable("meeting", {
   id: text("id").$defaultFn(createId).primaryKey(),
