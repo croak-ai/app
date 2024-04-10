@@ -26,9 +26,8 @@ export default function ChannelList({
   };
 
   return (
-    <ScrollArea className=" flex flex-col gap-2 p-4">
-      <main className="flex flex-col gap-2 p-4">
-        <h2 className="text-lg font-medium">Channels</h2>
+    <ScrollArea className=" flex flex-col gap-2 p-2">
+      <main className="flex flex-col gap-2 ">
         {workspaceChannels.map((channel) => (
           <div key={channel.Id}>
             <Link

@@ -5,6 +5,7 @@ import {
 } from "@acme/ui/components/ui/avatar";
 import { UserPopoverCard } from "@/components/user/user-card";
 import { Button } from "@acme/ui/components/ui/button";
+import Markdown from "react-markdown";
 
 interface Message {
   userId: string | null;
@@ -108,7 +109,7 @@ export default function Message({
             {new Date(createdAt * 1000).toLocaleTimeString()}
           </span>
         </div>
-        <div className={opacity}>{content}</div>
+        <Markdown className={opacity}>{content}</Markdown>
       </div>
     </div>
   );

@@ -60,7 +60,11 @@ export function OrgLayout({ children }: { children: React.ReactNode }) {
     return (
       <>
         {isAICollapsed && (
-          <Button variant="outline" onClick={() => setAICollapsed(false)}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setAICollapsed(false)}
+          >
             Ask Croak AI <Icons.magicWand className="mx-2 h-4 w-4" />
             <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
               <span className="text-base">{isMac ? "⌘ J" : "Ctrl + J"}</span>
@@ -74,7 +78,7 @@ export function OrgLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="box-border flex h-screen flex-col overflow-hidden">
       <div className="flex-grow overflow-hidden">
-        <div className="box-border grid w-full grid-cols-3 items-center py-3">
+        <div className="box-border grid w-full grid-cols-3 items-center ">
           <span className="flex px-6">
             <div className="mt-2">
               <UserButton />

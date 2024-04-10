@@ -220,7 +220,6 @@ export default function ChatBox({
           isInitialCursorAtBottom={true}
         />
         {devModeEnabled && MemoizedDevMessageBoxTools}
-        <div className="playground-wrapper my-2">{MemoizedMessageBox}</div>
         {isInDevMode() && (
           <div className="flex items-center justify-end">
             <Switch
@@ -231,6 +230,7 @@ export default function ChatBox({
             <span className="text-sm">Dev Mode</span>
           </div>
         )}
+        <div className="playground-wrapper my-2">{MemoizedMessageBox}</div>
       </div>
     </div>
   );

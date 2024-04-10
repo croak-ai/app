@@ -46,7 +46,7 @@ export default function WorkspaceSidebar() {
         )}
       />
       <div className="flex h-full w-full flex-col ">
-        <header className="flex h-16 items-center border-b px-4">
+        <header className="flex h-16 items-center border-b px-2">
           <WorkspaceSelection />
         </header>
         <Channels />

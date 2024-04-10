@@ -206,14 +206,14 @@ export default function Messages({
           {Object.entries(groupedMessages).map(
             ([date, messages], groupIndex) => (
               <div key={groupIndex} className="messages-section">
-                <Separator className="my-8" />
+                <Separator className="my-2" />
                 <div className="sticky top-0 flex w-full items-center justify-center">
                   <div className="flex-1"></div>
                   <div className="mx-2">
                     <Button
                       variant={"secondary"}
-                      size={"sm"}
-                      className="date-separator my-4"
+                      size={"xs"}
+                      className="date-separator"
                     >
                       {format(
                         new Date(messages[0].message.createdAt * 1000),
