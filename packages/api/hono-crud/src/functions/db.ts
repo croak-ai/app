@@ -30,6 +30,13 @@ export const getDbConnection = async ({
   organizationId: string;
   env: Bindings;
 }) => {
+  if (env.OVERRIDE_DB_URL) {
+    console.log("Using override DB URL");
+    return createDbClient(env.OVERRIDE_DB_URL);
+  }
+
+  console.log("Using default DB URL");
+
   const { main_database_turso_db_url, main_database_turso_group_name } =
     await getClerkOrgMetadata({
       organizationId,

@@ -14,7 +14,7 @@ import type {
 import { user, unGroupedMessage, message } from "@acme/db/schema/tenant";
 import { eq, asc } from "drizzle-orm";
 import { getDbConnection } from "../../functions/db";
-import { SingularMessage, groupMessage } from "./groupMessage";
+import { NewMessage, groupMessage } from "./groupMessage";
 import { DBClientType } from "@acme/db";
 
 type UserStatus = {
@@ -214,7 +214,7 @@ export class CroakDurableObject {
         });
       });
 
-      return c.text("Message sent to all connections.");
+      //return c.text("Message sent to all connections.");
 
       const { orgId } = newMessageResult;
 
@@ -263,7 +263,7 @@ export class CroakDurableObject {
   }: {
     db: DBClientType;
     env: Bindings;
-    newMessage: SingularMessage;
+    newMessage: NewMessage;
   }) {
     this.isProcessingMessages = true;
 
@@ -276,11 +276,8 @@ export class CroakDurableObject {
     const unGroupedMessages = await db
       .select({
         id: message.id,
-        userId: message.userId,
         channelId: message.channelId,
-        message: message.message,
         createdAt: message.createdAt,
-        nameOfUser: user.fullName,
       })
       .from(unGroupedMessage)
       .orderBy(asc(message.createdAt))

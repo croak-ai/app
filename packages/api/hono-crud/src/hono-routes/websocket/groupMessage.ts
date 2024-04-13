@@ -12,15 +12,6 @@ import { z } from "zod";
 import { Bindings } from "../../config";
 import { union } from "drizzle-orm/sqlite-core";
 
-export type SingularMessage = {
-  id: string;
-  userId: string;
-  channelId: string;
-  message: string;
-  createdAt: number;
-  nameOfUser: string | null;
-};
-
 const zAIGroupingResponse = z.object({
   conversationId: z.string(),
 });
@@ -37,12 +28,11 @@ const zAICompletionResponse = z.array(
   }),
 );
 
-/* 
-We need to pull last 100 messages from this channel 
-Use some SQL query to map messages with their conversations
-Then feed this mapped data into AI context and ask it to group
-the message
-*/
+export type NewMessage = {
+  id: string;
+  createdAt: number;
+  channelId: string;
+};
 
 /* Triggers the conversation grouping process */
 export async function groupMessage({
@@ -52,11 +42,11 @@ export async function groupMessage({
 }: {
   db: DBClientType;
   env: Bindings;
-  newMessage: SingularMessage;
+  newMessage: NewMessage;
 }) {
   try {
     console.log(
-      `Grouping message ${newMessage.message} by ${newMessage.nameOfUser}`,
+      `Grouping Messages at ${new Date(newMessage.createdAt * 1000).toISOString()}`,
     );
 
     const openai = new OpenAI({ apiKey: env.OPENAI_API_KEY });
@@ -137,15 +127,6 @@ export async function groupMessage({
         (a, b) =>
           new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
       );
-
-    const singularMessageFormatted = {
-      createdAt: new Date(newMessage.createdAt * 1000).toISOString(),
-      userId: newMessage.userId,
-      message: newMessage.message,
-      conversationId: null,
-      conversationSummary: null,
-      nameOfUser: newMessage.nameOfUser,
-    };
 
     // Convert recentMessages to JSON
     const recentMessagesJson = JSON.stringify(relevantMessagesFormatted);
@@ -279,10 +260,7 @@ export async function groupMessage({
 }
 
 /* Creates a new conversation and new conversationMessage */
-async function createConversation(
-  db: DBClientType,
-  newMessage: SingularMessage,
-) {
+async function createConversation(db: DBClientType, newMessage: NewMessage) {
   const [conversationResult] = await db
     .insert(conversation)
     .values({
