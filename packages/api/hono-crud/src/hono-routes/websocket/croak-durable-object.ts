@@ -214,7 +214,7 @@ export class CroakDurableObject {
         });
       });
 
-      //return c.text("Message sent to all connections.");
+      return c.text("Message sent to all connections.");
 
       const { orgId } = newMessageResult;
 

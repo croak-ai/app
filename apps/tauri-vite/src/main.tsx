@@ -17,7 +17,7 @@ import { routeTree } from "./routeTree.gen";
 import { ClerkProvider } from "@clerk/clerk-react";
 import { ThemeProvider } from "./theme";
 import { TooltipProvider } from "@acme/ui/components/ui/tooltip";
-import Spinner from "./components/Spinner";
+import LoadingScreen from "@acme/ui/components/bonus/loading-screen";
 
 // Set up a Router instance
 const router = createRouter({
@@ -79,7 +79,7 @@ function InnerApp() {
   });
 
   if (!auth.isLoaded) {
-    return <Spinner />;
+    return <LoadingScreen>Logging In</LoadingScreen>;
   }
 
   return (
