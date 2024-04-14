@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import ChatBoxProvider from "./-components/chat-box-provider";
 import ChatBox from "./-components/chat-box";
 import { RouterInput } from "@/utils/trpc";
 
@@ -41,12 +40,10 @@ function Channel() {
   }
 
   return (
-    <ChatBoxProvider>
-      <ChatBox
-        workspaceSlug={workspaceSlug}
-        channelId={channelId}
-        initialCursor={initialCursor}
-      />
-    </ChatBoxProvider>
+    <ChatBox
+      workspaceSlug={workspaceSlug}
+      channelId={channelId}
+      initialCursor={initialCursor}
+    />
   );
 }
