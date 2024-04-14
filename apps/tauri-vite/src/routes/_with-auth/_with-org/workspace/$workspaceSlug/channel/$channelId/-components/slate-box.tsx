@@ -19,8 +19,35 @@ import {
   BaseEditor,
   Range,
 } from "slate";
+import {
+  Undo,
+  Redo,
+  Bold,
+  Italic,
+  Strikethrough,
+  Code,
+  Underline,
+  Table,
+  List,
+  ListOrdered,
+  Quote,
+  Send,
+  Heading1,
+  Heading2,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  AlignJustify,
+  LucideIcon,
+} from "lucide-react";
+import { Button } from "@acme/ui/components/ui/button";
 import { withHistory } from "slate-history";
-import { Button, Icon, Toolbar } from "./components";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@acme/ui/components/ui/tooltip";
 
 type CustomElement = { type: string; children: CustomText[]; align?: string };
 const CustomText = z.object({
@@ -44,12 +71,27 @@ declare module "slate" {
   }
 }
 
-const HOTKEYS: { [key: string]: string } = {
+const HOTKEYS: Record<string, CustomMark> = {
   "mod+b": "bold",
   "mod+i": "italic",
   "mod+u": "underline",
   "mod+`": "code",
 };
+
+function formatHotkeyText(hotkey: string): string {
+  let formattedHotkey = hotkey.replace(/\+/g, " ").toUpperCase();
+
+  const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
+  const isWindows = navigator.platform.toUpperCase().indexOf("WIN") >= 0;
+  // Adjust the hotkey text based on the operating system
+  if (isMac) {
+    return formattedHotkey.replace("MOD", "⌘");
+  } else if (isWindows) {
+    return formattedHotkey.replace("MOD", "Ctrl");
+  } else {
+    return formattedHotkey.replace("MOD", "Ctrl");
+  }
+}
 
 const LIST_TYPES = ["numbered-list", "bulleted-list"];
 const TEXT_ALIGN_TYPES = ["left", "center", "right", "justify"];
@@ -67,40 +109,85 @@ const RichTextExample: React.FC = () => {
 
   return (
     <Slate editor={editor} initialValue={initialValue}>
-      <Toolbar>
-        <MarkButton format="bold" icon="format_bold" />
-        <MarkButton format="italic" icon="format_italic" />
-        <MarkButton format="underline" icon="format_underlined" />
-        <MarkButton format="code" icon="code" />
-        <BlockButton format="heading-one" icon="looks_one" />
-        <BlockButton format="heading-two" icon="looks_two" />
-        <BlockButton format="block-quote" icon="format_quote" />
-        <BlockButton format="numbered-list" icon="format_list_numbered" />
-        <BlockButton format="bulleted-list" icon="format_list_bulleted" />
-        <BlockButton format="left" icon="format_align_left" />
-        <BlockButton format="center" icon="format_align_center" />
-        <BlockButton format="right" icon="format_align_right" />
-        <BlockButton format="justify" icon="format_align_justify" />
-      </Toolbar>
-      <Editable
-        renderElement={renderElement}
-        renderLeaf={renderLeaf}
-        placeholder="Enter some rich text…"
-        spellCheck
-        autoFocus
-        onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => {
-          for (const hotkey in HOTKEYS) {
-            if (isHotkey(hotkey, event)) {
-              event.preventDefault();
+      <div className="h-full rounded-lg border bg-background shadow-sm">
+        <div className="flex items-center justify-between border-b p-2">
+          <div className="flex flex-row flex-wrap">
+            <MarkButton format="bold" Icon={Bold} tooltipText="Bold" />
+            <MarkButton format="italic" Icon={Italic} tooltipText="Italic" />
+            <MarkButton
+              format="underline"
+              Icon={Underline}
+              tooltipText="Underline"
+            />
+            <MarkButton format="code" Icon={Code} tooltipText="Code" />
+            <BlockButton
+              format="heading-one"
+              Icon={Heading1}
+              tooltipText="Heading 1"
+            />
+            <BlockButton
+              format="heading-two"
+              Icon={Heading2}
+              tooltipText="Heading 2"
+            />
+            <BlockButton
+              format="block-quote"
+              Icon={Quote}
+              tooltipText="Blockquote"
+            />
+            <BlockButton
+              format="numbered-list"
+              Icon={ListOrdered}
+              tooltipText="Numbered List"
+            />
+            <BlockButton
+              format="bulleted-list"
+              Icon={List}
+              tooltipText="Bulleted List"
+            />
+            <BlockButton
+              format="left"
+              Icon={AlignLeft}
+              tooltipText="Left Align"
+            />
+            <BlockButton
+              format="center"
+              Icon={AlignCenter}
+              tooltipText="Center Align"
+            />
+            <BlockButton
+              format="right"
+              Icon={AlignRight}
+              tooltipText="Right Align"
+            />
+            <BlockButton
+              format="justify"
+              Icon={AlignJustify}
+              tooltipText="Justify"
+            />
+          </div>
+        </div>
+        <div>
+          <Editable
+            className="max-h-[calc(100vh-10rem)] overflow-y-auto rounded bg-secondary p-2"
+            renderElement={renderElement}
+            renderLeaf={renderLeaf}
+            spellCheck
+            autoFocus
+            onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => {
+              for (const hotkey in HOTKEYS) {
+                if (isHotkey(hotkey, event)) {
+                  event.preventDefault();
 
-              const markString = HOTKEYS[hotkey];
-              const mark = CustomMark.parse(markString);
+                  const mark = HOTKEYS[hotkey];
 
-              toggleMark(editor, mark);
-            }
-          }
-        }}
-      />
+                  toggleMark(editor, mark);
+                }
+              }
+            }}
+          />
+        </div>
+      </div>
     </Slate>
   );
 };
@@ -247,37 +334,88 @@ const Leaf: React.FC<RenderLeafProps> = ({ attributes, children, leaf }) => {
   return <span {...attributes}>{children}</span>;
 };
 
-const BlockButton = ({ format, icon }: { format: string; icon: string }) => {
+const BlockButton = ({
+  format,
+  Icon,
+  tooltipText,
+}: {
+  format: string;
+  Icon: LucideIcon; // Change here
+  tooltipText: string;
+}) => {
   const editor = useSlate();
   return (
-    <Button
-      active={isBlockActive(
-        editor,
-        format,
-        TEXT_ALIGN_TYPES.includes(format) ? "align" : "type",
-      )}
-      onMouseDown={(event: MouseEvent) => {
-        event.preventDefault();
-        toggleBlock(editor, format);
-      }}
-    >
-      <Icon>{icon}</Icon>
-    </Button>
+    <Tooltip delayDuration={0}>
+      <TooltipTrigger>
+        <Button
+          variant={
+            isBlockActive(
+              editor,
+              format,
+              TEXT_ALIGN_TYPES.includes(format) ? "align" : "type",
+            )
+              ? "default"
+              : "outline"
+          }
+          onMouseDown={(event: MouseEvent) => {
+            event.preventDefault();
+            toggleBlock(editor, format);
+          }}
+          className="h-6 w-6"
+          size="icon"
+        >
+          <div className="flex items-center justify-center">
+            <Icon className="h-4 w-4" />
+          </div>
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{tooltipText}</TooltipContent>
+    </Tooltip>
   );
 };
 
-const MarkButton = ({ format, icon }: { format: CustomMark; icon: string }) => {
+const MarkButton = ({
+  format,
+  Icon,
+  tooltipText,
+}: {
+  format: CustomMark;
+  Icon: LucideIcon; // Change here
+  tooltipText: string;
+}) => {
   const editor = useSlate();
+
+  let hotkeyText: string | undefined = undefined;
+  for (const hotkey in HOTKEYS) {
+    if (HOTKEYS[hotkey] === format) {
+      hotkeyText = formatHotkeyText(hotkey);
+    }
+  }
+
   return (
-    <Button
-      active={isMarkActive(editor, format)}
-      onMouseDown={(event: MouseEvent) => {
-        event.preventDefault();
-        toggleMark(editor, format);
-      }}
-    >
-      <Icon>{icon}</Icon>
-    </Button>
+    <Tooltip delayDuration={0}>
+      <TooltipTrigger>
+        <Button
+          variant={isMarkActive(editor, format) ? "default" : "outline"}
+          onMouseDown={(event: MouseEvent) => {
+            event.preventDefault();
+            toggleMark(editor, format);
+          }}
+          className="h-6 w-6"
+          size="icon"
+        >
+          <div className="flex items-center justify-center">
+            <Icon className="h-4 w-4" />
+          </div>
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        <div className="flex flex-col items-center justify-center">
+          <div>{tooltipText}</div>
+          <code className="mt-2 border px-2 ">{hotkeyText}</code>
+        </div>
+      </TooltipContent>
+    </Tooltip>
   );
 };
 
