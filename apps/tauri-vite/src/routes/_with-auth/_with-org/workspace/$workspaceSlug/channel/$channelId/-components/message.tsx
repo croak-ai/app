@@ -142,7 +142,9 @@ export default function Message({
                   </Button>
                 </UserPopoverCard>
               ) : (
-                effectiveDisplayName
+                <Button variant={"link"} className="m-0 inline border-none p-0">
+                  {effectiveDisplayName}
+                </Button>
               )}
             </div>
             <span className="text-xs text-gray-500 dark:text-gray-400">
