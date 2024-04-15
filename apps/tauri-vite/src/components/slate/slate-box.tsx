@@ -3,7 +3,6 @@ import { z } from "zod";
 import isHotkey from "is-hotkey";
 import {
   Editable,
-  withReact,
   useSlate,
   Slate,
   ReactEditor,
@@ -13,11 +12,9 @@ import {
 import {
   Editor,
   Transforms,
-  createEditor,
   Descendant,
   Element as SlateElement,
   BaseEditor,
-  Range,
 } from "slate";
 import {
   Bold,
@@ -37,7 +34,6 @@ import {
   Send,
 } from "lucide-react";
 import { Button } from "@acme/ui/components/ui/button";
-import { withHistory } from "slate-history";
 import {
   Tooltip,
   TooltipContent,
@@ -105,15 +101,14 @@ const RichTextExample: React.FC<RichTextExampleProps> = ({
   editor,
   onSend,
 }) => {
-  const renderElement = useCallback(
-    (props: RenderElementProps) => <Element {...props} />,
-    [],
-  );
   const renderLeaf = useCallback(
     (props: RenderLeafProps) => <Leaf {...props} />,
     [],
   );
-
+  const renderElement = useCallback(
+    (props: RenderElementProps) => <Element {...props} />,
+    [],
+  );
   const SendButton = () => {
     if (!onSend) return null;
     return (
