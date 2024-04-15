@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, useMemo } from "react";
 import { RouterInput, trpc } from "@/utils/trpc";
 import Messages from "./messages";
 import { useUser } from "@clerk/clerk-react";
@@ -8,7 +8,11 @@ import {
   ChatMessage,
   WebSocketMessageType,
 } from "@croak/hono-crud/src/hono-routes/websocket/web-socket-req-messages-types";
-import SlateBox from "./slate-box";
+import SlateBox from "@/components/slate/slate-box";
+import { clearEditor } from "@/components/slate/helpers";
+import { withHistory } from "slate-history";
+import { withReact } from "slate-react";
+import { createEditor, Node } from "slate";
 
 type GetMessages = RouterOutput["getMessages"]["getMessages"];
 type SingleMessage = GetMessages["messages"][0];
@@ -30,6 +34,8 @@ export default function ChatBox({
 
   const [messagesHeight, setMessagesHeight] = useState(500); // Default height
   const { user } = useUser();
+
+  const editor = useMemo(() => withHistory(withReact(createEditor())), []);
 
   const updateMessagesCache = useCallback(
     (newMessage: SingleMessage) => {
@@ -114,6 +120,7 @@ export default function ChatBox({
         },
       };
       updateMessagesCache(newMessage);
+      clearEditor(editor);
     },
   });
 
@@ -145,7 +152,25 @@ export default function ChatBox({
           isInitialCursorAtBottom={true}
         />
         <div className="playground-wrapper my-2">
-          <SlateBox />
+          <SlateBox
+            editor={editor}
+            onSend={() => {
+              const message = editor.children.map((child) => child);
+
+              const plaintext = message.map((n) => Node.string(n)).join("");
+              if (plaintext === "") {
+                clearEditor(editor);
+                return;
+              }
+
+              createMessage.mutate({
+                channelId,
+                messageContent: JSON.stringify(editor.children),
+                workspaceSlug,
+                websocketId,
+              });
+            }}
+          />
         </div>
       </div>
     </div>

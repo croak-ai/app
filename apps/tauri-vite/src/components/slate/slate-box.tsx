@@ -20,18 +20,13 @@ import {
   Range,
 } from "slate";
 import {
-  Undo,
-  Redo,
   Bold,
   Italic,
-  Strikethrough,
   Code,
   Underline,
-  Table,
   List,
   ListOrdered,
   Quote,
-  Send,
   Heading1,
   Heading2,
   AlignLeft,
@@ -39,15 +34,18 @@ import {
   AlignRight,
   AlignJustify,
   LucideIcon,
+  Send,
 } from "lucide-react";
 import { Button } from "@acme/ui/components/ui/button";
 import { withHistory } from "slate-history";
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@acme/ui/components/ui/tooltip";
+
+import Leaf from "./Leaf";
+import Element from "./Element";
 
 type CustomElement = { type: string; children: CustomText[]; align?: string };
 const CustomText = z.object({
@@ -78,6 +76,8 @@ const HOTKEYS: Record<string, CustomMark> = {
   "mod+`": "code",
 };
 
+const SEND_KEY = "enter";
+
 function formatHotkeyText(hotkey: string): string {
   let formattedHotkey = hotkey.replace(/\+/g, " ").toUpperCase();
 
@@ -96,7 +96,15 @@ function formatHotkeyText(hotkey: string): string {
 const LIST_TYPES = ["numbered-list", "bulleted-list"];
 const TEXT_ALIGN_TYPES = ["left", "center", "right", "justify"];
 
-const RichTextExample: React.FC = () => {
+interface RichTextExampleProps {
+  editor: ReactEditor;
+  onSend?: () => void;
+}
+
+const RichTextExample: React.FC<RichTextExampleProps> = ({
+  editor,
+  onSend,
+}) => {
   const renderElement = useCallback(
     (props: RenderElementProps) => <Element {...props} />,
     [],
@@ -105,7 +113,27 @@ const RichTextExample: React.FC = () => {
     (props: RenderLeafProps) => <Leaf {...props} />,
     [],
   );
-  const editor = useMemo(() => withHistory(withReact(createEditor())), []);
+
+  const SendButton = () => {
+    if (!onSend) return null;
+    return (
+      <Tooltip delayDuration={0}>
+        <TooltipTrigger>
+          <Button onClick={() => onSend()} className="h-6 w-6" size="icon">
+            <div className="flex items-center justify-center">
+              <Send className="h-4 w-4" />
+            </div>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <div className="flex flex-col items-center justify-center">
+            <div>Send Message</div>
+            <code className="mt-2 border px-2 ">{SEND_KEY}</code>
+          </div>
+        </TooltipContent>
+      </Tooltip>
+    );
+  };
 
   return (
     <Slate editor={editor} initialValue={initialValue}>
@@ -166,6 +194,7 @@ const RichTextExample: React.FC = () => {
               tooltipText="Justify"
             />
           </div>
+          <SendButton />
         </div>
         <div>
           <Editable
@@ -183,6 +212,10 @@ const RichTextExample: React.FC = () => {
 
                   toggleMark(editor, mark);
                 }
+              }
+              if (isHotkey(SEND_KEY, event)) {
+                event.preventDefault();
+                onSend && onSend();
               }
             }}
           />
@@ -258,80 +291,6 @@ const isBlockActive = (
 const isMarkActive = (editor: Editor, format: CustomMark) => {
   const marks = Editor.marks(editor);
   return marks ? marks[format] === true : false;
-};
-
-const Element: React.FC<RenderElementProps> = ({
-  attributes,
-  children,
-  element,
-}) => {
-  switch (element.type) {
-    case "block-quote":
-      return (
-        <blockquote
-          className="ml-0 mr-0 border-l-2 border-primary pl-2 italic"
-          {...attributes}
-        >
-          {children}
-        </blockquote>
-      );
-    case "bulleted-list":
-      return (
-        <ul className="m-0 ml-8 list-outside list-disc p-0" {...attributes}>
-          {children}
-        </ul>
-      );
-    case "heading-one":
-      return (
-        <h1 className="m-0" {...attributes}>
-          {children}
-        </h1>
-      );
-    case "heading-two":
-      return (
-        <h2 className="m-0" {...attributes}>
-          {children}
-        </h2>
-      );
-    case "list-item":
-      return (
-        <li className="m-0" {...attributes}>
-          {children}
-        </li>
-      );
-    case "numbered-list":
-      return (
-        <ol className="m-0  ml-8 list-outside list-decimal p-0" {...attributes}>
-          {children}
-        </ol>
-      );
-    default:
-      return (
-        <p className="m-0" {...attributes}>
-          {children}
-        </p>
-      );
-  }
-};
-
-const Leaf: React.FC<RenderLeafProps> = ({ attributes, children, leaf }) => {
-  if (leaf.bold) {
-    children = <strong>{children}</strong>;
-  }
-
-  if (leaf.code) {
-    children = <code>{children}</code>;
-  }
-
-  if (leaf.italic) {
-    children = <em>{children}</em>;
-  }
-
-  if (leaf.underline) {
-    children = <u>{children}</u>;
-  }
-
-  return <span {...attributes}>{children}</span>;
 };
 
 const BlockButton = ({

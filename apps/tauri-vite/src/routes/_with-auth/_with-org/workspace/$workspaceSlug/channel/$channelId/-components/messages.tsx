@@ -249,7 +249,7 @@ export default function Messages({
           )}
           {hasNextPage && (
             <div ref={NextPageRef}>
-              <SkeletonMessages />{" "}
+              <SkeletonMessages />
             </div>
           )}
         </>
