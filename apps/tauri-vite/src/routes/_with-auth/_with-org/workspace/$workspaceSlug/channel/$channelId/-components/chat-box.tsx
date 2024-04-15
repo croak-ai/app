@@ -143,15 +143,15 @@ export default function ChatBox({
   }, []);
 
   return (
-    <div className="relative h-screen">
-      <div className="absolute bottom-24 w-full p-4">
+    <div className="relative ">
+      <div className=" w-full p-4">
         <Messages
           channelId={channelId}
           height={messagesHeight}
           initialCursor={initialCursor}
           isInitialCursorAtBottom={true}
         />
-        <div className="playground-wrapper my-2">
+        <div className="playground-wrapper my-6">
           <SlateBox
             editor={editor}
             onSend={() => {
