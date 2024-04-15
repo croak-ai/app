@@ -5,7 +5,7 @@ import {
 } from "@acme/ui/components/ui/avatar";
 import { UserPopoverCard } from "@/components/user/user-card";
 import { Button } from "@acme/ui/components/ui/button";
-import { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import {
   Editable,
   RenderElementProps,
@@ -123,7 +123,7 @@ export default function Message({
       <div className="flex items-start gap-4 pt-4">
         <Avatar className="mt-3 h-8 w-8">
           {effectiveAvatarSrc && (
-            <AvatarImage alt={effectiveDisplayName} src={effectiveAvatarSrc} />
+            <img alt={effectiveDisplayName} src={effectiveAvatarSrc} />
           )}
           {!effectiveAvatarSrc && (
             <AvatarFallback>{effectiveFallback}</AvatarFallback>

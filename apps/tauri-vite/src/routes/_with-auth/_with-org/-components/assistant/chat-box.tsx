@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { trpc } from "@/utils/trpc";
 import OpenAI from "openai";
 import { useUser } from "@clerk/clerk-react";
@@ -8,6 +8,12 @@ import Message from "../../workspace/$workspaceSlug/channel/$channelId/-componen
 import { unified } from "unified";
 import markdown from "remark-parse";
 import { remarkToSlate } from "remark-slate-transformer";
+import { withHistory } from "slate-history";
+import { withReact } from "slate-react";
+import { Transforms, createEditor } from "slate";
+import SlateBox from "@/components/slate/slate-box";
+import { Node } from "slate";
+import { clearEditor } from "@/components/slate/helpers";
 type Message = OpenAI.Beta.Threads.Messages.Message;
 type Messages = Message[];
 type MessageContentText = OpenAI.Beta.Threads.Messages.TextContentBlock;
@@ -19,9 +25,9 @@ interface ChatBoxProps {
 }
 
 export default function ChatBox(Props: ChatBoxProps) {
-  const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Messages>(Props.threadMessages);
   const [isLoading, setIsLoading] = useState(false);
+  const editor = useMemo(() => withHistory(withReact(createEditor())), []);
 
   const { startStream, isStreaming } = useStreamResponse({
     setThreadId: Props.setThreadId,
@@ -35,8 +41,9 @@ export default function ChatBox(Props: ChatBoxProps) {
   const createThread = trpc.createThread.createThread.useMutation();
 
   /* Store userMessage and Initial assistant response message in state */
-  function handleUserMessage() {
+  function handleUserMessage({ message }: { message: string }) {
     setIsLoading(true);
+
     const currentTime = Date.now();
     const userMessage: Message = {
       id: Math.random().toString(),
@@ -48,7 +55,7 @@ export default function ChatBox(Props: ChatBoxProps) {
         {
           type: "text",
           text: {
-            value: input,
+            value: message,
             annotations: [],
           },
         },
@@ -73,7 +80,7 @@ export default function ChatBox(Props: ChatBoxProps) {
         {
           type: "text",
           text: {
-            value: "",
+            value: "...",
             annotations: [],
           },
         },
@@ -88,11 +95,10 @@ export default function ChatBox(Props: ChatBoxProps) {
       status: "in_progress",
     };
 
-    setInput("");
     setMessages((prevMessages) => [
-      ...prevMessages,
-      userMessage,
       initialResponseMessage,
+      userMessage,
+      ...prevMessages,
     ]);
 
     const messageContent = userMessage.content[0] as MessageContentText;
@@ -103,11 +109,17 @@ export default function ChatBox(Props: ChatBoxProps) {
   Handle new messages, Create new thread in DB if needed, 
   begin streaming AI response 
   */
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  async function handleSubmit() {
     if (isLoading || isStreaming) return;
-    if (!input) return;
-    const message = handleUserMessage();
+
+    const inputMessage = editor.children.map((n) => Node.string(n)).join("\n");
+
+    if (inputMessage === "") {
+      clearEditor(editor);
+      return;
+    }
+
+    const message = handleUserMessage({ message: inputMessage });
 
     let newThreadId = "";
     if (Props.threadId === "new") {
@@ -121,6 +133,8 @@ export default function ChatBox(Props: ChatBoxProps) {
       message: message,
       thread: { id: newThreadId || Props.threadId, new: newThreadId },
     });
+
+    clearEditor(editor);
 
     startStream(body);
   }
@@ -141,6 +155,7 @@ export default function ChatBox(Props: ChatBoxProps) {
     const firstName = isUser ? user?.firstName : "Croak";
     const lastName = isUser ? user?.lastName : undefined;
     const imageUrl = isUser ? user?.imageUrl : croakLogo;
+    //const imageUrl = undefined;
     const createdAt = created_at;
     const textMessage = messageContent.text.value;
     const processedMessage = processor.processSync(textMessage).result;
@@ -157,7 +172,7 @@ export default function ChatBox(Props: ChatBoxProps) {
 
     let previousMessageUserId = undefined;
 
-    if (previousUserId && previousCreatedAt) {
+    if (previousMessage && previousUserId && previousCreatedAt) {
       previousMessageUserId = {
         userId: previousUserId,
         createdAt: previousCreatedAt,
@@ -206,7 +221,15 @@ export default function ChatBox(Props: ChatBoxProps) {
           );
         })}
       </div>
-      asd
+      <div className="playground-wrapper my-6">
+        <SlateBox
+          editor={editor}
+          onSend={() => {
+            handleSubmit();
+          }}
+          disabled={isLoading || isStreaming}
+        />
+      </div>
     </div>
   );
 }

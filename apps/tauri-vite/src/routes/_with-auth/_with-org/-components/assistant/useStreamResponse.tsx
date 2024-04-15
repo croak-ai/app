@@ -89,8 +89,8 @@ export default function useStreamResponse(Props: StreamResponseProps) {
 
         Props.setMessages((prevMessageArray) => {
           const newMessageArray = [...prevMessageArray];
-          newMessageArray.pop();
-          newMessageArray.push(newMessage);
+          newMessageArray.shift(); // Remove the first element
+          newMessageArray.unshift(newMessage); // Add newMessage at the beginning
           return newMessageArray;
         });
       }

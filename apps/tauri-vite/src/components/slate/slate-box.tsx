@@ -42,6 +42,7 @@ import {
 
 import Leaf from "./Leaf";
 import Element from "./Element";
+import { Icons } from "@acme/ui/components/bonus/icons";
 
 type CustomElement = { type: string; children: CustomText[]; align?: string };
 const CustomText = z.object({
@@ -95,11 +96,13 @@ const TEXT_ALIGN_TYPES = ["left", "center", "right", "justify"];
 interface RichTextExampleProps {
   editor: ReactEditor;
   onSend?: () => void;
+  disabled?: boolean;
 }
 
 const RichTextExample: React.FC<RichTextExampleProps> = ({
   editor,
   onSend,
+  disabled,
 }) => {
   const renderLeaf = useCallback(
     (props: RenderLeafProps) => <Leaf {...props} />,
@@ -114,9 +117,18 @@ const RichTextExample: React.FC<RichTextExampleProps> = ({
     return (
       <Tooltip delayDuration={0}>
         <TooltipTrigger>
-          <Button onClick={() => onSend()} className="h-6 w-6" size="icon">
+          <Button
+            onClick={() => onSend()}
+            className="h-6 w-6"
+            size="icon"
+            disabled={disabled}
+          >
             <div className="flex items-center justify-center">
-              <Send className="h-4 w-4" />
+              {disabled ? (
+                <Icons.spinner className=" h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
             </div>
           </Button>
         </TooltipTrigger>
@@ -198,6 +210,7 @@ const RichTextExample: React.FC<RichTextExampleProps> = ({
             renderLeaf={renderLeaf}
             spellCheck
             autoFocus
+            readOnly={disabled}
             onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => {
               for (const hotkey in HOTKEYS) {
                 if (isHotkey(hotkey, event)) {
@@ -376,36 +389,7 @@ const MarkButton = ({
 const initialValue: Descendant[] = [
   {
     type: "paragraph",
-    children: [
-      { text: "This is editable " },
-      { text: "rich", bold: true },
-      { text: " text, " },
-      { text: "much", italic: true },
-      { text: " better than a " },
-      { text: "<textarea>", code: true },
-      { text: "!" },
-    ],
-  },
-  {
-    type: "paragraph",
-    children: [
-      {
-        text: "Since it's rich text, you can do things like turn a selection of text ",
-      },
-      { text: "bold", bold: true },
-      {
-        text: ", or add a semantically rendered block quote in the middle of the page, like this:",
-      },
-    ],
-  },
-  {
-    type: "block-quote",
-    children: [{ text: "A wise quote." }],
-  },
-  {
-    type: "paragraph",
-    align: "center",
-    children: [{ text: "Try it out for yourself!" }],
+    children: [{ text: "" }],
   },
 ];
 

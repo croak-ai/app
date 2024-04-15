@@ -47,7 +47,7 @@ export default async function assistant(fastify: FastifyInstance) {
       readableStream._read = () => {};
       try {
         const run = openai.beta.threads.runs
-          .createAndStream(thread.id, {
+          .stream(thread.id, {
             assistant_id: assistant.id,
           })
           .on("textDelta", (textDelta, snapshot) => {
