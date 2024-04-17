@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { trpc } from "@/utils/trpc";
 import OpenAI from "openai";
 import { useUser } from "@clerk/clerk-react";
@@ -10,12 +10,10 @@ import markdown from "remark-parse";
 import { remarkToSlate, slateToRemark } from "remark-slate-transformer";
 import { withHistory } from "slate-history";
 import { withReact } from "slate-react";
-import { Transforms, createEditor } from "slate";
-
+import { createEditor } from "slate";
 import SlateBox from "@/components/slate/slate-box";
 import { Node } from "slate";
 import { clearEditor } from "@/components/slate/helpers";
-import { mdastToSlate } from "remark-slate-transformer";
 import gfm from "remark-gfm";
 import frontmatter from "remark-frontmatter";
 import stringify from "remark-stringify";
@@ -51,6 +49,7 @@ export default function ChatBox(Props: ChatBoxProps) {
 
   const toSlate = (s: string) =>
     toSlateProcessor.processSync(s).result as Node[];
+
   const toMd = (value: Node[]) => {
     const mdast: any = toRemarkProcessor.runSync(slateToRemark(value));
     return toRemarkProcessor.stringify(mdast);
@@ -172,7 +171,7 @@ export default function ChatBox(Props: ChatBoxProps) {
     //const imageUrl = undefined;
     const createdAt = created_at;
     const textMessage = messageContent.text.value;
-    const processedMessage = toSlateProcessor.processSync(textMessage).result;
+    const processedMessage = toSlate(textMessage);
 
     const previousMessage = index > 0 ? messages[index - 1] : null;
     const previousUserId = previousMessage
