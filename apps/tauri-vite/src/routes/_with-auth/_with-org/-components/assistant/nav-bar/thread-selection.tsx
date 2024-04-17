@@ -27,7 +27,6 @@ interface ThreadSelectionProps {
 
 export default function ThreadSelection(Props: ThreadSelectionProps) {
   const [open, setOpen] = useState(false);
-  const [activeThreadId, setActiveThreadId] = useState(Props.threadId);
   const threads = trpc.retrieveThreadList.retrieveThreadList.useQuery();
 
   return (
@@ -46,7 +45,7 @@ export default function ThreadSelection(Props: ThreadSelectionProps) {
             {threads.data?.map((thread) => (
               <CommandItem
                 key={thread.id}
-                value={`${thread.preview}:${thread.threadId}`}
+                value={thread.threadId}
                 onSelect={() => {
                   if (thread.threadId !== Props.threadId) {
                     Props.setThreadId(thread.threadId);
