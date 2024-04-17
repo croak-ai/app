@@ -1,6 +1,9 @@
 import { Editor, Transforms } from "slate";
+import { CustomElement } from "./slate";
 
-export const blankParagraph = [{ type: "paragraph", children: [{ text: "" }] }];
+export const blankParagraph: CustomElement[] = [
+  { type: "paragraph", children: [{ text: "" }] },
+];
 
 export const clearEditor = (editor: Editor) => {
   for (const child of editor.children) {

@@ -43,34 +43,13 @@ import {
 import Leaf from "./Leaf";
 import Element from "./Element";
 import { Icons } from "@acme/ui/components/bonus/icons";
-
-type CustomElement = { type: string; children: CustomText[]; align?: string };
-const CustomText = z.object({
-  text: z.string(),
-  bold: z.boolean().optional(),
-  italic: z.boolean().optional(),
-  underline: z.boolean().optional(),
-  code: z.boolean().optional(),
-});
-type CustomText = z.infer<typeof CustomText>;
-
-const CustomMark = z.enum(["bold", "italic", "underline", "code"]);
-
-type CustomMark = z.infer<typeof CustomMark>;
-
-declare module "slate" {
-  interface CustomTypes {
-    Editor: BaseEditor & ReactEditor;
-    Element: CustomElement;
-    Text: CustomText;
-  }
-}
+import { CustomElement, CustomElementType, CustomMark } from "./slate";
 
 const HOTKEYS: Record<string, CustomMark> = {
-  "mod+b": "bold",
-  "mod+i": "italic",
+  "mod+b": "strong",
+  "mod+i": "emphasis",
   "mod+u": "underline",
-  "mod+`": "code",
+  "mod+`": "inlineCode",
 };
 
 const SEND_KEY = "enter";
@@ -146,59 +125,19 @@ const RichTextExample: React.FC<RichTextExampleProps> = ({
     <Slate editor={editor} initialValue={initialValue}>
       <div className="h-full rounded-lg border bg-background shadow-sm">
         <div className="flex items-center justify-between border-b p-2">
-          <div className="flex flex-row flex-wrap">
-            <MarkButton format="bold" Icon={Bold} tooltipText="Bold" />
-            <MarkButton format="italic" Icon={Italic} tooltipText="Italic" />
+          <div className="flex flex-row flex-wrap gap-2">
+            <MarkButton format="strong" Icon={Bold} tooltipText="Bold" />
+            <MarkButton format="emphasis" Icon={Italic} tooltipText="Italic" />
             <MarkButton
               format="underline"
               Icon={Underline}
               tooltipText="Underline"
             />
-            <MarkButton format="code" Icon={Code} tooltipText="Code" />
+            <MarkButton format="inlineCode" Icon={Code} tooltipText="Code" />
             <BlockButton
-              format="heading-one"
-              Icon={Heading1}
-              tooltipText="Heading 1"
-            />
-            <BlockButton
-              format="heading-two"
-              Icon={Heading2}
-              tooltipText="Heading 2"
-            />
-            <BlockButton
-              format="block-quote"
+              format="blockquote"
               Icon={Quote}
               tooltipText="Blockquote"
-            />
-            <BlockButton
-              format="numbered-list"
-              Icon={ListOrdered}
-              tooltipText="Numbered List"
-            />
-            <BlockButton
-              format="bulleted-list"
-              Icon={List}
-              tooltipText="Bulleted List"
-            />
-            <BlockButton
-              format="left"
-              Icon={AlignLeft}
-              tooltipText="Left Align"
-            />
-            <BlockButton
-              format="center"
-              Icon={AlignCenter}
-              tooltipText="Center Align"
-            />
-            <BlockButton
-              format="right"
-              Icon={AlignRight}
-              tooltipText="Right Align"
-            />
-            <BlockButton
-              format="justify"
-              Icon={AlignJustify}
-              tooltipText="Justify"
             />
           </div>
           <SendButton />
@@ -249,20 +188,27 @@ const toggleBlock = (editor: Editor, format: string) => {
       !TEXT_ALIGN_TYPES.includes(format),
     split: true,
   });
+
   let newProperties: Partial<SlateElement>;
   if (TEXT_ALIGN_TYPES.includes(format)) {
     newProperties = {
-      align: isActive ? undefined : format,
+      align: isActive
+        ? undefined
+        : (format as "left" | "center" | "right" | "justify"),
     };
   } else {
     newProperties = {
-      type: isActive ? "paragraph" : isList ? "list-item" : format,
+      type: isActive
+        ? "paragraph"
+        : isList
+        ? "listItem"
+        : (format as CustomElement["type"]),
     };
   }
   Transforms.setNodes<SlateElement>(editor, newProperties);
 
   if (!isActive && isList) {
-    const block = { type: format, children: [] };
+    const block = { type: format as CustomElement["type"], children: [] };
     Transforms.wrapNodes(editor, block);
   }
 };
@@ -306,7 +252,7 @@ const BlockButton = ({
   Icon,
   tooltipText,
 }: {
-  format: string;
+  format: CustomElementType;
   Icon: LucideIcon; // Change here
   tooltipText: string;
 }) => {

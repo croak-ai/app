@@ -7,13 +7,19 @@ import useStreamResponse from "./useStreamResponse";
 import Message from "../../workspace/$workspaceSlug/channel/$channelId/-components/message";
 import { unified } from "unified";
 import markdown from "remark-parse";
-import { remarkToSlate } from "remark-slate-transformer";
+import { remarkToSlate, slateToRemark } from "remark-slate-transformer";
 import { withHistory } from "slate-history";
 import { withReact } from "slate-react";
 import { Transforms, createEditor } from "slate";
+
 import SlateBox from "@/components/slate/slate-box";
 import { Node } from "slate";
 import { clearEditor } from "@/components/slate/helpers";
+import { mdastToSlate } from "remark-slate-transformer";
+import gfm from "remark-gfm";
+import frontmatter from "remark-frontmatter";
+import stringify from "remark-stringify";
+
 type Message = OpenAI.Beta.Threads.Messages.Message;
 type Messages = Message[];
 type MessageContentText = OpenAI.Beta.Threads.Messages.TextContentBlock;
@@ -35,7 +41,20 @@ export default function ChatBox(Props: ChatBoxProps) {
     setIsLoading,
   });
   const { user } = useUser();
-  const processor = unified().use(markdown).use(remarkToSlate);
+
+  const toSlateProcessor = unified()
+    .use(markdown)
+    .use(gfm)
+    .use(frontmatter)
+    .use(remarkToSlate);
+  const toRemarkProcessor = unified().use(gfm).use(frontmatter).use(stringify);
+
+  const toSlate = (s: string) =>
+    toSlateProcessor.processSync(s).result as Node[];
+  const toMd = (value: Node[]) => {
+    const mdast: any = toRemarkProcessor.runSync(slateToRemark(value));
+    return toRemarkProcessor.stringify(mdast);
+  };
 
   /* Create new thread in database and openai */
   const createThread = trpc.createThread.createThread.useMutation();
@@ -112,14 +131,9 @@ export default function ChatBox(Props: ChatBoxProps) {
   async function handleSubmit() {
     if (isLoading || isStreaming) return;
 
-    const inputMessage = editor.children.map((n) => Node.string(n)).join("\n");
+    const mdMessage = toMd(editor.children);
 
-    if (inputMessage === "") {
-      clearEditor(editor);
-      return;
-    }
-
-    const message = handleUserMessage({ message: inputMessage });
+    const message = handleUserMessage({ message: mdMessage });
 
     let newThreadId = "";
     if (Props.threadId === "new") {
@@ -158,7 +172,7 @@ export default function ChatBox(Props: ChatBoxProps) {
     //const imageUrl = undefined;
     const createdAt = created_at;
     const textMessage = messageContent.text.value;
-    const processedMessage = processor.processSync(textMessage).result;
+    const processedMessage = toSlateProcessor.processSync(textMessage).result;
 
     const previousMessage = index > 0 ? messages[index - 1] : null;
     const previousUserId = previousMessage

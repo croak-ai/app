@@ -49,13 +49,11 @@ export default function useStreamResponse(Props: StreamResponseProps) {
     async function read() {
       const { done, value } = await reader.read();
       if (done) {
-        console.log("BUFFER: ", buffer);
         setIsStreaming(false);
         return;
       }
 
       const text = new TextDecoder().decode(value);
-      console.log("TEXT: ", text);
       if (text.includes("END STREAM")) {
         const thread = JSON.parse(text.replace(/.*END STREAM/, ""));
         setIsStreaming(false);
