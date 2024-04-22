@@ -6,7 +6,7 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
-import { UserSearchCombobox } from "../user/select-users";
+import { UserSearchCombobox } from "../user/select-users-combo-box";
 import isHotkey from "is-hotkey";
 import {
   Editable,
