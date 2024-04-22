@@ -1,5 +1,4 @@
-import React, { useCallback, useMemo, MouseEvent } from "react";
-import { z } from "zod";
+import React, { useCallback, MouseEvent } from "react";
 import isHotkey from "is-hotkey";
 import {
   Editable,
@@ -9,27 +8,21 @@ import {
   RenderElementProps,
   RenderLeafProps,
 } from "slate-react";
-import {
-  Editor,
-  Transforms,
-  Descendant,
-  Element as SlateElement,
-  BaseEditor,
-} from "slate";
+import { Editor, Transforms, Descendant, Element as SlateElement } from "slate";
 import {
   Bold,
   Italic,
   Code,
   Underline,
-  List,
-  ListOrdered,
+  // List,
+  // ListOrdered,
   Quote,
-  Heading1,
-  Heading2,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-  AlignJustify,
+  // Heading1,
+  // Heading2,
+  // AlignLeft,
+  // AlignCenter,
+  // AlignRight,
+  // AlignJustify,
   LucideIcon,
   Send,
 } from "lucide-react";
@@ -43,7 +36,12 @@ import {
 import Leaf from "./Leaf";
 import Element from "./Element";
 import { Icons } from "@acme/ui/components/bonus/icons";
-import { CustomElement, CustomElementType, CustomMark } from "./slate";
+import {
+  CustomEditor,
+  // CustomElement,
+  CustomElementType,
+  CustomMark,
+} from "./slate";
 
 const HOTKEYS: Record<string, CustomMark> = {
   "mod+b": "strong",
@@ -73,7 +71,7 @@ const LIST_TYPES = ["numbered-list", "bulleted-list"];
 const TEXT_ALIGN_TYPES = ["left", "center", "right", "justify"];
 
 interface RichTextExampleProps {
-  editor: ReactEditor;
+  editor: CustomEditor;
   onSend?: () => void;
   disabled?: boolean;
 }
@@ -172,48 +170,45 @@ const RichTextExample: React.FC<RichTextExampleProps> = ({
   );
 };
 
-const toggleBlock = (editor: Editor, format: string) => {
-  const isActive = isBlockActive(
-    editor,
-    format,
-    TEXT_ALIGN_TYPES.includes(format) ? "align" : "type",
-  );
-  const isList = LIST_TYPES.includes(format);
-
-  Transforms.unwrapNodes(editor, {
-    match: (n) =>
-      !Editor.isEditor(n) &&
-      SlateElement.isElement(n) &&
-      LIST_TYPES.includes(n.type) &&
-      !TEXT_ALIGN_TYPES.includes(format),
-    split: true,
-  });
-
-  let newProperties: Partial<SlateElement>;
-  if (TEXT_ALIGN_TYPES.includes(format)) {
-    newProperties = {
-      align: isActive
-        ? undefined
-        : (format as "left" | "center" | "right" | "justify"),
-    };
-  } else {
-    newProperties = {
-      type: isActive
-        ? "paragraph"
-        : isList
-        ? "listItem"
-        : (format as CustomElement["type"]),
-    };
-  }
-  Transforms.setNodes<SlateElement>(editor, newProperties);
-
-  if (!isActive && isList) {
-    const block = { type: format as CustomElement["type"], children: [] };
-    Transforms.wrapNodes(editor, block);
-  }
+const toggleBlock = (editor: CustomEditor, format: string) => {
+  // const isActive = isBlockActive(
+  //   editor,
+  //   format,
+  //   TEXT_ALIGN_TYPES.includes(format) ? "align" : "type",
+  // );
+  // const isList = LIST_TYPES.includes(format);
+  // Transforms.unwrapNodes(editor, {
+  //   match: (n) =>
+  //     !Editor.isEditor(n) &&
+  //     SlateElement.isElement(n) &&
+  //     LIST_TYPES.includes(n.type) &&
+  //     !TEXT_ALIGN_TYPES.includes(format),
+  //   split: true,
+  // });
+  // let newProperties: Partial<SlateElement>;
+  // if (TEXT_ALIGN_TYPES.includes(format)) {
+  //   newProperties = {
+  //     align: isActive
+  //       ? undefined
+  //       : (format as "left" | "center" | "right" | "justify"),
+  //   };
+  // } else {
+  //   newProperties = {
+  //     type: isActive
+  //       ? "paragraph"
+  //       : isList
+  //       ? "listItem"
+  //       : (format as CustomElement["type"]),
+  //   };
+  // }
+  // Transforms.setNodes<SlateElement>(editor, newProperties);
+  // if (!isActive && isList) {
+  //   const block = { type: format as CustomElement["type"], children: [] };
+  //   Transforms.wrapNodes(editor, block);
+  // }
 };
 
-const toggleMark = (editor: Editor, format: CustomMark) => {
+const toggleMark = (editor: CustomEditor, format: CustomMark) => {
   const isActive = isMarkActive(editor, format);
 
   if (isActive) {
@@ -242,7 +237,7 @@ const isBlockActive = (
   return !!match;
 };
 
-const isMarkActive = (editor: Editor, format: CustomMark) => {
+const isMarkActive = (editor: CustomEditor, format: CustomMark) => {
   const marks = Editor.marks(editor);
   return marks ? marks[format] === true : false;
 };

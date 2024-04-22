@@ -6,7 +6,7 @@ export const blankParagraph: CustomElement[] = [
 ];
 
 export const clearEditor = (editor: Editor) => {
-  for (const child of editor.children) {
+  for (let i = 0; i < editor.children.length; i++) {
     Transforms.delete(editor, {
       at: [0],
     });

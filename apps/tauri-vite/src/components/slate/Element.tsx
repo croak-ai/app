@@ -6,7 +6,6 @@ import {
 } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { useTheme } from "@/theme";
 import { Button } from "@acme/ui/components/ui/button";
-import { BaseEditor } from "slate";
 
 export const Element: React.FC<RenderElementProps> = ({
   attributes,
@@ -126,6 +125,12 @@ export const Element: React.FC<RenderElementProps> = ({
           </a>
         </Button>
       );
+    // case "mention":
+    //   return (
+    //     <p className="text-primary" {...attributes}>
+    //       {children}
+    //     </p>
+    //   );
     case "image":
       return (
         <>
