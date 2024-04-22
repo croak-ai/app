@@ -13,7 +13,7 @@ import { withReact } from "slate-react";
 import { createEditor } from "slate";
 import SlateBox from "@/components/slate/slate-box";
 import { Node } from "slate";
-import { clearEditor } from "@/components/slate/helpers";
+import { clearEditor, withMentions } from "@/components/slate/helpers";
 import gfm from "remark-gfm";
 import frontmatter from "remark-frontmatter";
 import stringify from "remark-stringify";
@@ -31,7 +31,10 @@ interface ChatBoxProps {
 export default function ChatBox(Props: ChatBoxProps) {
   const [messages, setMessages] = useState<Messages>(Props.threadMessages);
   const [isLoading, setIsLoading] = useState(false);
-  const editor = useMemo(() => withHistory(withReact(createEditor())), []);
+  const editor = useMemo(
+    () => withMentions(withHistory(withReact(createEditor()))),
+    [],
+  );
 
   const { startStream, isStreaming } = useStreamResponse({
     setThreadId: Props.setThreadId,

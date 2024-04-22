@@ -24,7 +24,7 @@ import { trpc } from "@/utils/trpc";
 import { useNavigate } from "@tanstack/react-router";
 import MeetingMemberList from "./meeting-member-list";
 import { useUser } from "@clerk/clerk-react";
-import { UserSearchCombobox } from "./select-users";
+import { UserSearchCombobox } from "../../../../../components/user/select-users";
 
 export default function CreateMeetingForm({
   onCreated,

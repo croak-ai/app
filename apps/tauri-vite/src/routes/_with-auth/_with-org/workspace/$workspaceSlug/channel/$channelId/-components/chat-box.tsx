@@ -9,7 +9,7 @@ import {
   WebSocketMessageType,
 } from "@croak/hono-crud/src/hono-routes/websocket/web-socket-req-messages-types";
 import SlateBox from "@/components/slate/slate-box";
-import { clearEditor } from "@/components/slate/helpers";
+import { clearEditor, withMentions } from "@/components/slate/helpers";
 import { withHistory } from "slate-history";
 import { withReact } from "slate-react";
 import { createEditor, Node } from "slate";
@@ -35,7 +35,10 @@ export default function ChatBox({
   const [messagesHeight, setMessagesHeight] = useState(500); // Default height
   const { user } = useUser();
 
-  const editor = useMemo(() => withHistory(withReact(createEditor())), []);
+  const editor = useMemo(
+    () => withMentions(withHistory(withReact(createEditor()))),
+    [],
+  );
 
   const updateMessagesCache = useCallback(
     (newMessage: SingleMessage) => {

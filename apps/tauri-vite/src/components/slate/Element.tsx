@@ -1,4 +1,4 @@
-import { ReactEditor, RenderElementProps } from "slate-react";
+import { RenderElementProps } from "slate-react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import {
   vscDarkPlus,
@@ -6,6 +6,36 @@ import {
 } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { useTheme } from "@/theme";
 import { Button } from "@acme/ui/components/ui/button";
+import { MentionElement } from "./slate";
+import { cn } from "@acme/ui/lib/utils";
+
+const Mention = ({
+  attributes,
+  children,
+  element,
+}: {
+  attributes: any;
+  children: any;
+  element: MentionElement;
+}) => {
+  const classes = cn(
+    "inline-block m-0 px-1 py-[2px] align-baseline text-sm h-6",
+  );
+
+  return (
+    <Button
+      {...attributes}
+      contentEditable={false}
+      data-cy={`mention-${element.character.replace(" ", "-")}`}
+      className={classes}
+      variant={"default"}
+      size={"sm"}
+    >
+      @{element.character}
+      {children}
+    </Button>
+  );
+};
 
 export const Element: React.FC<RenderElementProps> = ({
   attributes,
@@ -34,6 +64,14 @@ export const Element: React.FC<RenderElementProps> = ({
       }
       break;
     }
+    case "mention":
+      return (
+        <Mention
+          attributes={attributes}
+          children={children}
+          element={element}
+        />
+      );
     case "thematicBreak":
       return <hr />;
     case "blockquote":

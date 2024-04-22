@@ -91,6 +91,12 @@ export type ImageElement = {
   children: EmptyText[];
 };
 
+export type MentionElement = {
+  type: "mention";
+  character: string;
+  children: CustomText[];
+};
+
 type CustomElement =
   | ParagraphElement
   | BreakElement
@@ -107,7 +113,8 @@ type CustomElement =
   | YamlElement
   | TomlElement
   | LinkElement
-  | ImageElement;
+  | ImageElement
+  | MentionElement;
 
 export type CustomText = {
   bold?: boolean;

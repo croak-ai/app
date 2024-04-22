@@ -1,4 +1,12 @@
-import React, { useCallback, MouseEvent } from "react";
+import React, {
+  useCallback,
+  MouseEvent,
+  useRef,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import { UserSearchCombobox } from "../user/select-users";
 import isHotkey from "is-hotkey";
 import {
   Editable,
@@ -6,8 +14,9 @@ import {
   Slate,
   RenderElementProps,
   RenderLeafProps,
+  ReactEditor,
 } from "slate-react";
-import { Editor, Descendant } from "slate";
+import { Editor, Descendant, Range } from "slate";
 import { Bold, Italic, Code, Underline, LucideIcon, Send } from "lucide-react";
 import { Button } from "@acme/ui/components/ui/button";
 import {
@@ -19,7 +28,16 @@ import {
 import Leaf from "./Leaf";
 import Element from "./Element";
 import { Icons } from "@acme/ui/components/bonus/icons";
-import { CustomEditor, CustomMark } from "./slate";
+import { CustomEditor, CustomMark, MentionElement } from "./slate";
+import { Transforms } from "slate";
+import ReactDOM from "react-dom";
+import { trpc } from "@/utils/trpc";
+
+const Portal = ({ children }: { children?: ReactNode }) => {
+  return typeof document === "object"
+    ? ReactDOM.createPortal(children, document.body)
+    : null;
+};
 
 const markHotkeys: Record<string, CustomMark> = {
   "mod+b": "strong",
@@ -56,6 +74,18 @@ const RichTextExample: React.FC<RichTextExampleProps> = ({
   onSend,
   disabled,
 }) => {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [target, setTarget] = useState<Range | undefined>(undefined);
+  const [index, setIndex] = useState(0);
+  const [search, setSearch] = useState("");
+
+  const { data, isFetching } = trpc.searchUsers.searchUsers.useQuery(
+    {
+      zSearch: search,
+    },
+    { enabled: search.length > 0 },
+  );
+
   const renderLeaf = useCallback(
     (props: RenderLeafProps) => <Leaf {...props} />,
     [],
@@ -64,6 +94,50 @@ const RichTextExample: React.FC<RichTextExampleProps> = ({
     (props: RenderElementProps) => <Element {...props} />,
     [],
   );
+
+  const onKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (data === undefined) return;
+      if (target && data.length > 0) {
+        switch (event.key) {
+          case "ArrowDown":
+            event.preventDefault();
+            const prevIndex = index >= data.length - 1 ? 0 : index + 1;
+            setIndex(prevIndex);
+            break;
+          case "ArrowUp":
+            event.preventDefault();
+            const nextIndex = index <= 0 ? data.length - 1 : index - 1;
+            setIndex(nextIndex);
+            break;
+          case "Tab":
+          case "Enter":
+            event.preventDefault();
+            Transforms.select(editor, target);
+            insertMention(editor, data[index].userId);
+            setTarget(undefined);
+            break;
+          case "Escape":
+            event.preventDefault();
+            setTarget(undefined);
+            break;
+        }
+      }
+    },
+    [data, editor, index, target],
+  );
+
+  useEffect(() => {
+    if (target && data && data.length > 0) {
+      const el = ref.current;
+      if (!el) return;
+      const domRange = ReactEditor.toDOMRange(editor, target);
+      const rect = domRange.getBoundingClientRect();
+      el.style.top = `${rect.top + window.pageYOffset + 24}px`;
+      el.style.left = `${rect.left + window.pageXOffset}px`;
+    }
+  }, [data?.length, editor, index, search, target]);
+
   const SendButton = () => {
     if (!onSend) return null;
     return (
@@ -95,49 +169,113 @@ const RichTextExample: React.FC<RichTextExampleProps> = ({
   };
 
   return (
-    <Slate editor={editor} initialValue={initialValue}>
-      <div className="h-full rounded-lg border bg-background shadow-sm">
-        <div className="flex items-center justify-between border-b p-2">
-          <div className="flex flex-row flex-wrap gap-2">
-            <MarkButton format="strong" Icon={Bold} tooltipText="Bold" />
-            <MarkButton format="emphasis" Icon={Italic} tooltipText="Italic" />
-            <MarkButton
-              format="underline"
-              Icon={Underline}
-              tooltipText="Underline"
-            />
-            <MarkButton format="inlineCode" Icon={Code} tooltipText="Code" />
+    <div>
+      <Slate
+        editor={editor}
+        initialValue={initialValue}
+        onChange={() => {
+          const { selection } = editor;
+
+          if (selection && Range.isCollapsed(selection)) {
+            const [start] = Range.edges(selection);
+            const wordBefore = Editor.before(editor, start, { unit: "word" });
+            const before = wordBefore && Editor.before(editor, wordBefore);
+            const beforeRange = before && Editor.range(editor, before, start);
+            const beforeText =
+              beforeRange && Editor.string(editor, beforeRange);
+            const beforeMatch = beforeText && beforeText.match(/^@(\w+)$/);
+            const after = Editor.after(editor, start);
+            const afterRange = Editor.range(editor, start, after);
+            const afterText = Editor.string(editor, afterRange);
+            const afterMatch = afterText.match(/^(\s|$)/);
+
+            if (beforeMatch && afterMatch) {
+              setTarget(beforeRange);
+              setSearch(beforeMatch[1]);
+              setIndex(0);
+              return;
+            }
+          }
+
+          setTarget(undefined);
+        }}
+      >
+        <div className="h-full rounded-lg border bg-background shadow-sm">
+          <div className="flex items-center justify-between border-b p-2">
+            <div className="flex flex-row flex-wrap gap-2">
+              <MarkButton format="strong" Icon={Bold} tooltipText="Bold" />
+              <MarkButton
+                format="emphasis"
+                Icon={Italic}
+                tooltipText="Italic"
+              />
+              <MarkButton
+                format="underline"
+                Icon={Underline}
+                tooltipText="Underline"
+              />
+              <MarkButton format="inlineCode" Icon={Code} tooltipText="Code" />
+            </div>
+            <SendButton />
           </div>
-          <SendButton />
-        </div>
-        <div>
-          <Editable
-            className="max-h-[calc(100vh-10rem)] overflow-y-auto rounded bg-secondary p-2"
-            renderElement={renderElement}
-            renderLeaf={renderLeaf}
-            spellCheck
-            autoFocus
-            readOnly={disabled}
-            onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => {
-              for (const hotkey in markHotkeys) {
-                if (isHotkey(hotkey, event)) {
-                  event.preventDefault();
+          <div>
+            <Editable
+              className="max-h-[calc(100vh-10rem)] overflow-y-auto rounded bg-secondary p-2"
+              renderElement={renderElement}
+              renderLeaf={renderLeaf}
+              spellCheck
+              autoFocus
+              readOnly={disabled}
+              onChange={() => {
+                const { selection } = editor;
 
-                  const mark = markHotkeys[hotkey];
+                if (selection && Range.isCollapsed(selection)) {
+                  const [start] = Range.edges(selection);
+                  const wordBefore = Editor.before(editor, start, {
+                    unit: "word",
+                  });
+                  const before =
+                    wordBefore && Editor.before(editor, wordBefore);
+                  const beforeRange =
+                    before && Editor.range(editor, before, start);
+                  const beforeText =
+                    beforeRange && Editor.string(editor, beforeRange);
+                  const beforeMatch =
+                    beforeText && beforeText.match(/^@(\w+)$/);
+                  const after = Editor.after(editor, start);
+                  const afterRange = Editor.range(editor, start, after);
+                  const afterText = Editor.string(editor, afterRange);
+                  const afterMatch = afterText.match(/^(\s|$)/);
 
-                  toggleMark(editor, mark);
+                  if (beforeMatch && afterMatch) {
+                    console.log("hello");
+                    setTarget(beforeRange);
+                    setSearch(beforeMatch[1]);
+                    setIndex(0);
+                    return;
+                  }
                 }
-              }
-              if (isHotkey(SEND_KEY, event)) {
-                event.preventDefault();
-                onSend && onSend();
-              }
-            }}
-          />
+
+                setTarget(undefined);
+              }}
+              onKeyDown={onKeyDown}
+            />
+          </div>
         </div>
-      </div>
-    </Slate>
+        {target && data && data.length > 0 && <div>{JSON.stringify(data)}</div>}
+      </Slate>
+    </div>
   );
+};
+
+const insertMention = (editor: CustomEditor, character: string) => {
+  const mention: MentionElement = {
+    type: "mention",
+    character,
+    children: [{ text: "" }],
+  };
+  Transforms.insertNodes(editor, mention);
+  Transforms.move(editor);
 };
 
 const toggleMark = (editor: CustomEditor, format: CustomMark) => {
