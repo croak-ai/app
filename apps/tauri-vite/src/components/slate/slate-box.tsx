@@ -32,6 +32,7 @@ import { CustomEditor, CustomMark, MentionElement } from "./slate";
 import { Transforms } from "slate";
 import ReactDOM from "react-dom";
 import { trpc } from "@/utils/trpc";
+import { Avatar, AvatarImage } from "@acme/ui/components/ui/avatar";
 
 const Portal = ({ children }: { children?: ReactNode }) => {
   return typeof document === "object"
@@ -133,7 +134,7 @@ const RichTextExample: React.FC<RichTextExampleProps> = ({
       if (!el) return;
       const domRange = ReactEditor.toDOMRange(editor, target);
       const rect = domRange.getBoundingClientRect();
-      el.style.top = `${rect.top + window.pageYOffset + 24}px`;
+      el.style.top = `${rect.top + window.pageYOffset - 54}px`;
       el.style.left = `${rect.left + window.pageXOffset}px`;
     }
   }, [data?.length, editor, index, search, target]);
@@ -170,6 +171,41 @@ const RichTextExample: React.FC<RichTextExampleProps> = ({
 
   return (
     <div>
+      {target && data && data.length > 0 && (
+        <Portal>
+          <div
+            ref={ref}
+            className="absolute bottom-full left-0 z-10 flex flex-col-reverse  p-1"
+            data-cy="mentions-portal"
+          >
+            <div>
+              {data.map((user, i) => (
+                <Button
+                  key={user.userId}
+                  onClick={() => {
+                    Transforms.select(editor, target);
+                    insertMention(editor, user.userId);
+                    setTarget(undefined);
+                  }}
+                  size="sm"
+                  variant={i === index ? "secondary" : "outline"}
+                  className="mb-2 flex w-64 items-center justify-between"
+                >
+                  <div className="flex items-center">
+                    <Avatar className="mr-2 h-4 w-4">
+                      <AvatarImage
+                        src={user.imageUrl}
+                        alt={`${user.firstName} ${user.lastName}`}
+                      />
+                    </Avatar>
+                    {user.firstName} {user.lastName}
+                  </div>
+                </Button>
+              ))}
+            </div>
+          </div>
+        </Portal>
+      )}
       <Slate
         editor={editor}
         initialValue={initialValue}
@@ -262,7 +298,6 @@ const RichTextExample: React.FC<RichTextExampleProps> = ({
             />
           </div>
         </div>
-        {target && data && data.length > 0 && <div>{JSON.stringify(data)}</div>}
       </Slate>
     </div>
   );
