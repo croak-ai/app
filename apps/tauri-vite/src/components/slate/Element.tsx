@@ -8,6 +8,10 @@ import { useTheme } from "@/theme";
 import { Button } from "@acme/ui/components/ui/button";
 import { MentionElement } from "./slate";
 import { cn } from "@acme/ui/lib/utils";
+import { trpc } from "@/utils/trpc";
+import { Skeleton } from "@acme/ui/components/ui/skeleton";
+import { UserPopoverCard } from "../user/user-card";
+import { useState } from "react";
 
 const Mention = ({
   attributes,
@@ -18,20 +22,49 @@ const Mention = ({
   children: any;
   element: MentionElement;
 }) => {
-  const classes = cn(
-    "inline-block m-0 px-1 py-[2px] align-baseline text-sm h-6",
-  );
+  const [userCardOpen, setUserCardOpen] = useState(false);
+
+  const { data, isLoading } = trpc.getUserNameImage.getUserNameImage.useQuery({
+    userId: element.character,
+  });
+
+  const UserDetails = () => {
+    if (isLoading) {
+      return <Skeleton className="h-4 w-12 rounded-full" />;
+    }
+
+    if (!data) {
+      return <>User not found</>;
+    }
+
+    return (
+      <div>
+        <UserPopoverCard
+          userId={element.character}
+          open={userCardOpen}
+          setOpen={setUserCardOpen}
+          side="top"
+        >
+          <div>
+            <span className="mr-1">@</span>
+            {data.firstName} {data.lastName}
+          </div>
+        </UserPopoverCard>
+      </div>
+    );
+  };
 
   return (
     <Button
       {...attributes}
       contentEditable={false}
       data-cy={`mention-${element.character.replace(" ", "-")}`}
-      className={classes}
-      variant={"default"}
+      className=" mr-1 inline-block h-6 px-1  align-baseline text-sm "
+      variant={"outline"}
       size={"sm"}
+      onClick={() => setUserCardOpen(!userCardOpen)}
     >
-      @{element.character}
+      <UserDetails />
       {children}
     </Button>
   );

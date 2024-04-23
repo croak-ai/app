@@ -98,30 +98,36 @@ const RichTextExample: React.FC<RichTextExampleProps> = ({
 
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
-      if (data === undefined) return;
-      if (target && data.length > 0) {
+      if (target && data && data.length > 0) {
         switch (event.key) {
           case "ArrowDown":
             event.preventDefault();
             const prevIndex = index >= data.length - 1 ? 0 : index + 1;
             setIndex(prevIndex);
-            break;
+            return;
           case "ArrowUp":
             event.preventDefault();
             const nextIndex = index <= 0 ? data.length - 1 : index - 1;
             setIndex(nextIndex);
-            break;
+            return;
           case "Tab":
           case "Enter":
             event.preventDefault();
             Transforms.select(editor, target);
             insertMention(editor, data[index].userId);
             setTarget(undefined);
-            break;
+            return;
           case "Escape":
             event.preventDefault();
             setTarget(undefined);
-            break;
+            return;
+        }
+      }
+
+      if (isHotkey(SEND_KEY, event)) {
+        event.preventDefault();
+        if (onSend) {
+          onSend();
         }
       }
     },
