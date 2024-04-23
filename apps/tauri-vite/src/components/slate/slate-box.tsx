@@ -6,7 +6,6 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
-import { UserSearchCombobox } from "../user/select-users-combo-box";
 import isHotkey from "is-hotkey";
 import {
   Editable,
@@ -80,7 +79,7 @@ const RichTextExample: React.FC<RichTextExampleProps> = ({
   const [index, setIndex] = useState(0);
   const [search, setSearch] = useState("");
 
-  const { data, isFetching } = trpc.searchUsers.searchUsers.useQuery(
+  const { data } = trpc.searchUsers.searchUsers.useQuery(
     {
       zSearch: search,
     },

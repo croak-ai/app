@@ -7,7 +7,6 @@ import {
 import { useTheme } from "@/theme";
 import { Button } from "@acme/ui/components/ui/button";
 import { MentionElement } from "./slate";
-import { cn } from "@acme/ui/lib/utils";
 import { trpc } from "@/utils/trpc";
 import { Skeleton } from "@acme/ui/components/ui/skeleton";
 import { UserPopoverCard } from "../user/user-card";
@@ -34,7 +33,14 @@ const Mention = ({
     }
 
     if (!data) {
-      return <>User not found</>;
+      return (
+        <div>
+          <div>
+            <span className="mr-1">@</span>
+            <span className="font-bold text-destructive">Unknown User</span>
+          </div>
+        </div>
+      );
     }
 
     return (

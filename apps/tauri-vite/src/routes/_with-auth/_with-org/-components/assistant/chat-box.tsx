@@ -17,6 +17,7 @@ import { clearEditor, withMentions } from "@/components/slate/helpers";
 import gfm from "remark-gfm";
 import frontmatter from "remark-frontmatter";
 import stringify from "remark-stringify";
+import { MentionElement } from "@/components/slate/slate";
 
 type Message = OpenAI.Beta.Threads.Messages.Message;
 type Messages = Message[];
@@ -47,15 +48,43 @@ export default function ChatBox(Props: ChatBoxProps) {
     .use(markdown)
     .use(gfm)
     .use(frontmatter)
-    .use(remarkToSlate);
-  const toRemarkProcessor = unified().use(gfm).use(frontmatter).use(stringify);
+    .use(remarkToSlate, {
+      overrides: {
+        inlineCode: (node, next) => {
+          if (node.value.includes("userId=")) {
+            const character = node.value.split("userId=")[1].trim();
+            return {
+              type: "mention",
+              character,
+              children: [{ text: character }],
+            };
+          }
+        },
+      },
+    });
+  const toRemarkProcessor = unified().use(stringify);
 
   const toSlate = (s: string) =>
     toSlateProcessor.processSync(s).result as Node[];
 
   const toMd = (value: Node[]) => {
-    const mdast: any = toRemarkProcessor.runSync(slateToRemark(value));
-    return toRemarkProcessor.stringify(mdast);
+    const mdast: any = toRemarkProcessor.runSync(
+      slateToRemark(value, {
+        overrides: {
+          mention: (node: any, next) => {
+            return {
+              type: "inlineCode",
+              value: ` userId=${node.character} `,
+            };
+          },
+        },
+      }),
+    );
+    console.log(mdast);
+
+    const ret = toRemarkProcessor.stringify(mdast);
+    console.log(ret);
+    return ret;
   };
 
   /* Create new thread in database and openai */

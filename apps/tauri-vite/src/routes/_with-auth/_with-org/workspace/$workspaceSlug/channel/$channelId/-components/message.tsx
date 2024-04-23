@@ -16,6 +16,7 @@ import {
 import { createEditor } from "slate";
 import Leaf from "@/components/slate/Leaf";
 import Element from "@/components/slate/Element";
+import { withMentions } from "@/components/slate/helpers";
 
 interface Message {
   userId: string | null;
@@ -37,7 +38,7 @@ export default function Message({
   message,
   previousMessageUserId,
 }: MessageProps) {
-  const editor = useMemo(() => withReact(createEditor()), []);
+  const editor = useMemo(() => withMentions(withReact(createEditor())), []);
   const {
     userId,
     firstName,

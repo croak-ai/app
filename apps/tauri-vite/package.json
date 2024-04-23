@@ -92,6 +92,7 @@
     "@croak/hono-crud": "*",
     "@tanstack/router-vite-plugin": "^1.15.22",
     "@tauri-apps/cli": "^2.0.0-beta.0",
+    "@types/mdast": "^4.0.3",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@types/react-infinite-scroller": "^1.2.5",

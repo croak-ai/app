@@ -18,7 +18,7 @@ export const getUserNameImage = router({
         .execute();
 
       if (rawUserDetails.length === 0) {
-        return undefined;
+        return null;
       }
 
       return rawUserDetails[0];
