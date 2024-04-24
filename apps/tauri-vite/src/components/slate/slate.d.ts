@@ -97,6 +97,12 @@ export type MentionElement = {
   children: CustomText[];
 };
 
+export type TimeElement = {
+  type: "time";
+  epoch_sec: number;
+  children: CustomText[];
+};
+
 type CustomElement =
   | ParagraphElement
   | BreakElement
@@ -114,7 +120,8 @@ type CustomElement =
   | TomlElement
   | LinkElement
   | ImageElement
-  | MentionElement;
+  | MentionElement
+  | TimeElement;
 
 export type CustomText = {
   bold?: boolean;

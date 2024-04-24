@@ -59,6 +59,15 @@ export default function ChatBox(Props: ChatBoxProps) {
               children: [{ text: character }],
             };
           }
+
+          if (node.value.includes("epoch_sec=")) {
+            const epoch_sec = node.value.split("epoch_sec=")[1].trim();
+            return {
+              type: "time",
+              epoch_sec,
+              children: [{ text: epoch_sec }],
+            };
+          }
         },
       },
     });
@@ -75,6 +84,12 @@ export default function ChatBox(Props: ChatBoxProps) {
             return {
               type: "inlineCode",
               value: ` userId=${node.character} `,
+            };
+          },
+          time: (node: any, next) => {
+            return {
+              type: "inlineCode",
+              value: ` epoch_sec=${node.epoch_sec} `,
             };
           },
         },

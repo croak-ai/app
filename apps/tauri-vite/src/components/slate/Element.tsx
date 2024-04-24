@@ -6,11 +6,12 @@ import {
 } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { useTheme } from "@/theme";
 import { Button } from "@acme/ui/components/ui/button";
-import { MentionElement } from "./slate";
+import { MentionElement, TimeElement } from "./slate";
 import { trpc } from "@/utils/trpc";
 import { Skeleton } from "@acme/ui/components/ui/skeleton";
 import { UserPopoverCard } from "../user/user-card";
 import { useState } from "react";
+import formatDistanceToNow from "date-fns/formatDistanceToNow";
 
 const Mention = ({
   attributes,
@@ -76,6 +77,23 @@ const Mention = ({
   );
 };
 
+const TimeComponent = ({
+  attributes,
+  element,
+}: {
+  attributes: any;
+  element: TimeElement;
+}) => {
+  const date = new Date(element.epoch_sec * 1000);
+  return (
+    <Button {...attributes} variant={"link"} className="px-0">
+      {formatDistanceToNow(date, {
+        addSuffix: true,
+      })}
+    </Button>
+  );
+};
+
 export const Element: React.FC<RenderElementProps> = ({
   attributes,
   children,
@@ -111,6 +129,8 @@ export const Element: React.FC<RenderElementProps> = ({
           element={element}
         />
       );
+    case "time":
+      return <TimeComponent attributes={attributes} element={element} />;
     case "thematicBreak":
       return <hr />;
     case "blockquote":
