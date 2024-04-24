@@ -12,6 +12,7 @@ import { Skeleton } from "@acme/ui/components/ui/skeleton";
 import { UserPopoverCard } from "../user/user-card";
 import { useState } from "react";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
+import { Dot } from "lucide-react";
 
 const Mention = ({
   attributes,
@@ -102,6 +103,8 @@ export const Element: React.FC<RenderElementProps> = ({
   const { theme } = useTheme();
 
   switch (element.type) {
+    case "paragraph":
+      return <p {...attributes}>{children}</p>;
     case "heading": {
       switch (element.depth) {
         case 1:
@@ -149,14 +152,22 @@ export const Element: React.FC<RenderElementProps> = ({
         return <ul {...attributes}>{children}</ul>;
       }
     case "listItem":
+      if (element.checked === true || element.checked === false) {
+        return (
+          <li {...attributes} className="flex items-center">
+            <input
+              type="checkbox"
+              readOnly
+              checked={element.checked}
+              className="mr-2"
+            />
+            {children}
+          </li>
+        );
+      }
       return (
-        <li {...attributes}>
-          {element.checked === true ? (
-            <input type="checkbox" readOnly checked />
-          ) : element.checked === false ? (
-            <input type="checkbox" readOnly />
-          ) : null}
-          {children}
+        <li {...attributes} className="my-2 flex items-center">
+          <span className="mr-2">•</span> {children}
         </li>
       );
     case "table":
@@ -209,7 +220,12 @@ export const Element: React.FC<RenderElementProps> = ({
     // case "footnoteDefinition":
     //   break;
     case "break":
-      return <br />;
+      return (
+        <div>
+          <br />
+          <br />
+        </div>
+      );
     case "link":
       return (
         <Button variant="link" className="mx-0 px-0">

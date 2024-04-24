@@ -35,6 +35,12 @@ export async function createOrRetrieveAssistant() {
 
       Always format ALL of your responses in Markdown format. Be sure to provide line breaks in Markdown format.
 
+      However we have custom requirements for userId and dates. If you have a userId you should use an inlineCode block like this: \`userId=example\`.
+
+      If there is a date in epoch seconds involved you should use an inlineCode block like this: \`epoch_sec=1234\`.
+
+      Never repeat messages, simply summarize conversations.
+
       `,
       model: "gpt-4",
       tools: [
@@ -54,10 +60,13 @@ export async function createOrRetrieveAssistant() {
             strftime('%s', datetime('now', 'weekday 0', '-7 days')),  -- Start of last week
             strftime('%s', datetime('now', 'weekday 0', '-1 day'))   -- End of last week
 
+            Never use a where clause for userId, we want to pull all messages related to the user, which doesn't mean the user had to have sent it.
+
+            If a user asks for a specific topic, intead of searching for matches, query messages in the time range of the topic.
+
             Be extremely generous with the queries. We allow a limit of 10000 rows. However, if you think the query doesn't need it you can lower the limit.
             
-
-            Also if someone asks you about a person it should always be in the format (userId='userId') if they don't do this, tell them 
+            Also if someone asks you about a person it should always be in the format userId='userId' if they don't do this, tell them 
             "There can be multiple users with the same name, so you must use @user to refer to someone"
 
             The database is SQLite

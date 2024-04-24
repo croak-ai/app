@@ -73,8 +73,15 @@ export default function ChatBox(Props: ChatBoxProps) {
     });
   const toRemarkProcessor = unified().use(stringify);
 
-  const toSlate = (s: string) =>
-    toSlateProcessor.processSync(s).result as Node[];
+  const toSlate = (s: string) => {
+    try {
+      const nodes = toSlateProcessor.processSync(s).result as Node[];
+      return nodes;
+    } catch (e) {
+      console.log(e);
+      return [{ type: "paragraph", children: [{ text: s }] }];
+    }
+  };
 
   const toMd = (value: Node[]) => {
     const mdast: any = toRemarkProcessor.runSync(
