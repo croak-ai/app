@@ -32,7 +32,6 @@ export default function ChatBox({
   const { addMessageHandler, removeMessageHandler, websocketId } =
     useWebSocket();
 
-  const [messagesHeight, setMessagesHeight] = useState(500); // Default height
   const { user } = useUser();
 
   const editor = useMemo(
@@ -127,54 +126,34 @@ export default function ChatBox({
     },
   });
 
-  // Effect to adjust the height of the messages based on the PlaygroundMilkdown height
-  useEffect(() => {
-    const editorElement = document.querySelector(".playground-wrapper");
-    if (!editorElement) return;
-
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (let entry of entries) {
-        const { height } = entry.contentRect;
-        const newMessagesHeight = window.innerHeight - height - 175;
-        setMessagesHeight(newMessagesHeight);
-      }
-    });
-
-    resizeObserver.observe(editorElement);
-
-    return () => resizeObserver.disconnect();
-  }, []);
-
   return (
-    <div className="relative ">
-      <div className=" w-full p-4">
-        <Messages
-          channelId={channelId}
-          height={messagesHeight}
-          initialCursor={initialCursor}
-          isInitialCursorAtBottom={true}
+    <div className="flex h-full w-full grow flex-col gap-6 overflow-y-auto rounded-sm p-2">
+      <Messages
+        channelId={channelId}
+        initialCursor={initialCursor}
+        isInitialCursorAtBottom={true}
+      />
+
+      <div className=" my-6">
+        <SlateBox
+          editor={editor}
+          onSend={() => {
+            const message = editor.children.map((child) => child);
+
+            const plaintext = message.map((n) => Node.string(n)).join("");
+            if (plaintext === "") {
+              clearEditor(editor);
+              return;
+            }
+
+            createMessage.mutate({
+              channelId,
+              messageContent: JSON.stringify(editor.children),
+              workspaceSlug,
+              websocketId,
+            });
+          }}
         />
-        <div className="playground-wrapper my-6">
-          <SlateBox
-            editor={editor}
-            onSend={() => {
-              const message = editor.children.map((child) => child);
-
-              const plaintext = message.map((n) => Node.string(n)).join("");
-              if (plaintext === "") {
-                clearEditor(editor);
-                return;
-              }
-
-              createMessage.mutate({
-                channelId,
-                messageContent: JSON.stringify(editor.children),
-                workspaceSlug,
-                websocketId,
-              });
-            }}
-          />
-        </div>
       </div>
     </div>
   );
