@@ -49,13 +49,11 @@ export default function useStreamResponse(Props: StreamResponseProps) {
     async function read() {
       const { done, value } = await reader.read();
       if (done) {
-        console.log("BUFFER: ", buffer);
         setIsStreaming(false);
         return;
       }
 
       const text = new TextDecoder().decode(value);
-      console.log("TEXT: ", text);
       if (text.includes("END STREAM")) {
         const thread = JSON.parse(text.replace(/.*END STREAM/, ""));
         setIsStreaming(false);
@@ -89,8 +87,8 @@ export default function useStreamResponse(Props: StreamResponseProps) {
 
         Props.setMessages((prevMessageArray) => {
           const newMessageArray = [...prevMessageArray];
-          newMessageArray.pop();
-          newMessageArray.push(newMessage);
+          newMessageArray.shift(); // Remove the first element
+          newMessageArray.unshift(newMessage); // Add newMessage at the beginning
           return newMessageArray;
         });
       }

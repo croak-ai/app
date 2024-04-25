@@ -24,7 +24,8 @@ import { trpc } from "@/utils/trpc";
 import { useNavigate } from "@tanstack/react-router";
 import MeetingMemberList from "./meeting-member-list";
 import { useUser } from "@clerk/clerk-react";
-import { UserSearchCombobox } from "./select-users";
+import { UserSearchCombobox } from "../../../../../components/user/select-users-combo-box";
+import { Command, CommandList } from "@acme/ui/components/ui/command";
 
 export default function CreateMeetingForm({
   onCreated,
@@ -34,6 +35,7 @@ export default function CreateMeetingForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [meetingName, setMeetingName] = useState<string>("");
+  const [userSearchTerm, setUserSearchTerm] = useState<string>("");
   const [timeoutId, setTimeoutId] = useState<number | null>(null);
 
   const { user } = useUser();
@@ -265,18 +267,33 @@ export default function CreateMeetingForm({
                 </FormItem>
               )}
             />
-            <UserSearchCombobox
-              existingUserIds={fields.map((field) => field.zUserId)}
-              onSelect={(user) => {
-                append({
-                  zUserId: user.userId,
-                  zFullName: `${user.firstName} ${user.lastName}`,
-                  zImageUrl: user.imageUrl,
-                  zRequired: true, // Set this based on your logic
-                  zHost: false, // Set this based on your logic
-                });
-              }}
-            />
+            <div className="relative">
+              <Command>
+                <CommandList>
+                  <Input
+                    placeholder="Search user..."
+                    value={userSearchTerm}
+                    onChange={(e) => setUserSearchTerm(e.target.value)}
+                  />
+
+                  <UserSearchCombobox
+                    existingUserIds={fields.map((field) => field.zUserId)}
+                    onSelect={(user) => {
+                      setUserSearchTerm("");
+                      append({
+                        zUserId: user.userId,
+                        zFullName: `${user.firstName} ${user.lastName}`,
+                        zImageUrl: user.imageUrl,
+                        zRequired: true, // Set this based on your logic
+                        zHost: false, // Set this based on your logic
+                      });
+                    }}
+                    searchTerm={userSearchTerm}
+                  />
+                </CommandList>
+              </Command>
+            </div>
+
             <FormField
               control={form.control}
               name="meetingMembers"

@@ -15,6 +15,7 @@ export type Bindings = {
   CLERK_USER_WEBHOOK_SECRET_KEY: string;
   TRPC_TURSO_ORG_SLUG: string;
   TRPC_TURSO_AUTH_TOKEN: string;
+  OVERRIDE_DB_URL: string;
   DB_ENVIORNMENT_LEVEL: "dev" | "staging" | "prod";
   AMS_SECRET: string;
   BOG_SECRET: string;

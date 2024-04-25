@@ -13,7 +13,7 @@ export default function Assistant(Props: AssistantProps) {
   const savedThreadId = localStorage.getItem("threadId") || "new";
   const [threadId, setThreadId] = useState(savedThreadId);
 
-  const { data, status } =
+  const { data, isLoading, error } =
     trpc.retrieveThreadMessages.retrieveThreadMessages.useQuery(
       {
         zThreadId: threadId,
@@ -21,8 +21,12 @@ export default function Assistant(Props: AssistantProps) {
       { enabled: threadId !== "new" }, // Only fetch data when threadId is not "new"
     );
 
-  if (status === "error") {
-    console.log("ERROR fetching threadMessages:", data);
+  if (error) {
+    console.log("ERROR fetching threadMessages:", error);
+  }
+
+  if (isLoading) {
+    return <div>Loading...</div>;
   }
 
   /* Query Assistant with given user message, add Assistant response message to state */
@@ -34,21 +38,12 @@ export default function Assistant(Props: AssistantProps) {
         setThreadId={setThreadId}
         setAICollapsed={Props.setAICollapsed}
       />
-      {status === "pending" ? (
-        <ChatBox
-          key={"new"}
-          threadId={"new"}
-          threadMessages={[]}
-          setThreadId={setThreadId}
-        />
-      ) : (
-        <ChatBox
-          key={Math.random().toString()}
-          threadId={threadId}
-          threadMessages={data || []}
-          setThreadId={setThreadId}
-        />
-      )}
+      <ChatBox
+        key={Math.random().toString()}
+        threadId={threadId}
+        threadMessages={data || []}
+        setThreadId={setThreadId}
+      />
     </div>
   );
 }

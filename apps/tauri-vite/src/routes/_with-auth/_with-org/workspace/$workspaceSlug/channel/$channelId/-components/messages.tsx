@@ -9,12 +9,10 @@ import SkeletonMessages from "./skeleton-messages";
 
 export default function Messages({
   channelId,
-  height,
   initialCursor,
   isInitialCursorAtBottom,
 }: {
   channelId: string;
-  height: number;
   initialCursor: RouterInput["getMessages"]["getMessages"]["cursor"];
   isInitialCursorAtBottom: boolean;
 }) {
@@ -186,74 +184,57 @@ export default function Messages({
   const groupedMessages = groupMessagesByDate(allMessages);
 
   return (
-    <div>
-      <div
-        ref={scrollBoxRef}
-        id="scrollableDiv"
-        style={{
-          height: height,
-          overflow: "auto",
-          display: "flex",
-          flexDirection: "column-reverse",
-          overflowAnchor: "none",
-        }}
-      >
-        <>
-          <div ref={PreviousPageRef}>
-            {hasPreviousPage && <SkeletonMessages />}
-          </div>
-          <div className="h-6 flex-shrink-0"></div>
-          {Object.entries(groupedMessages).map(
-            ([date, messages], groupIndex) => (
-              <div key={groupIndex} className="messages-section">
-                <Separator className="my-2" />
-                <div className="sticky top-0 flex w-full items-center justify-center">
-                  <div className="flex-1"></div>
-                  <div className="mx-2">
-                    <Button
-                      variant={"secondary"}
-                      size={"xs"}
-                      className="date-separator"
-                    >
-                      {format(
-                        new Date(messages[0].message.createdAt * 1000),
-                        "PPP",
-                      )}
-                    </Button>
-                  </div>
-                  <div className="flex-1"></div>
-                </div>
-                {messages
-                  .slice()
-                  .reverse()
-                  .map((message, messageIndex, arr) => (
-                    <div key={message.message.id} data-key={message.message.id}>
-                      <Message
-                        message={{
-                          userId: message.message.userId,
-                          firstName: message.user?.firstName,
-                          lastName: message.user?.lastName,
-                          imageUrl: message.user?.imageUrl,
-                          createdAt: message.message.createdAt,
-                          message: message.message.message,
-                        }}
-                        previousMessageUserId={{
-                          userId: arr[messageIndex - 1]?.message.userId,
-                          createdAt: arr[messageIndex - 1]?.message.createdAt,
-                        }}
-                      />
-                    </div>
-                  ))}
-              </div>
-            ),
-          )}
-          {hasNextPage && (
-            <div ref={NextPageRef}>
-              <SkeletonMessages />{" "}
+    <div
+      ref={scrollBoxRef}
+      id="scrollableDiv"
+      className="flex grow flex-col flex-col-reverse justify-start gap-4 overflow-y-scroll rounded-lg border-slate-400 px-4 scrollbar-thin"
+    >
+      <div ref={PreviousPageRef}>{hasPreviousPage && <SkeletonMessages />}</div>
+      <div className="h-6 flex-shrink-0"></div>
+      {Object.entries(groupedMessages).map(([date, messages], groupIndex) => (
+        <div key={groupIndex} className="messages-section">
+          <Separator className="my-2" />
+          <div className="sticky top-0 flex w-full items-center justify-center">
+            <div className="flex-1"></div>
+            <div className="mx-2">
+              <Button
+                variant={"secondary"}
+                size={"xs"}
+                className="date-separator"
+              >
+                {format(new Date(messages[0].message.createdAt * 1000), "PPP")}
+              </Button>
             </div>
-          )}
-        </>
-      </div>
+            <div className="flex-1"></div>
+          </div>
+          {messages
+            .slice()
+            .reverse()
+            .map((message, messageIndex, arr) => (
+              <div key={message.message.id} data-key={message.message.id}>
+                <Message
+                  message={{
+                    userId: message.message.userId,
+                    firstName: message.user?.firstName,
+                    lastName: message.user?.lastName,
+                    imageUrl: message.user?.imageUrl,
+                    createdAt: message.message.createdAt,
+                    message: message.message.message,
+                  }}
+                  previousMessageUserId={{
+                    userId: arr[messageIndex - 1]?.message.userId,
+                    createdAt: arr[messageIndex - 1]?.message.createdAt,
+                  }}
+                />
+              </div>
+            ))}
+        </div>
+      ))}
+      {hasNextPage && (
+        <div ref={NextPageRef}>
+          <SkeletonMessages />
+        </div>
+      )}
     </div>
   );
 }

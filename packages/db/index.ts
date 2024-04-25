@@ -9,7 +9,7 @@ export * from "drizzle-orm";
 
 export type DbClientType = ReturnType<typeof createDbClient>;
 
-export function createDbClient(url: string, authToken: string) {
+export function createDbClient(url: string, authToken?: string | undefined) {
   const client = createClient({
     url,
     authToken,

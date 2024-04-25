@@ -35,8 +35,14 @@ export async function createOrRetrieveAssistant() {
 
       Always format ALL of your responses in Markdown format. Be sure to provide line breaks in Markdown format.
 
+      However we have custom requirements for userId and dates. If you have a userId you should use an inlineCode block like this: \`userId=example\`.
+
+      If there is a date in epoch seconds involved you should use an inlineCode block like this: \`epoch_sec=1234\`.
+
+      Never repeat messages, simply summarize conversations.
+
       `,
-      model: "gpt-4-turbo-preview",
+      model: "gpt-4",
       tools: [
         {
           type: "function",
@@ -48,38 +54,53 @@ export async function createOrRetrieveAssistant() {
             Sometimes you may not know exactly how to write the query, in this case try your best by searching through data that might have what the user is asking for.
             Typically, this looks like searching through messages, but using joins to narrow down the messages to query for.
 
-            In the database, dates are stored in UNIX epoch in seconds, you can use strftime('%s', 'now'); to get the current time.
+            In the database, dates are stored in UNIX epoch in seconds, you can use strftime('%s', datetime('now')) to get the current time.
             Also, if the user asks for information involving dates you will likely need a range of dates. 
+            You can use strftime's datetime to get the correct date for the query, for example if the user asks for last week's activity, you can use strftime like:
+            strftime('%s', datetime('now', 'weekday 0', '-7 days')),  -- Start of last week
+            strftime('%s', datetime('now', 'weekday 0', '-1 day'))   -- End of last week
+
+            Never use a where clause for userId, we want to pull all messages related to the user, which doesn't mean the user had to have sent it.
+
+            If a user asks for a specific topic, intead of searching for matches, query messages in the time range of the topic.
 
             Be extremely generous with the queries. We allow a limit of 10000 rows. However, if you think the query doesn't need it you can lower the limit.
+            
+            Also if someone asks you about a person it should always be in the format userId='userId' if they don't do this, tell them 
+            "There can be multiple users with the same name, so you must use @user to refer to someone"
+
+            The database is SQLite
 
             Database Schema:
 
-                  
+           
             CREATE TABLE "channel" (
               "id" text PRIMARY KEY NOT NULL,
               "slug" text(256) NOT NULL,
               "description" text(512) NOT NULL,
               "workspaceId" text NOT NULL,
               "channelType" text(256) NOT NULL,
-              "createdAt" integer NOT NULL,
-              "updatedAt" integer NOT NULL,
+              "createdAt" integer DEFAULT (strftime('%s', 'now')) NOT NULL,
+              "updatedAt" integer DEFAULT (strftime('%s', 'now')) NOT NULL,
               "deletedAt" integer
             );
-            
+
+
             CREATE TABLE "message" (
               "id" text PRIMARY KEY NOT NULL,
               "channelId" text NOT NULL,
               "userId" text NOT NULL,
               "message" text(60000) NOT NULL,
-              "createdAt" integer NOT NULL,
-              "updatedAt" integer NOT NULL,
+              "createdAt" integer DEFAULT (strftime('%s', 'now')) NOT NULL,
+              "updatedAt" integer DEFAULT (strftime('%s', 'now')) NOT NULL,
               "deletedAt" integer
             );
-            
+
+
             CREATE TABLE "user" (
               "internalId" integer PRIMARY KEY NOT NULL,
               "userId" text(256) NOT NULL,
+              "discordId" integer,
               "role" text(256) NOT NULL,
               "firstName" text(1024),
               "lastName" text(1024),
@@ -89,20 +110,20 @@ export async function createOrRetrieveAssistant() {
               "lastKnownStatus" text,
               "lastKnownStatusConfirmedAt" integer,
               "lastKnownStatusSwitchedAt" integer,
-              "createdAt" integer NOT NULL,
-              "updatedAt" integer NOT NULL
+              "createdAt" integer DEFAULT (strftime('%s', 'now')) NOT NULL,
+              "updatedAt" integer DEFAULT (strftime('%s', 'now')) NOT NULL
             );
-            
+
             CREATE TABLE "workspace" (
               "id" text PRIMARY KEY NOT NULL,
               "name" text(256) NOT NULL,
               "slug" text(256) NOT NULL,
               "description" text(512) NOT NULL,
-              "createdAt" integer NOT NULL,
-              "updatedAt" integer NOT NULL,
+              "createdAt" integer DEFAULT (strftime('%s', 'now')) NOT NULL,
+              "updatedAt" integer DEFAULT (strftime('%s', 'now')) NOT NULL,
               "deletedAt" integer
             );
-            
+
             CREATE TABLE "workspaceMember" (
               "id" text PRIMARY KEY NOT NULL,
               "workspaceId" text NOT NULL,
@@ -110,55 +131,86 @@ export async function createOrRetrieveAssistant() {
               "bCanManageChannels" integer DEFAULT 0,
               "bCanManageWorkspaceMembers" integer DEFAULT 0,
               "bCanManageWorkspaceSettings" integer DEFAULT 0,
-              "createdAt" integer NOT NULL,
-              "updatedAt" integer NOT NULL,
+              "createdAt" integer DEFAULT (strftime('%s', 'now')) NOT NULL,
+              "updatedAt" integer DEFAULT (strftime('%s', 'now')) NOT NULL,
               "deletedAt" integer
             );
-            
-            
+
+
+            create virtual table vss_summaries using vss0(
+              summary_embedding(384),
+            );
+
+
             CREATE VIRTUAL TABLE user_fts USING fts5(firstName, lastName, fullName, email, content="user", content_rowid="internalId");
-            
-            
+
+
             CREATE TRIGGER user_ai AFTER INSERT ON user BEGIN
                 INSERT INTO user_fts(rowid, firstName, lastName, fullName, email) VALUES (new.internalId, new.firstName, new.lastName, new.fullName, new.email);
             END;    
-            
-            
+
+
             CREATE TRIGGER user_ad AFTER DELETE ON user BEGIN
                 INSERT INTO user_fts(user_fts, rowid, firstName, lastName, fullName, email) VALUES('delete', old.internalId, old.firstName, old.lastName, old.fullName, old.email);
             END;
-            
-            
+
+
             CREATE TRIGGER user_au AFTER UPDATE ON user BEGIN
                 INSERT INTO user_fts(user_fts, rowid, firstName, lastName, fullName, email) VALUES('delete', old.internalId, old.firstName, old.lastName, old.fullName, old.email);
                 INSERT INTO user_fts(rowid, firstName, lastName, fullName, email) VALUES (new.internalId, new.firstName, new.lastName, new.fullName, new.email);
             END;
-            
-            
-            
-            create virtual table vss_summaries using vss0(
-              summary_embedding(384),
-            );
-            
-            
-            
+
+
+            CREATE TRIGGER after_message_insert
+            AFTER INSERT ON "message"
+            FOR EACH ROW
+            BEGIN
+                INSERT OR IGNORE INTO "unGroupedMessage" ("messageId")
+                SELECT NEW."id";
+            END;
+
+
+            CREATE TRIGGER after_message_update
+            AFTER UPDATE ON "message"
+            FOR EACH ROW
+            BEGIN
+
+                -- Insert into unGroupedMessage if not exists
+                INSERT OR IGNORE INTO "unGroupedMessage" ("messageId")
+                SELECT NEW."id";
+              
+
+                -- Add the conversation to conversationNeedsSummary
+                -- We do not need insert into conversationNeedsSummary if the conversation already exists already exists
+                INSERT OR IGNORE INTO "conversationNeedsSummary" ("conversationId")
+                SELECT "conversationId" FROM "conversationMessage" WHERE "messageId" = OLD."id";
+
+                -- Remove from conversationMessage
+                DELETE FROM "conversationMessage" WHERE "messageId" = OLD."id";
+
+            END;
+
+
             CREATE UNIQUE INDEX "channel_workspaceId_slug_unique" ON "channel" ("workspaceId","slug");
             CREATE UNIQUE INDEX "meeting_name_unique" ON "meeting" ("name");
             CREATE UNIQUE INDEX "recurringMeeting_name_unique" ON "recurringMeeting" ("name");
             CREATE UNIQUE INDEX "user_userId_unique" ON "user" ("userId");
+            CREATE UNIQUE INDEX "user_discordId_unique" ON "user" ("discordId");
             CREATE UNIQUE INDEX "user_email_unique" ON "user" ("email");
             CREATE INDEX "email_idx" ON "user" ("email");
             CREATE INDEX "userId_idx" ON "user" ("userId");
             CREATE UNIQUE INDEX "workspace_slug_unique" ON "workspace" ("slug");
             CREATE INDEX "slug_idx" ON "workspace" ("slug");
-            
-            CREATE TABLE "test" (
-              "id" integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-              "name" text(256) NOT NULL
-            );
-            
-            
-            DROP TABLE "test";
+
+            ALTER TABLE conversationNeedsSummary ADD "createdAt" integer DEFAULT (strftime('%s', 'now')) NOT NULL;
+            ALTER TABLE unGroupedMessage ADD "createdAt" integer DEFAULT (strftime('%s', 'now')) NOT NULL;
+
+            ALTER TABLE conversation ADD "summary" text(10000);
+
+            CREATE UNIQUE INDEX "conversationMessage_messageId_conversationId_unique" ON "conversationMessage" ("messageId","conversationId");
+
+            Remember that createdAt and updatedAt are in every table. So avoid ambiguous column names by using the table name.
+
         `,
             parameters: {
               type: "object",

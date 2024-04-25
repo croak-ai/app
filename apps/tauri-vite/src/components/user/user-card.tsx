@@ -157,12 +157,23 @@ export function UserPopoverCard({
   children,
   side,
   userId,
+  open: controlledOpen,
+  setOpen: setControlledOpen,
 }: {
   children: React.ReactNode;
   side: "left" | "right" | "top" | "bottom";
   userId: string;
+  open?: boolean;
+  setOpen?: (open: boolean) => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const [localOpen, setLocalOpen] = useState(false);
+
+  // Determine if the component is controlled
+  const isControlled =
+    controlledOpen !== undefined && setControlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : localOpen;
+  const setOpen = isControlled ? setControlledOpen : setLocalOpen;
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
