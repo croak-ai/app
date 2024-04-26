@@ -4,6 +4,7 @@ packages:
   - packages/api/fastify-crud
   - packages/api/fastify-ai
   - packages/api/hono-crud
+  - packages/discord/ingestor
   - packages/db
   - packages/shared-functions
   - packages/ui
